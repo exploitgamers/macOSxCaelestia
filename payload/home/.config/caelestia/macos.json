@@ -8,7 +8,9 @@
       "thunar",
       "foot",
       "desktop-settings",
-      "firefox"
+      "firefox",
+      "org.blender.Blender",
+      "robloxstudiobeta.exe"
     ]
   },
   "hotCorners": {
@@ -63,7 +65,7 @@
       },
       {
         "id": "weather-1",
-        "order": -5123,
+        "order": -5529,
         "pos": {
           "HDMI-A-1": {
             "x": 1546,
@@ -97,7 +99,7 @@
       },
       {
         "id": "music-1",
-        "order": -5122,
+        "order": -5528,
         "pos": {
           "HDMI-A-1": {
             "x": 1546,
@@ -114,7 +116,7 @@
       },
       {
         "id": "system-1",
-        "order": -20,
+        "order": -22,
         "screen": "",
         "size": "small",
         "smartRotate": true,
