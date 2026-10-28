@@ -9,8 +9,7 @@
       "foot",
       "desktop-settings",
       "firefox",
-      "org.blender.Blender",
-      "robloxstudiobeta.exe"
+      "org.blender.Blender"
     ]
   },
   "hotCorners": {
@@ -65,7 +64,7 @@
       },
       {
         "id": "weather-1",
-        "order": -5529,
+        "order": -5907,
         "pos": {
           "HDMI-A-1": {
             "x": 1546,
@@ -99,7 +98,7 @@
       },
       {
         "id": "music-1",
-        "order": -5528,
+        "order": -5906,
         "pos": {
           "HDMI-A-1": {
             "x": 1546,
@@ -116,7 +115,7 @@
       },
       {
         "id": "system-1",
-        "order": -22,
+        "order": -24,
         "screen": "",
         "size": "small",
         "smartRotate": true,
@@ -161,7 +160,7 @@
       },
       {
         "id": "conditions-1",
-        "order": -21,
+        "order": -25,
         "screen": "",
         "size": "small",
         "smartRotate": true,
@@ -197,8 +196,8 @@
         "id": "notes-mv83pcqw",
         "pos": {
           "HDMI-A-1": {
-            "x": 1160,
-            "y": 198
+            "x": 1154,
+            "y": 200
           }
         },
         "screen": "eDP-1",
@@ -230,6 +229,17 @@
         "type": "clock",
         "x": 1350,
         "y": 4
+      },
+      {
+        "id": "reminders-mvqmwpmb",
+        "order": -1,
+        "pos": {},
+        "screen": "HDMI-A-1",
+        "size": "medium",
+        "stack": "reminders-mvqmwh7f",
+        "type": "reminders",
+        "x": 1154,
+        "y": 592
       }
     ],
     "temperatureUnit": "C",

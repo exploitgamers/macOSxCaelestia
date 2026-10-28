@@ -5,6 +5,12 @@ it was published (`vYYYY.MM.DD`) and can be downloaded from the GitHub releases 
 
 ## Unreleased
 
+## v2026.10.28
+
+<!-- auto: rewritten on every publish -->
+- Built for Hyprland 0.56.2-4.1, Qt 6.12.0 and Python 3.14.
+- Updated: App themes and icons; Dock & widgets settings; Hyprland config; Other settings; Shell UI (Dock, Spotlight, widgets); Top bar (Caelestia); Wallpaper.
+
 ## v2026.10.27
 
 <!-- auto: rewritten on every publish -->

@@ -1,0 +1,556 @@
+- generic [ref=f27e4]:
+  - generic [ref=f27e9]:
+    - generic [ref=f27e12]:
+      - link [ref=f27e17] [cursor=pointer]:
+        - /url: /
+        - img "Instagram" [ref=f27e22]
+      - generic [ref=f27e25]:
+        - link [ref=f27e30] [cursor=pointer]:
+          - /url: /
+          - img "Home" [ref=f27e35]
+        - link [ref=f27e40] [cursor=pointer]:
+          - /url: /reels/
+          - img "Reels" [ref=f27e45]
+        - link [ref=f27e52] [cursor=pointer]:
+          - /url: /direct/inbox/
+          - img "Messages" [ref=f27e57]
+        - link [ref=f27e63] [cursor=pointer]:
+          - /url: /explore/
+          - img "Search" [ref=f27e68]
+        - link [ref=f27e75] [cursor=pointer]:
+          - /url: "#"
+          - img "Notifications" [ref=f27e80]
+        - link [ref=f27e86] [cursor=pointer]:
+          - /url: "#"
+          - img "New post" [ref=f27e91]
+        - link [ref=f27e97] [cursor=pointer]:
+          - /url: /@@USER@@yk/
+          - link [ref=f27e102]:
+            - img "@@USER@@yk's profile picture" [ref=f27e103]
+      - generic [ref=f27e104]:
+        - link [ref=f27e107] [cursor=pointer]:
+          - /url: "#"
+          - img "Settings" [ref=f27e112]
+        - link [ref=f27e115] [cursor=pointer]:
+          - /url: "#"
+          - img "Also from Meta" [ref=f27e120]
+    - generic [ref=f27e124]:
+      - main [ref=f27e125]:
+        - generic [ref=f27e126]:
+          - generic [ref=f27e128]:
+            - group "Video player" [ref=f27e147]:
+              - generic:
+                - generic "Play"
+              - slider "Adjust volume" [ref=f27e150]:
+                - button [ref=f27e152] [cursor=pointer]:
+                  - img "Audio is muted" [ref=f27e153]
+              - button [ref=f27e156] [cursor=pointer]:
+                - img "Tags" [ref=f27e158]
+            - generic [ref=f27e161]:
+              - generic [ref=f27e163]:
+                - generic [ref=f27e165]:
+                  - link [ref=f27e166]:
+                    - img "bydfamilia's profile picture" [ref=f27e167]
+                  - link [ref=f27e170]:
+                    - img "charrlsy's profile picture" [ref=f27e171]
+                - generic [ref=f27e175]:
+                  - generic [ref=f27e178]:
+                    - link "charrlsy" [ref=f27e183] [cursor=pointer]:
+                      - /url: /charrlsy/
+                    - text: and
+                    - link "bydfamilia" [ref=f27e191] [cursor=pointer]:
+                      - /url: /bydfamilia/
+                  - link "Original audio" [ref=f27e198] [cursor=pointer]:
+                    - /url: /reels/audio/28560205970334858/
+                - button [ref=f27e204] [cursor=pointer]:
+                  - img "More Options" [ref=f27e207]
+              - separator [ref=f27e211]
+              - generic [ref=f27e213]:
+                - generic [ref=f27e215]:
+                  - link [ref=f27e220] [cursor=pointer]:
+                    - /url: /charrlsy/
+                    - img "charrlsy's profile picture" [ref=f27e221]
+                  - generic [ref=f27e225]:
+                    - generic [ref=f27e226]:
+                      - link "charrlsy" [ref=f27e230] [cursor=pointer]:
+                        - /url: /charrlsy/
+                      - time [ref=f27e235]: 7 w
+                    - generic [ref=f27e236]:
+                      - text: "& it’s also within walking distance to your future mrt station 🫡comment “details” for more info!"
+                      - link "#sgrealestate" [ref=f27e237] [cursor=pointer]:
+                        - /url: /explore/tags/sgrealestate/
+                      - link "#realestateinvesting" [ref=f27e238] [cursor=pointer]:
+                        - /url: /explore/tags/realestateinvesting/
+                      - link "#realestatesingapore" [ref=f27e239] [cursor=pointer]:
+                        - /url: /explore/tags/realestatesingapore/
+                - generic [ref=f27e240]:
+                  - generic [ref=f27e241]:
+                    - generic [ref=f27e243]:
+                      - link [ref=f27e249] [cursor=pointer]:
+                        - /url: /peironggggg/
+                        - img "peironggggg's profile picture" [ref=f27e250]
+                      - generic [ref=f27e251]:
+                        - generic [ref=f27e252]:
+                          - generic [ref=f27e255]:
+                            - generic [ref=f27e256]:
+                              - link "peironggggg" [ref=f27e261] [cursor=pointer]:
+                                - /url: /peironggggg/
+                              - link [ref=f27e266] [cursor=pointer]:
+                                - /url: /p/Dc0vSzFSXoI/c/18007059047985784/
+                                - time [ref=f27e267]: 7 w
+                            - generic [ref=f27e268]: Details
+                          - button "Reply" [ref=f27e271] [cursor=pointer]
+                        - button [ref=f27e278] [cursor=pointer]:
+                          - img "Like" [ref=f27e281]
+                    - button "View all 1 replies" [ref=f27e284] [cursor=pointer]
+                  - generic [ref=f27e288]:
+                    - generic [ref=f27e290]:
+                      - link [ref=f27e296] [cursor=pointer]:
+                        - /url: /kimmeshi/
+                        - img "kimmeshi's profile picture" [ref=f27e297]
+                      - generic [ref=f27e298]:
+                        - generic [ref=f27e299]:
+                          - generic [ref=f27e302]:
+                            - generic [ref=f27e303]:
+                              - link "kimmeshi" [ref=f27e308] [cursor=pointer]:
+                                - /url: /kimmeshi/
+                              - link [ref=f27e313] [cursor=pointer]:
+                                - /url: /p/Dc0vSzFSXoI/c/18119614337304271/
+                                - time [ref=f27e314]: 7 w
+                            - generic [ref=f27e315]: Details
+                          - button "Reply" [ref=f27e318] [cursor=pointer]
+                        - button [ref=f27e325] [cursor=pointer]:
+                          - img "Like" [ref=f27e328]
+                    - button "View all 1 replies" [ref=f27e331] [cursor=pointer]
+                  - generic [ref=f27e335]:
+                    - generic [ref=f27e337]:
+                      - link [ref=f27e343] [cursor=pointer]:
+                        - /url: /shazster/
+                        - img "shazster's profile picture" [ref=f27e344]
+                      - generic [ref=f27e345]:
+                        - generic [ref=f27e346]:
+                          - generic [ref=f27e349]:
+                            - generic [ref=f27e350]:
+                              - link "shazster" [ref=f27e355] [cursor=pointer]:
+                                - /url: /shazster/
+                              - link [ref=f27e360] [cursor=pointer]:
+                                - /url: /p/Dc0vSzFSXoI/c/18105562277171121/
+                                - time [ref=f27e361]: 7 w
+                            - generic [ref=f27e362]: Details pls
+                          - button "Reply" [ref=f27e365] [cursor=pointer]
+                        - button [ref=f27e372] [cursor=pointer]:
+                          - img "Like" [ref=f27e375]
+                    - button "View all 2 replies" [ref=f27e378] [cursor=pointer]
+                  - generic [ref=f27e382]:
+                    - generic [ref=f27e384]:
+                      - link [ref=f27e390] [cursor=pointer]:
+                        - /url: /femininekim101/
+                        - img "femininekim101's profile picture" [ref=f27e391]
+                      - generic [ref=f27e392]:
+                        - generic [ref=f27e393]:
+                          - generic [ref=f27e396]:
+                            - generic [ref=f27e397]:
+                              - link "femininekim101" [ref=f27e402] [cursor=pointer]:
+                                - /url: /femininekim101/
+                              - link [ref=f27e407] [cursor=pointer]:
+                                - /url: /p/Dc0vSzFSXoI/c/18102510004966099/
+                                - time [ref=f27e408]: 7 w
+                            - generic [ref=f27e409]: Details
+                          - button "Reply" [ref=f27e412] [cursor=pointer]
+                        - button [ref=f27e419] [cursor=pointer]:
+                          - img "Like" [ref=f27e422]
+                    - button "View all 1 replies" [ref=f27e425] [cursor=pointer]
+                  - generic [ref=f27e429]:
+                    - generic [ref=f27e431]:
+                      - link [ref=f27e437] [cursor=pointer]:
+                        - /url: /dericktay2001/
+                        - img "dericktay2001's profile picture" [ref=f27e438]
+                      - generic [ref=f27e439]:
+                        - generic [ref=f27e440]:
+                          - generic [ref=f27e443]:
+                            - generic [ref=f27e444]:
+                              - link "dericktay2001" [ref=f27e449] [cursor=pointer]:
+                                - /url: /dericktay2001/
+                              - link [ref=f27e454] [cursor=pointer]:
+                                - /url: /p/Dc0vSzFSXoI/c/18094345742407764/
+                                - time [ref=f27e455]: 7 w
+                            - generic [ref=f27e456]: freehold?
+                          - button "Reply" [ref=f27e459] [cursor=pointer]
+                        - button [ref=f27e466] [cursor=pointer]:
+                          - img "Like" [ref=f27e469]
+                    - button "View all 1 replies" [ref=f27e472] [cursor=pointer]
+                  - generic [ref=f27e476]:
+                    - generic [ref=f27e478]:
+                      - link [ref=f27e484] [cursor=pointer]:
+                        - /url: /xuaani_/
+                        - img "xuaani_'s profile picture" [ref=f27e485]
+                      - generic [ref=f27e486]:
+                        - generic [ref=f27e487]:
+                          - generic [ref=f27e490]:
+                            - generic [ref=f27e491]:
+                              - link "xuaani_" [ref=f27e496] [cursor=pointer]:
+                                - /url: /xuaani_/
+                              - link [ref=f27e501] [cursor=pointer]:
+                                - /url: /p/Dc0vSzFSXoI/c/18020235722715915/
+                                - time [ref=f27e502]: 7 w
+                            - generic [ref=f27e503]: Details please
+                          - button "Reply" [ref=f27e506] [cursor=pointer]
+                        - button [ref=f27e513] [cursor=pointer]:
+                          - img "Like" [ref=f27e516]
+                    - button "View all 1 replies" [ref=f27e519] [cursor=pointer]
+                  - generic [ref=f27e523]:
+                    - generic [ref=f27e525]:
+                      - link [ref=f27e531] [cursor=pointer]:
+                        - /url: /francis_prudential/
+                        - img "francis_prudential's profile picture" [ref=f27e532]
+                      - generic [ref=f27e533]:
+                        - generic [ref=f27e534]:
+                          - generic [ref=f27e537]:
+                            - generic [ref=f27e538]:
+                              - link "francis_prudential" [ref=f27e543] [cursor=pointer]:
+                                - /url: /francis_prudential/
+                              - link [ref=f27e548] [cursor=pointer]:
+                                - /url: /p/Dc0vSzFSXoI/c/17953958487246507/
+                                - time [ref=f27e549]: 7 w
+                            - generic [ref=f27e550]: Details
+                          - button "Reply" [ref=f27e553] [cursor=pointer]
+                        - button [ref=f27e560] [cursor=pointer]:
+                          - img "Like" [ref=f27e563]
+                    - button "View all 1 replies" [ref=f27e566] [cursor=pointer]
+                  - generic [ref=f27e570]:
+                    - generic [ref=f27e572]:
+                      - link [ref=f27e578] [cursor=pointer]:
+                        - /url: /bijouandjade/
+                        - img "bijouandjade's profile picture" [ref=f27e579]
+                      - generic [ref=f27e580]:
+                        - generic [ref=f27e581]:
+                          - generic [ref=f27e584]:
+                            - generic [ref=f27e585]:
+                              - link "bijouandjade" [ref=f27e590] [cursor=pointer]:
+                                - /url: /bijouandjade/
+                              - link [ref=f27e595] [cursor=pointer]:
+                                - /url: /p/Dc0vSzFSXoI/c/18395585875200224/
+                                - time [ref=f27e596]: 7 w
+                            - generic [ref=f27e597]: Details please
+                          - button "Reply" [ref=f27e600] [cursor=pointer]
+                        - button [ref=f27e607] [cursor=pointer]:
+                          - img "Like" [ref=f27e610]
+                    - button "View all 1 replies" [ref=f27e613] [cursor=pointer]
+                  - generic [ref=f27e617]:
+                    - generic [ref=f27e619]:
+                      - link [ref=f27e625] [cursor=pointer]:
+                        - /url: /_delishar_/
+                        - img "_delishar_'s profile picture" [ref=f27e626]
+                      - generic [ref=f27e627]:
+                        - generic [ref=f27e628]:
+                          - generic [ref=f27e631]:
+                            - generic [ref=f27e632]:
+                              - link "_delishar_" [ref=f27e637] [cursor=pointer]:
+                                - /url: /_delishar_/
+                              - link [ref=f27e642] [cursor=pointer]:
+                                - /url: /p/Dc0vSzFSXoI/c/17903296794556302/
+                                - time [ref=f27e643]: 7 w
+                            - generic [ref=f27e644]: Details pls
+                          - button "Reply" [ref=f27e647] [cursor=pointer]
+                        - button [ref=f27e654] [cursor=pointer]:
+                          - img "Like" [ref=f27e657]
+                    - button "View all 1 replies" [ref=f27e660] [cursor=pointer]
+                  - generic [ref=f27e664]:
+                    - generic [ref=f27e666]:
+                      - link [ref=f27e672] [cursor=pointer]:
+                        - /url: /lala.idiosyncrasy/
+                        - img "lala.idiosyncrasy's profile picture" [ref=f27e673]
+                      - generic [ref=f27e674]:
+                        - generic [ref=f27e675]:
+                          - generic [ref=f27e678]:
+                            - generic [ref=f27e679]:
+                              - link "lala.idiosyncrasy" [ref=f27e684] [cursor=pointer]:
+                                - /url: /lala.idiosyncrasy/
+                              - link [ref=f27e689] [cursor=pointer]:
+                                - /url: /p/Dc0vSzFSXoI/c/18140672131584565/
+                                - time [ref=f27e690]: 7 w
+                            - generic [ref=f27e691]: Details
+                          - button "Reply" [ref=f27e694] [cursor=pointer]
+                        - button [ref=f27e701] [cursor=pointer]:
+                          - img "Like" [ref=f27e704]
+                    - button "View all 1 replies" [ref=f27e707] [cursor=pointer]
+                  - generic [ref=f27e711]:
+                    - generic [ref=f27e713]:
+                      - link [ref=f27e719] [cursor=pointer]:
+                        - /url: /msybliss/
+                        - img "msybliss's profile picture" [ref=f27e720]
+                      - generic [ref=f27e721]:
+                        - generic [ref=f27e722]:
+                          - generic [ref=f27e725]:
+                            - generic [ref=f27e726]:
+                              - link "msybliss" [ref=f27e731] [cursor=pointer]:
+                                - /url: /msybliss/
+                              - link [ref=f27e736] [cursor=pointer]:
+                                - /url: /p/Dc0vSzFSXoI/c/18221839570330905/
+                                - time [ref=f27e737]: 7 w
+                            - generic [ref=f27e738]: Details
+                          - button "Reply" [ref=f27e741] [cursor=pointer]
+                        - button [ref=f27e748] [cursor=pointer]:
+                          - img "Like" [ref=f27e751]
+                    - button "View all 1 replies" [ref=f27e754] [cursor=pointer]
+                  - generic [ref=f27e758]:
+                    - generic [ref=f27e760]:
+                      - link [ref=f27e766] [cursor=pointer]:
+                        - /url: /prawnboy70/
+                        - img "prawnboy70's profile picture" [ref=f27e767]
+                      - generic [ref=f27e768]:
+                        - generic [ref=f27e769]:
+                          - generic [ref=f27e772]:
+                            - generic [ref=f27e773]:
+                              - link "prawnboy70" [ref=f27e778] [cursor=pointer]:
+                                - /url: /prawnboy70/
+                              - link [ref=f27e783] [cursor=pointer]:
+                                - /url: /p/Dc0vSzFSXoI/c/18092310275423143/
+                                - time [ref=f27e784]: 7 w
+                            - generic [ref=f27e785]: Details
+                          - button "Reply" [ref=f27e788] [cursor=pointer]
+                        - button [ref=f27e795] [cursor=pointer]:
+                          - img "Like" [ref=f27e798]
+                    - button "View all 1 replies" [ref=f27e801] [cursor=pointer]
+                  - generic [ref=f27e805]:
+                    - generic [ref=f27e807]:
+                      - link [ref=f27e813] [cursor=pointer]:
+                        - /url: /yvonnetanxh/
+                        - img "yvonnetanxh's profile picture" [ref=f27e814]
+                      - generic [ref=f27e815]:
+                        - generic [ref=f27e816]:
+                          - generic [ref=f27e819]:
+                            - generic [ref=f27e820]:
+                              - link "yvonnetanxh" [ref=f27e825] [cursor=pointer]:
+                                - /url: /yvonnetanxh/
+                              - link [ref=f27e830] [cursor=pointer]:
+                                - /url: /p/Dc0vSzFSXoI/c/18105192125183717/
+                                - time [ref=f27e831]: 7 w
+                            - generic [ref=f27e832]: Details
+                          - button "Reply" [ref=f27e835] [cursor=pointer]
+                        - button [ref=f27e842] [cursor=pointer]:
+                          - img "Like" [ref=f27e845]
+                    - button "View all 1 replies" [ref=f27e848] [cursor=pointer]
+                  - generic [ref=f27e852]:
+                    - generic [ref=f27e854]:
+                      - link [ref=f27e860] [cursor=pointer]:
+                        - /url: /dxn.wh/
+                        - img "dxn.wh's profile picture" [ref=f27e861]
+                      - generic [ref=f27e862]:
+                        - generic [ref=f27e863]:
+                          - generic [ref=f27e866]:
+                            - generic [ref=f27e867]:
+                              - link "dxn.wh" [ref=f27e872] [cursor=pointer]:
+                                - /url: /dxn.wh/
+                              - link [ref=f27e877] [cursor=pointer]:
+                                - /url: /p/Dc0vSzFSXoI/c/18143664937495622/
+                                - time [ref=f27e878]: 7 w
+                            - generic [ref=f27e879]: Details
+                          - button "Reply" [ref=f27e882] [cursor=pointer]
+                        - button [ref=f27e889] [cursor=pointer]:
+                          - img "Like" [ref=f27e892]
+                    - button "View all 1 replies" [ref=f27e895] [cursor=pointer]
+                  - generic [ref=f27e899]:
+                    - generic [ref=f27e901]:
+                      - link [ref=f27e907] [cursor=pointer]:
+                        - /url: /ameunicelin/
+                        - img "ameunicelin's profile picture" [ref=f27e908]
+                      - generic [ref=f27e909]:
+                        - generic [ref=f27e910]:
+                          - generic [ref=f27e913]:
+                            - generic [ref=f27e914]:
+                              - link "ameunicelin" [ref=f27e919] [cursor=pointer]:
+                                - /url: /ameunicelin/
+                              - link [ref=f27e924] [cursor=pointer]:
+                                - /url: /p/Dc0vSzFSXoI/c/18007715507974221/
+                                - time [ref=f27e925]: 7 w
+                            - generic [ref=f27e926]: Details
+                          - generic [ref=f27e928]:
+                            - button "1 like" [ref=f27e929] [cursor=pointer]
+                            - button "Reply" [ref=f27e932] [cursor=pointer]
+                        - button [ref=f27e939] [cursor=pointer]:
+                          - img "Like" [ref=f27e942]
+                    - button "View all 1 replies" [ref=f27e945] [cursor=pointer]
+                  - generic [ref=f27e949]: This reel has 40 comments from Facebook.
+                  - progressbar [ref=f27e959]:
+                    - img "Loading..." [ref=f27e960]
+              - generic [ref=f27e973]:
+                - generic [ref=f27e974]:
+                  - generic [ref=f27e975]:
+                    - button [ref=f27e978] [cursor=pointer]:
+                      - img "Like" [ref=f27e981]
+                    - button [ref=f27e984] [cursor=pointer]:
+                      - img "Comment" [ref=f27e986]
+                    - button "213" [ref=f27e988] [cursor=pointer]
+                    - button [ref=f27e989] [cursor=pointer]:
+                      - img "Share" [ref=f27e990]
+                  - button [ref=f27e995] [cursor=pointer]:
+                    - button [ref=f27e996]:
+                      - img "Save" [ref=f27e998]
+                - generic [ref=f27e1003]:
+                  - text: Liked by
+                  - link "btsindex" [ref=f27e1004] [cursor=pointer]:
+                    - /url: /btsindex/
+                  - text: and
+                  - link "others" [ref=f27e1005] [cursor=pointer]:
+                    - /url: /p/Dc0vSzFSXoI/liked_by/
+                - link [ref=f27e1008] [cursor=pointer]:
+                  - /url: /charrlsy/reel/Dc0vSzFSXoI/
+                  - time [ref=f27e1010]: 3 September
+              - generic [ref=f27e1013]:
+                - link [ref=f27e1014]
+                - generic [ref=f27e1016]:
+                  - button [ref=f27e1018] [cursor=pointer]:
+                    - img "Emoji" [ref=f27e1020]
+                  - textbox "Add a comment…" [ref=f27e1022]
+          - separator [ref=f27e1024]
+          - generic [ref=f27e1025]:
+            - generic [ref=f27e1027]:
+              - text: More posts from
+              - link "charrlsy" [ref=f27e1028] [cursor=pointer]:
+                - /url: /charrlsy/
+            - generic [ref=f27e1031]:
+              - generic [ref=f27e1032]:
+                - link [ref=f27e1034] [cursor=pointer]:
+                  - /url: /charrlsy/p/DcTTkDvEsDS/
+                  - img "hii! a little life update 🫡 still so surreal to me, definitely wasn’t easy but thankful for my client’s trust in me! was car hunting for three months & almost gave up until my friend shared this listing with me! i love cream interiors <3 the best times hi pipi flow state" [ref=f27e1037]
+                  - generic:
+                    - generic:
+                      - generic:
+                        - img "Carousel"
+                - link [ref=f27e1040] [cursor=pointer]:
+                  - /url: /charrlsy/p/DQY7x1zkiic/
+                  - img "autumn breeze + 고양이 🐱🍁" [ref=f27e1043]
+                  - generic:
+                    - generic:
+                      - generic:
+                        - img "Carousel"
+                - link [ref=f27e1046] [cursor=pointer]:
+                  - /url: /charrlsy/p/DKuETf8Cn51/
+                  - img "postcards from shanghai 💌🧸" [ref=f27e1049]
+                  - generic:
+                    - generic:
+                      - generic:
+                        - img "Carousel"
+              - generic [ref=f27e1051]:
+                - link [ref=f27e1053] [cursor=pointer]:
+                  - /url: /charrlsy/p/De9D7g8Eu7T/
+                  - img "a change of scenery in malacca 🗺️📍 what a cute postcard “can u help me to take a picture of me walking please” proof that i went to malacca my daily matcha yoms" [ref=f27e1056]
+                  - generic:
+                    - generic:
+                      - generic:
+                        - img "Carousel"
+                - link [ref=f27e1059] [cursor=pointer]:
+                  - /url: /charrlsy/p/De1seWREjNc/
+                  - img "generated by higgsfield i love flowers" [ref=f27e1062]
+                  - generic:
+                    - generic:
+                      - generic:
+                        - img "Carousel"
+                - link [ref=f27e1065] [cursor=pointer]:
+                  - /url: /charrlsy/p/DeHMYk_klXA/
+                  - img "padel & protein bubble tea 🫡 there’s finally an excuse to drink bbt on a diet" [ref=f27e1068]
+                  - generic:
+                    - generic:
+                      - generic:
+                        - img "Carousel"
+      - contentinfo [ref=f27e1070]:
+        - generic [ref=f27e1071]:
+          - generic [ref=f27e1073]:
+            - link "Meta" [ref=f27e1075] [cursor=pointer]:
+              - /url: https://about.meta.com/
+            - link "About" [ref=f27e1078] [cursor=pointer]:
+              - /url: https://about.instagram.com/
+            - link "Blog" [ref=f27e1081] [cursor=pointer]:
+              - /url: https://about.instagram.com/blog/
+            - link "Jobs" [ref=f27e1084] [cursor=pointer]:
+              - /url: https://about.instagram.com/about-us/careers
+            - link "Help" [ref=f27e1087] [cursor=pointer]:
+              - /url: https://help.instagram.com/
+            - link "API" [ref=f27e1090] [cursor=pointer]:
+              - /url: https://developers.facebook.com/docs/instagram
+            - link "Privacy" [ref=f27e1093] [cursor=pointer]:
+              - /url: /legal/privacy/
+            - link "Terms" [ref=f27e1096] [cursor=pointer]:
+              - /url: /legal/terms/
+            - link "Locations" [ref=f27e1099] [cursor=pointer]:
+              - /url: /explore/locations/
+            - link "Popular" [ref=f27e1102] [cursor=pointer]:
+              - /url: /popular/
+            - link "Instagram Lite" [ref=f27e1105] [cursor=pointer]:
+              - /url: /web/lite/
+            - link "Meta AI" [ref=f27e1108] [cursor=pointer]:
+              - /url: https://www.meta.ai/?utm_source=foa_web_footer
+            - link "Muse" [ref=f27e1111] [cursor=pointer]:
+              - /url: https://muse.ai/
+            - link "Threads" [ref=f27e1114] [cursor=pointer]:
+              - /url: https://www.threads.com/
+            - link "Contact uploading and non-users" [ref=f27e1117] [cursor=pointer]:
+              - /url: https://www.facebook.com/help/instagram/261704639352628
+            - link "Meta Verified" [ref=f27e1120] [cursor=pointer]:
+              - /url: /accounts/meta_verified/?entrypoint=web_footer
+          - generic [ref=f27e1122]:
+            - generic [ref=f27e1123] [cursor=pointer]:
+              - generic [ref=f27e1124]:
+                - generic [ref=f27e1125]: English (UK)
+                - img "Down Chevron Icon" [ref=f27e1128]
+              - combobox "Switch display language" [ref=f27e1130]:
+                - option "Afrikaans"
+                - option "العربية"
+                - option "Čeština"
+                - option "Dansk"
+                - option "Deutsch"
+                - option "Ελληνικά"
+                - option "English"
+                - option "English (UK)" [selected]
+                - option "Español (España)"
+                - option "Español"
+                - option "فارسی"
+                - option "Suomi"
+                - option "Français"
+                - option "עברית"
+                - option "Bahasa Indonesia"
+                - option "Italiano"
+                - option "日本語"
+                - option "한국어"
+                - option "Bahasa Melayu"
+                - option "Norsk"
+                - option "Nederlands"
+                - option "Polski"
+                - option "Português (Brasil)"
+                - option "Português (Portugal)"
+                - option "Русский"
+                - option "Svenska"
+                - option "ภาษาไทย"
+                - option "Filipino"
+                - option "Türkçe"
+                - option "中文(简体)"
+                - option "中文(台灣)"
+                - option "বাংলা"
+                - option "ગુજરાતી"
+                - option "हिन्दी"
+                - option "Hrvatski"
+                - option "Magyar"
+                - option "ಕನ್ನಡ"
+                - option "മലയാളം"
+                - option "मराठी"
+                - option "नेपाली"
+                - option "ਪੰਜਾਬੀ"
+                - option "සිංහල"
+                - option "Slovenčina"
+                - option "தமிழ்"
+                - option "తెలుగు"
+                - option "اردو"
+                - option "Tiếng Việt"
+                - option "中文(香港)"
+                - option "Български"
+                - option "Français (Canada)"
+                - option "Română"
+                - option "Српски"
+                - option "Українська"
+            - generic [ref=f27e1131]: © 2026 Instagram from Meta
+  - button [ref=f27e1134] [cursor=pointer]:
+    - generic "Messages" [ref=f27e1135]:
+      - generic [ref=f27e1136]:
+        - img "Messages" [ref=f27e1139]
+        - generic [ref=f27e1142]: Messages
