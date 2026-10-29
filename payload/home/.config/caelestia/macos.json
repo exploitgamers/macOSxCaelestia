@@ -48,8 +48,12 @@
     "items": [
       {
         "id": "calendar-1",
-        "order": 0,
+        "order": 2,
         "pos": {
+          "HDMI-A-1": {
+            "x": 1350,
+            "y": 396
+          },
           "eDP-1": {
             "x": 1358,
             "y": 4
@@ -64,7 +68,7 @@
       },
       {
         "id": "weather-1",
-        "order": -5907,
+        "order": -503,
         "pos": {
           "HDMI-A-1": {
             "x": 1546,
@@ -81,7 +85,7 @@
       },
       {
         "id": "profile-1",
-        "order": 0,
+        "order": 3,
         "pos": {
           "HDMI-A-1": {
             "x": 1546,
@@ -98,7 +102,7 @@
       },
       {
         "id": "music-1",
-        "order": -5906,
+        "order": -502,
         "pos": {
           "HDMI-A-1": {
             "x": 1546,
@@ -115,7 +119,7 @@
       },
       {
         "id": "system-1",
-        "order": -24,
+        "order": -28,
         "screen": "",
         "size": "small",
         "smartRotate": true,
@@ -126,7 +130,7 @@
       },
       {
         "id": "battery-1",
-        "order": -3,
+        "order": -1,
         "pos": {
           "HDMI-A-1": {
             "x": 1545,
@@ -160,7 +164,7 @@
       },
       {
         "id": "conditions-1",
-        "order": -25,
+        "order": -29,
         "screen": "",
         "size": "small",
         "smartRotate": true,
@@ -208,8 +212,12 @@
       },
       {
         "id": "timer-mvdcc67l",
-        "order": 1,
+        "order": 3,
         "pos": {
+          "HDMI-A-1": {
+            "x": 1350,
+            "y": 396
+          },
           "eDP-1": {
             "x": 1358,
             "y": 4
@@ -226,9 +234,10 @@
         "id": "clock-mvdcd6a3",
         "screen": "HDMI-A-1",
         "size": "medium",
+        "stack": "clock-mvdcd6a3",
         "type": "clock",
-        "x": 1350,
-        "y": 4
+        "x": 1154,
+        "y": 200
       },
       {
         "id": "reminders-mvqmwpmb",
@@ -236,10 +245,10 @@
         "pos": {},
         "screen": "HDMI-A-1",
         "size": "medium",
-        "stack": "reminders-mvqmwh7f",
+        "stack": "clock-mvdcd6a3",
         "type": "reminders",
         "x": 1154,
-        "y": 592
+        "y": 200
       }
     ],
     "temperatureUnit": "C",

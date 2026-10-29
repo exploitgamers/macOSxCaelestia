@@ -21,7 +21,9 @@ PanelWindow {
     // down when the pointer reaches the top): this bar stays out of their way — its
     // trigger strip used to catch the pointer there, so Firefox's tabs never appeared
     readonly property bool ownChrome: /firefox|librewolf|zen|chrom|brave|vivaldi|microsoft-edge/i.test(top?.appId ?? "")
-    readonly property bool active: fsActive && !ownChrome
+    // games: the strip took the pointer from a game whose c‍ursor reached the top edge
+    readonly property bool isGame: Shared.gameApps.test(top?.appId ?? "")
+    readonly property bool active: fsActive && !ownChrome && !isGame
     readonly property int barHeight: Shared.titleBarHeight
     property bool shown: false
 

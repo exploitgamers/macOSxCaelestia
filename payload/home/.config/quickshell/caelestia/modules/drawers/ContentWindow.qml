@@ -35,6 +35,13 @@ StyledWindow {
         }
         return hasFullscreenOnNormalWs;
     }
+    // [macos] a fullscreen game keeps its side edges: their trigger strips took the pointer from its free c‍ursor
+    // (same list as the macos shell's Shared.gameApps)
+    readonly property bool hasFullscreenGame: {
+        const special = hasSpecialWorkspace ? monitor?.lastIpcObject.specialWorkspace?.name : "";
+        const ws = special ? Hypr.workspaces.values.find(w => w.name === special) : monitor?.activeWorkspace;
+        return ws?.toplevels.values.some(t => t.lastIpcObject.fullscreen > 1 && /^org\.vinegarhq\.Sober$|^steam_app_|^gamescope$/.test(t.lastIpcObject.class ?? "")) ?? false;
+    }
 
     property real fsTransitionProg: hasFullscreen ? 1 : 0
     readonly property real sdfBorderOffset: 2 // [macos] always (upstream: only in fullscreen): with border thickness 0 the edge anti-aliasing drew a 1 px line round the screen

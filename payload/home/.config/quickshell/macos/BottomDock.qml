@@ -232,18 +232,22 @@ PanelWindow {
 
     function finishDrag(commit: bool): void {
         const m = items[dragFrom];
-        if (commit && m?.kind === "app") {
-            if (removing)
-                Config.unpin(m.appId);
-            else if (m.pinned && dropAt >= 0 && dropAt !== dragFrom - firstPinned)
-                Config.movePinnedTo(m.appId, dropAt);
-            else if (!m.pinned && dropAt >= 0)
-                Config.pinAt(m.appId, dropAt);
-        }
+        const rm = removing, at = dropAt, from = dragFrom - firstPinned;
+        // end the drag before touching Config: the pin list rebuilds `items` at once, and with
+        // dragging still set every slot's shiftFor() read a dragFrom past the shortened list
+        // (TypeError at items[dragFrom].pinned when the only unpinned app was pinned)
         dragging = false;
         dragFrom = -1;
         dragDX = 0;
         dragDY = 0;
+        if (!commit || m?.kind !== "app")
+            return;
+        if (rm)
+            Config.unpin(m.appId);
+        else if (m.pinned && at >= 0 && at !== from)
+            Config.movePinnedTo(m.appId, at);
+        else if (!m.pinned && at >= 0)
+            Config.pinAt(m.appId, at);
     }
 
     // ── Motion ───────────────────────────────────────────────────────────
@@ -377,7 +381,7 @@ PanelWindow {
 
         anchors.bottom: parent.bottom
         anchors.horizontalCenter: parent.horizontalCenter
-        width: win.autoHiding ? Math.max(dock.width, 400) : 0
+        width: win.autoHiding && !Shared.gameFullscreenOn(win.modelData) ? Math.max(dock.width, 400) : 0
         height: 2
 
         HoverHandler { id: edge }

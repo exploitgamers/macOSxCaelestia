@@ -13,7 +13,7 @@ PanelWindow {
 
     required property ShellScreen modelData
 
-    readonly property bool here: (Hyprland.focusedMonitor?.name ?? Quickshell.screens[0]?.name) === modelData?.name
+    property bool here: false // set per desktop change: a binding to the focused display followed the pointer
     property int current: 1
     property var desktops: []
     property bool active: false
@@ -25,6 +25,7 @@ PanelWindow {
         function onDesktopChanged(current: int, desktops: var): void {
             ind.current = current;
             ind.desktops = desktops;
+            ind.here = (Hyprland.focusedMonitor?.name ?? Quickshell.screens[0]?.name) === ind.modelData?.name;
             ind.active = true;
             hideTimer.restart();
         }

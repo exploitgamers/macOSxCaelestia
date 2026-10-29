@@ -19,10 +19,13 @@ PanelWindow {
 
     required property ShellScreen modelData
 
-    // widgets for this display; ones whose display isn't connected go to the first
+    // widgets for this display; ones whose display isn't connected go to the home display:
+    // an external one if plugged in, else the laptop. Not screens[0]: its order changes after
+    // a suspend/resume, which sent every widget to the other display.
     // (modelData?: it turns null for a moment while an unplugged display's copy is torn down)
+    readonly property string homeScreen: (Quickshell.screens.find(s => !s.name.startsWith("eDP")) ?? Quickshell.screens[0])?.name ?? ""
     readonly property var items: Config.widgetItems.filter(w => w.screen === modelData?.name
-        || (!Quickshell.screens.some(s => s.name === w.screen) && Quickshell.screens[0]?.name === modelData?.name))
+        || (!Quickshell.screens.some(s => s.name === w.screen) && homeScreen === modelData?.name))
 
     // one entry per spot: { id: stack key, members: [front, …] }
     // set a moment after start: cards made later (a stack split apart, a widget added)

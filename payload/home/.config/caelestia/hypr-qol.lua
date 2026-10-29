@@ -1364,6 +1364,38 @@ hl.on("window.move_to_workspace", function(w) mac_game_throttle(w) end)
 hl.on("window.close", function(w) mac_game_throttle(w, true) end)
 for _, w in ipairs(hl.get_windows()) do mac_game_throttle(w) end
 
+-- A focused fullscreen game keeps the pointer on its screen: with a free c‍ursor (Roblox menus,
+-- third-person camera) it slid onto the other display, where a click lost the game its focus.
+-- Only while the game is (or just was) the active window, so keyboard switches still leave it.
+local function is_game(win)
+    for _, p in ipairs(GAME_CLASSES) do
+        if win and (win.class or ""):match(p) then return true end
+    end
+    return false
+end
+mac_active_now, mac_active_prev = nil, nil -- addresses; monitor.focused may fire before or after window.active
+hl.on("window.active", function(win)
+    mac_active_prev, mac_active_now = mac_active_now, win and win.address
+end)
+hl.on("monitor.focused", function()
+    local p = hl.get_cursor_pos()
+    local here = p and hl.get_monitor_at(p.x, p.y)
+    if not here then return end
+    for _, m in ipairs(hl.get_monitors()) do
+        local ws = m.active_workspace
+        local fw = m.id ~= here.id and ws and ws.has_fullscreen and ws.fullscreen_window
+        if fw and is_game(fw) and (fw.address == mac_active_now or fw.address == mac_active_prev) then
+            local s = m.scale or 1
+            hl.dispatch(hl.dsp.cursor.move({
+                x = math.max(m.x + 1, math.min(m.x + m.width / s - 2, p.x)),
+                y = math.max(m.y + 1, math.min(m.y + m.height / s - 2, p.y)),
+            }))
+            hl.dispatch(hl.dsp.focus({ window = fw }))
+            return
+        end
+    end
+end)
+
 -----------------------
 ---- VIDEO EDITING ----
 -----------------------

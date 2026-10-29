@@ -17,7 +17,13 @@ PanelWindow {
 
     required property ShellScreen modelData
 
-    readonly property bool here: (Hyprland.focusedMonitor?.name ?? Quickshell.screens[0]?.name) === modelData?.name
+    // latched while open: focus follows the mouse, so a live binding hopped displays mid-show
+    property bool here: false
+    Binding on here {
+        when: !Shared.spotlightOpen
+        value: (Hyprland.focusedMonitor?.name ?? Quickshell.screens[0]?.name) === spot.modelData?.name
+        restoreMode: Binding.RestoreNone
+    }
     readonly property bool open: Shared.spotlightOpen && here
 
     property string query: ""

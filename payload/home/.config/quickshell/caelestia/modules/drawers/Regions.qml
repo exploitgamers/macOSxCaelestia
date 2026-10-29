@@ -14,12 +14,13 @@ Region {
     readonly property real borderThickness: win.contentItem.Config.border.thickness
     readonly property real clampedThickness: win.contentItem.Config.border.clampedThickness
 
-    x: geometry.insetLeft(clampedThickness, true) + win.dragMaskPadding
+    // [macos] no edge strips at all over a fullscreen game (open panels stay clickable)
+    x: win.hasFullscreenGame ? 0 : geometry.insetLeft(clampedThickness, true) + win.dragMaskPadding
     // [macos] in fullscreen only the side edges trigger; the top edge belongs to the
     // fullscreen title bar and the bottom to the dock
     // [macos] drag-to-open band only on the left edge (side panels); top/right/bottom stay click-through
     y: win.hasFullscreen ? 0 : geometry.insetTop(clampedThickness, true)
-    width: win.width - geometry.insetLeft(clampedThickness, true) - clampedThickness - win.dragMaskPadding
+    width: win.hasFullscreenGame ? win.width : win.width - geometry.insetLeft(clampedThickness, true) - clampedThickness - win.dragMaskPadding
     height: win.hasFullscreen ? win.height : win.height - geometry.insetTop(clampedThickness, true) - geometry.insetBottom(clampedThickness, true)
     intersection: Intersection.Xor
 

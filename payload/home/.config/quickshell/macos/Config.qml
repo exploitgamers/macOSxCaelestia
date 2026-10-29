@@ -72,7 +72,7 @@ Singleton {
     }
 
     // ── Per-display places: x/y is the spot on the widget's own display (`screen`; "" = the
-    // first one). Moved on another display (its own is unplugged, or "" shown elsewhere), the
+    // home one, DesktopWidgets.homeScreen). Moved on another display (its own is unplugged, or "" shown elsewhere), the
     // spot goes to pos[that display] instead, so each display keeps its layout across hot-plugs.
     function placeOn(w: var, screen: string): var {
         const p = w.screen === screen ? null : (w.pos ?? {})[screen];

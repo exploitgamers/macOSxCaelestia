@@ -43,7 +43,9 @@ Singleton {
         }
     }
 
-    onActiveChanged: if (active) poll()
+    // deferred: poll() can flip SmartRotate.busy → evaluate() → Config.widgetItems, which `active`
+    // is bound to, while this handler still runs inside that binding (binding loop warning)
+    onActiveChanged: if (active) Qt.callLater(poll)
     Component.onCompleted: if (active) poll()
 
     // every 2 s on the wall-clock second, with the clock's second hand: one repaint, not two

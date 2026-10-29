@@ -71,7 +71,12 @@ local function apply_rule(class)
     end
     rules[class] = nil
     if not g then return end
-    local x, y = place(g, hl.get_active_monitor())
+    local mon = hl.get_active_monitor()
+    local x, y = place(g, mon)
+    -- a rule's move is relative to the monitor the window opens on (Hyprland adds its origin) but
+    -- place() is absolute: on HDMI (x 1536) a window that opened fullscreen (Sober) skipped the fix-up
+    -- in window.open and came back from fullscreen 1536 px too far right
+    if g.mw and mon and mon.width then x, y = x - mon.x, y - mon.y end
     local matches = { { class = "^" .. escape(class) .. "$", float = false, modal = false } }
     if g.title and g.title ~= "" then
         matches[2] = { class = "^" .. escape(class) .. "$", initial_title = "^" .. escape(g.title) .. "$" }

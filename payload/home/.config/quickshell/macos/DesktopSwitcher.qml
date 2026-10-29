@@ -15,7 +15,13 @@ PanelWindow {
 
     required property ShellScreen modelData
 
-    readonly property bool here: (Hyprland.focusedMonitor?.name ?? Quickshell.screens[0]?.name) === modelData?.name
+    // latched while open: focus follows the mouse, so a live binding hopped displays mid-show
+    property bool here: false
+    Binding on here {
+        when: !ds.active
+        value: (Hyprland.focusedMonitor?.name ?? Quickshell.screens[0]?.name) === ds.modelData?.name
+        restoreMode: Binding.RestoreNone
+    }
     property var desks: [] // [{ id, classes: [] }]
     property int index: 0
     property bool active: false

@@ -15,6 +15,7 @@ kill_config() { # $1 = config dir name; also kills its monitor children (nmcli/g
         tr '\0' ' ' < "/proc/$pid/cmdline" 2>/dev/null | grep -q -- "-c $1 " && kill "$pid" $(pgrep -P "$pid")
     done
     sleep 0.6
+    pkill -P 1 -x gsettings; pkill -P 1 -x nmcli # monitors orphaned by shells that crashed or exited on their own (47 piled up by 2026-10-28)
 }
 kill_config macos
 if [ "${1:-}" = "all" ]; then
@@ -23,7 +24,9 @@ if [ "${1:-}" = "all" ]; then
     kill_config caelestia
     setsid caelestia shell -d >/dev/null 2>&1 &
     if [ "$inhibit" = true ]; then
-        (sleep 6; "$HOME/.local/bin/qs" -c caelestia ipc call idleInhibitor enable >/dev/null 2>&1) &
+        # setsid: a plain `( … ) &` died with the caller's shell (e.g. a tool run), so the switch was lost
+        # check isEnabled: `ipc call` exits 0 on "Target not found." while the new shell is still loading
+        setsid sh -c 'q="$HOME/.local/bin/qs"; for i in $(seq 20); do sleep 1; "$q" -c caelestia ipc call idleInhibitor enable >/dev/null 2>&1; [ "$("$q" -c caelestia ipc call idleInhibitor isEnabled 2>/dev/null)" = true ] && exit; done' >/dev/null 2>&1 &
     fi
 fi
 setsid qs -c macos -d >/dev/null 2>&1 &

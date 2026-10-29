@@ -13,11 +13,23 @@ Singleton {
     // special:minimized, not the shown desktop. A special desktop shown over it (special:communication,
     // where games like Sober land) counts too: Quickshell doesn't track it, so read lastIpcObject.
     function fullscreenOn(screen: var): bool {
+        return fullscreenMatching(screen, /./);
+    }
+
+    // games keep their screen edges: the dock's and the fullscreen title bar's hover strips took the
+    // pointer from a game whose free c‍ursor reached the edge (same list as GAME_CLASSES in hypr-qol.lua)
+    readonly property var gameApps: /^org\.vinegarhq\.Sober$|^steam_app_|^gamescope$/
+    function gameFullscreenOn(screen: var): bool {
+        return fullscreenMatching(screen, gameApps);
+    }
+
+    function fullscreenMatching(screen: var, apps: var): bool {
         const mon = Hyprland.monitors.values.find(m => m.name === screen?.name);
         const id = mon?.activeWorkspace?.id;
         const special = mon?.lastIpcObject?.specialWorkspace?.name ?? "";
         return id !== undefined && Hyprland.toplevels.values.some(h =>
-            (h.workspace?.id === id || (special !== "" && h.workspace?.name === special)) && (h.wayland?.fullscreen ?? false));
+            (h.workspace?.id === id || (special !== "" && h.workspace?.name === special)) && (h.wayland?.fullscreen ?? false)
+            && apps.test(h.wayland?.appId ?? ""));
     }
 
     // Now Playing click: bring the player's app forward — its window if it has

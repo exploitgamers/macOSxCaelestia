@@ -21,12 +21,20 @@ PanelWindow {
 
     required property ShellScreen modelData
 
-    readonly property bool here: (Hyprland.focusedMonitor?.name ?? Quickshell.screens[0]?.name) === modelData?.name
+    // latched while open: focus follows the mouse, so a live binding hopped displays mid-show
+    property bool here: false
+    Binding on here {
+        when: !Shared.wallpaperOpen
+        value: (Hyprland.focusedMonitor?.name ?? Quickshell.screens[0]?.name) === wb.modelData?.name
+        restoreMode: Binding.RestoreNone
+    }
     // Loaded in the background (shell.qml WarmLoader) with the local wallpapers and cached
     // collections already in place; `ready` after a few all-but-invisible frames, so building
     // the scene graph and thumbnails doesn't freeze the opening animation.
     property bool ready: false
     Component.onCompleted: {
+        // WarmLoader may build this after wallpaperOpen turned on (Binding inactive): latch once here
+        here = (Hyprland.focusedMonitor?.name ?? Quickshell.screens[0]?.name) === wb.modelData?.name;
         lister.running = true;
         const c = Object.assign({}, cats);
         for (const col of collections) {

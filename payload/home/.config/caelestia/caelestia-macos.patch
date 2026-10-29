@@ -1,3 +1,24 @@
+diff --git a/modules/IdleMonitors.qml b/modules/IdleMonitors.qml
+index 0ad75814..423c4b9e 100644
+--- a/modules/IdleMonitors.qml
++++ b/modules/IdleMonitors.qml
+@@ -8,6 +8,7 @@ import Quickshell.Services.UPower
+ import Caelestia.Config
+ import Caelestia.Services
+ import qs.services
++import qs.services as S // [macos] S.IdleInhibitor: the bare name clashes with Quickshell.Wayland's IdleInhibitor type
+ 
+ Scope {
+     id: root
+@@ -16,6 +17,8 @@ Scope {
+     readonly property bool hasPlayer: Players.list.some(p => p.isPlaying)
+     readonly property bool isCharging: !UPower.onBattery
+     readonly property bool enabled: {
++        if (S.IdleInhibitor.enabled) // [macos] Hyprland 0.56 ignores the 0×0 layer-surface inhibitor, so honour the switch here
++            return false;
+         if (GlobalConfig.general.idle.inhibitWhenAudio && hasPlayer)
+             return false;
+         if (GlobalConfig.general.idle.inhibitWhenCharging && isCharging)
 diff --git a/modules/background/Background.qml b/modules/background/Background.qml
 index 9730f626..ae1e449b 100644
 --- a/modules/background/Background.qml
@@ -2318,7 +2339,7 @@ index 2c484743..d4a16294 100644
 +    }
  }
 diff --git a/modules/bar/components/workspaces/SpecialWorkspaces.qml b/modules/bar/components/workspaces/SpecialWorkspaces.qml
-index 5eb602ff..68054585 100644
+index 5eb602ff..7411e3c4 100644
 --- a/modules/bar/components/workspaces/SpecialWorkspaces.qml
 +++ b/modules/bar/components/workspaces/SpecialWorkspaces.qml
 @@ -1,83 +1,28 @@
@@ -2389,7 +2410,7 @@ index 5eb602ff..68054585 100644
 +    required property ShellScreen screen
 +    required property bool horizontal
 +    readonly property HyprlandMonitor monitor: Hypr.monitorFor(screen)
-+    readonly property string activeSpecial: (GlobalConfig.bar.workspaces.perMonitorWorkspaces ? monitor : Hypr.focusedMonitor)?.lastIpcObject.specialWorkspace?.name ?? ""
++    readonly property string activeSpecial: (GlobalConfig.bar.workspaces.perMonitor ? monitor : Hypr.focusedMonitor)?.lastIpcObject.specialWorkspace?.name ?? "" // [macos] perMonitor, see Workspaces.qml
  
      layer.enabled: true
      layer.effect: Mask {
@@ -2496,7 +2517,7 @@ index 5eb602ff..68054585 100644
  
          model: ScriptModel {
 -            values: root.wsIds
-+            values: Hypr.workspaces.values.filter(w => w.name.startsWith("special:") && (!GlobalConfig.bar.workspaces.perMonitorWorkspaces || w.monitor === root.monitor))
++            values: Hypr.workspaces.values.filter(w => w.name.startsWith("special:") && (!GlobalConfig.bar.workspaces.perMonitor || w.monitor === root.monitor))
 +        }
 +
 +        preferredHighlightBegin: 0
@@ -3227,7 +3248,7 @@ index af314c29..8e31d603 100644
      }
  }
 diff --git a/modules/bar/components/workspaces/Workspaces.qml b/modules/bar/components/workspaces/Workspaces.qml
-index 53523179..1b078c1b 100644
+index 53523179..a706b08e 100644
 --- a/modules/bar/components/workspaces/Workspaces.qml
 +++ b/modules/bar/components/workspaces/Workspaces.qml
 @@ -1,11 +1,10 @@
@@ -3279,8 +3300,8 @@ index 53523179..1b078c1b 100644
 -        workspaces.itemsDirty;
 -        return wsIds.map(id => workspaces.itemAtIndex(workspaceIndex(id)));
 -    }
-+    readonly property bool onSpecial: (GlobalConfig.bar.workspaces.perMonitorWorkspaces ? Hypr.monitorFor(screen) : Hypr.focusedMonitor)?.lastIpcObject.specialWorkspace?.name !== ""
-+    readonly property int activeWsId: GlobalConfig.bar.workspaces.perMonitorWorkspaces ? (Hypr.monitorFor(screen).activeWorkspace?.id ?? 1) : Hypr.activeWsId
++    readonly property bool onSpecial: (GlobalConfig.bar.workspaces.perMonitor ? Hypr.monitorFor(screen) : Hypr.focusedMonitor)?.lastIpcObject.specialWorkspace?.name !== "" // [macos] option is perMonitor (perMonitorWorkspaces does not exist: every bar showed the focused display)
++    readonly property int activeWsId: GlobalConfig.bar.workspaces.perMonitor ? (Hypr.monitorFor(screen)?.activeWorkspace?.id ?? 1) : Hypr.activeWsId
  
 -    // Only relevant for when showUnoccupied is true
 -    readonly property int groupOffset: {
@@ -3442,8 +3463,9 @@ index 53523179..1b078c1b 100644
 +                const ws = (layout.childAt(event.x, event.y) as Workspace)?.ws;
                  if (!ws)
                      return;
-                 if (Hypr.activeWsId !== ws)
+-                if (Hypr.activeWsId !== ws)
 -                    Hypr.focusWorkspace(ws);
++                if (root.activeWsId !== ws) // [macos] this display's desktop, not the focused one
 +                    Hypr.dispatch(Hypr.usingLua ? `hl.dsp.focus({ workspace = "${ws}" })` : `workspace ${ws}`);
                  else
 -                    Hypr.toggleSpecial("special");
@@ -4678,7 +4700,7 @@ index a474448d..323a58ea 100644
          spacing: Tokens.spacing.small
  
 diff --git a/modules/drawers/ContentWindow.qml b/modules/drawers/ContentWindow.qml
-index 212682f9..8048dc99 100644
+index 212682f9..33dd8bc6 100644
 --- a/modules/drawers/ContentWindow.qml
 +++ b/modules/drawers/ContentWindow.qml
 @@ -18,6 +18,7 @@ StyledWindow {
@@ -4689,8 +4711,17 @@ index 212682f9..8048dc99 100644
  
      readonly property ScreenState screenState: ShellState.forScreen(screen)
  
-@@ -36,9 +37,8 @@ StyledWindow {
+@@ -34,11 +35,17 @@ StyledWindow {
+         }
+         return hasFullscreenOnNormalWs;
      }
++    // [macos] a fullscreen game keeps its side edges: their trigger strips took the pointer from its free c‍ursor
++    // (same list as the macos shell's Shared.gameApps)
++    readonly property bool hasFullscreenGame: {
++        const special = hasSpecialWorkspace ? monitor?.lastIpcObject.specialWorkspace?.name : "";
++        const ws = special ? Hypr.workspaces.values.find(w => w.name === special) : monitor?.activeWorkspace;
++        return ws?.toplevels.values.some(t => t.lastIpcObject.fullscreen > 1 && /^org\.vinegarhq\.Sober$|^steam_app_|^gamescope$/.test(t.lastIpcObject.class ?? "")) ?? false;
++    }
  
      property real fsTransitionProg: hasFullscreen ? 1 : 0
 -    readonly property real sdfBorderOffset: 2 * fsTransitionProg // SDFs joins are not exact, so offset by 2px to ensure nothing shows
@@ -4700,7 +4731,7 @@ index 212682f9..8048dc99 100644
      readonly property real shadowOpacity: 0.7 * (1 - fsTransitionProg)
      readonly property real borderLayoutThickness: hasFullscreen ? 0 : contentItem.Config.border.thickness
  
-@@ -68,9 +68,68 @@ StyledWindow {
+@@ -68,9 +75,68 @@ StyledWindow {
      name: "drawers"
      WlrLayershell.exclusionMode: ExclusionMode.Ignore
      WlrLayershell.layer: (fsTransitionProg > 0 && contentItem.Config.general.showOverFullscreen) || (hasSpecialWorkspace && hasFullscreenOnNormalWs) ? WlrLayer.Overlay : WlrLayer.Top
@@ -4737,7 +4768,8 @@ index 212682f9..8048dc99 100644
 +    Region {
 +        id: noInput
 +    }
-+
+ 
+-    mask: hasFullscreen ? emptyRegion : regions
 +    Connections {
 +        target: Hyprland
 +
@@ -4753,8 +4785,7 @@ index 212682f9..8048dc99 100644
 +            }
 +        }
 +    }
- 
--    mask: hasFullscreen ? emptyRegion : regions
++
 +    Timer {
 +        id: dragRelease
 +
@@ -4771,7 +4802,7 @@ index 212682f9..8048dc99 100644
  
      anchors.top: true
      anchors.bottom: true
-@@ -85,26 +144,18 @@ StyledWindow {
+@@ -85,26 +151,18 @@ StyledWindow {
          CAnim {}
      }
  
@@ -4805,7 +4836,7 @@ index 212682f9..8048dc99 100644
          panels: panels
          win: root
      }
-@@ -121,6 +172,8 @@ StyledWindow {
+@@ -121,6 +179,8 @@ StyledWindow {
                  return true;
              if (panels.popouts.currentName.startsWith("traymenu") && (panels.popouts.current as StackView)?.depth > 1)
                  return true;
@@ -4814,7 +4845,7 @@ index 212682f9..8048dc99 100644
              return false;
          }
          windows: [root]
-@@ -149,10 +202,12 @@ StyledWindow {
+@@ -149,10 +209,12 @@ StyledWindow {
      Item {
          anchors.fill: parent
          opacity: root.surfaceColour.a
@@ -4829,7 +4860,7 @@ index 212682f9..8048dc99 100644
              shadowColor: Qt.alpha(Colours.palette.m3shadow, Math.max(0, root.shadowOpacity))
          }
  
-@@ -167,11 +222,11 @@ StyledWindow {
+@@ -167,11 +229,11 @@ StyledWindow {
              anchors.fill: parent
              anchors.margins: -50 // Make border thicker to smooth out bulge from closed drawers
              group: blobGroup
@@ -4845,7 +4876,7 @@ index 212682f9..8048dc99 100644
          }
  
          PanelBg {
-@@ -191,28 +246,32 @@ StyledWindow {
+@@ -191,28 +253,32 @@ StyledWindow {
          PanelBg {
              id: sessionBg
  
@@ -4882,7 +4913,7 @@ index 212682f9..8048dc99 100644
              implicitWidth: panels.osd.width
          }
  
-@@ -220,32 +279,22 @@ StyledWindow {
+@@ -220,32 +286,22 @@ StyledWindow {
              id: notifsBg
  
              panel: panels.notifications
@@ -4921,7 +4952,7 @@ index 212682f9..8048dc99 100644
      }
  
      Interactions {
-@@ -256,6 +305,7 @@ StyledWindow {
+@@ -256,6 +312,7 @@ StyledWindow {
          screenState: root.screenState
          panels: panels
          bar: bar
@@ -4929,7 +4960,7 @@ index 212682f9..8048dc99 100644
          borderThickness: root.borderLayoutThickness
          fullscreen: root.hasFullscreen
  
-@@ -265,6 +315,7 @@ StyledWindow {
+@@ -265,6 +322,7 @@ StyledWindow {
              screen: root.screen
              screenState: root.screenState
              bar: bar
@@ -4937,7 +4968,7 @@ index 212682f9..8048dc99 100644
              borderThickness: root.borderThickness
  
              utilities.horizontalStretch: (sidebarBg.rawDeformMatrix.m11 - 1) / 2 + 1
-@@ -291,20 +342,24 @@ StyledWindow {
+@@ -291,20 +349,24 @@ StyledWindow {
              utilities.transform: Matrix4x4 {
                  matrix: utilsBg.deformMatrix
              }
@@ -4967,7 +4998,7 @@ index 212682f9..8048dc99 100644
  
              fullscreen: root.hasFullscreen
          }
-@@ -337,13 +392,25 @@ StyledWindow {
+@@ -337,13 +399,25 @@ StyledWindow {
      component PanelBg: BlobRect {
          required property Item panel
          property real deformAmount: 0.15
@@ -5507,10 +5538,10 @@ index 28a03564..3f8deede 100644
      }
  }
 diff --git a/modules/drawers/Regions.qml b/modules/drawers/Regions.qml
-index 47ad0680..4b20a58a 100644
+index 47ad0680..ec76c5e7 100644
 --- a/modules/drawers/Regions.qml
 +++ b/modules/drawers/Regions.qml
-@@ -3,41 +3,43 @@ pragma ComponentBehavior: Bound
+@@ -3,41 +3,44 @@ pragma ComponentBehavior: Bound
  import QtQuick
  import Quickshell
  import Caelestia.Config
@@ -5531,12 +5562,13 @@ index 47ad0680..4b20a58a 100644
 -    y: clampedThickness + win.dragMaskPadding
 -    width: win.width - bar.clampedWidth - clampedThickness - win.dragMaskPadding * 2
 -    height: win.height - clampedThickness * 2 - win.dragMaskPadding * 2
-+    x: geometry.insetLeft(clampedThickness, true) + win.dragMaskPadding
++    // [macos] no edge strips at all over a fullscreen game (open panels stay clickable)
++    x: win.hasFullscreenGame ? 0 : geometry.insetLeft(clampedThickness, true) + win.dragMaskPadding
 +    // [macos] in fullscreen only the side edges trigger; the top edge belongs to the
 +    // fullscreen title bar and the bottom to the dock
 +    // [macos] drag-to-open band only on the left edge (side panels); top/right/bottom stay click-through
 +    y: win.hasFullscreen ? 0 : geometry.insetTop(clampedThickness, true)
-+    width: win.width - geometry.insetLeft(clampedThickness, true) - clampedThickness - win.dragMaskPadding
++    width: win.hasFullscreenGame ? win.width : win.width - geometry.insetLeft(clampedThickness, true) - clampedThickness - win.dragMaskPadding
 +    height: win.hasFullscreen ? win.height : win.height - geometry.insetTop(clampedThickness, true) - geometry.insetBottom(clampedThickness, true)
      intersection: Intersection.Xor
  
@@ -5563,7 +5595,7 @@ index 47ad0680..4b20a58a 100644
          width: panel.width * (1 - root.panels.session.offsetScale) + root.borderThickness + sidebarRegion.width
      }
  
-@@ -45,38 +47,39 @@ Region {
+@@ -45,38 +48,39 @@ Region {
          id: sidebarRegion
  
          panel: root.panels.sidebar
@@ -6192,6 +6224,26 @@ index 4f6cef18..f3f45e8f 100644
                  const toasts = [];
                  let count = 0;
                  for (const toast of Toaster.toasts) {
+diff --git a/services/IdleInhibitor.qml b/services/IdleInhibitor.qml
+index 9f556b3a..78621e76 100644
+--- a/services/IdleInhibitor.qml
++++ b/services/IdleInhibitor.qml
+@@ -34,6 +34,15 @@ Singleton {
+         }
+     }
+ 
++    // [macos] the switch says "Block sleep" too: hold a logind sleep lock while it's on.
++    // `cat` on our stdin pipe, not `sleep infinity`: Quickshell leaves children running when it is
++    // killed or crashes, so the lock outlived the shell; cat ends at EOF once the shell is gone
++    Process {
++        running: props.enabled
++        stdinEnabled: true
++        command: ["systemd-inhibit", "--what=idle:sleep", "--who=Caelestia", "--why=Block sleep and screen locking switch", "--mode=block", "cat"]
++    }
++
+     IpcHandler {
+         function isEnabled(): bool {
+             return props.enabled;
 diff --git a/services/NotifData.qml b/services/NotifData.qml
 index 2bfcec3d..f2d4d99f 100644
 --- a/services/NotifData.qml

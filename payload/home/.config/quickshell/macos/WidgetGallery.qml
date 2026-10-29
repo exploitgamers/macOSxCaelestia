@@ -22,7 +22,15 @@ PanelWindow {
 
     required property ShellScreen modelData
 
-    readonly property bool here: (Hyprland.focusedMonitor?.name ?? Quickshell.screens[0]?.name) === modelData?.name
+    // latched while open: focus follows the mouse, so a live binding hopped displays mid-show
+    property bool here: false
+    Binding on here {
+        when: !Shared.widgetEdit
+        value: (Hyprland.focusedMonitor?.name ?? Quickshell.screens[0]?.name) === gallery.modelData?.name
+        restoreMode: Binding.RestoreNone
+    }
+    // WarmLoader may build this after widgetEdit turned on (Binding inactive): latch once here
+    Component.onCompleted: here = (Hyprland.focusedMonitor?.name ?? Quickshell.screens[0]?.name) === gallery.modelData?.name
     // Loaded in the background (shell.qml WarmLoader) and kept mapped while loaded: re-mapping
     // rebuilt the whole scene graph (~300 ms). Before each opening it draws a few frames all but
     // invisible (`primed`): the first time that builds shaders, glyphs and textures, later it
