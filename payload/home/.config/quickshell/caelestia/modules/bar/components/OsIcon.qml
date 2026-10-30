@@ -9,6 +9,8 @@ import qs.utils
 Item {
     id: root
 
+    required property ScreenState screenState
+
     // [macos] as tall as the other pills (the bar's inner width)
     implicitWidth: Tokens.sizes.bar.innerWidth
     implicitHeight: Tokens.sizes.bar.innerWidth
@@ -18,8 +20,8 @@ Item {
     MouseArea {
         anchors.fill: parent
         cursorShape: Qt.PointingHandCursor
-        // [macos] open the dock's Apps launcher instead of Caelestia's own
-        onClicked: Quickshell.execDetached(["qs", "-c", "macos", "ipc", "call", "launcher", "toggle"])
+        // [macos] the power menu (session), like the Apple menu; the power button became notifications
+        onClicked: root.screenState.session = !root.screenState.session
     }
 
     Loader {

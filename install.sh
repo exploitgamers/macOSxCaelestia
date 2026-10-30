@@ -175,7 +175,7 @@ preflight() {
         curl -fsS --max-time 15 -o /dev/null https://cachyos.org 2>/dev/null ||
         { [ "$STUB" = 1 ] || [ $DRY = 1 ]; } || die "no internet connection"
     if [ $DRY = 0 ] && [ "$STUB" != 1 ]; then
-        sudo -v || die "sudo does not work for $USER"
+        sudo -v || die "sudo does not work for ${USER:-$(id -un)}"
     fi
 }
 
@@ -264,7 +264,7 @@ choose_hyprbars() {
 
 template() { # @@HOME@@ / @@USER@@ -> this user
     local h u f
-    h=$(printf '%s' "$HOME" | sed 's/[&|\\]/\\&/g'); u=$(printf '%s' "$USER" | sed 's/[&|\\]/\\&/g')
+    h=$(printf '%s' "$HOME" | sed 's/[&|\\]/\\&/g'); u=$(printf '%s' "${USER:-$(id -un)}" | sed 's/[&|\\]/\\&/g')
     while IFS= read -r f; do
         [ -f "$WORK/home/$f" ] && sed -i "s|@@HOME@@|$h|g; s|@@USER@@|$u|g" "$WORK/home/$f"
     done < "$WORK/templated.list"

@@ -44,11 +44,11 @@ Item {
     Item {
         id: osdWrapper
 
-        // [macos] the side panels (OSD, session, sidebar, notifications, utilities) live on the left edge
+        // [macos] OSD and session live on the left edge; sidebar, notifications and utilities on the right
         anchors.verticalCenter: parent.verticalCenter
         anchors.left: parent.left
         anchors.leftMargin: sessionWrapper.anchors.leftMargin + session.width * (1 - session.offsetScale)
-        clip: sidebar.visible || session.visible
+        clip: session.visible
 
         implicitWidth: osd.implicitWidth * (1 - osd.offsetScale)
         implicitHeight: osd.implicitHeight
@@ -58,7 +58,7 @@ Item {
 
             screen: root.screen
             screenState: root.screenState
-            sidebarOrSessionVisible: sidebar.visible || session.visible
+            sidebarOrSessionVisible: session.visible
 
             anchors.verticalCenter: parent.verticalCenter
             anchors.right: parent.right
@@ -75,7 +75,7 @@ Item {
         utilitiesPanel: utilities
 
         anchors.top: parent.top
-        anchors.left: parent.left
+        anchors.right: parent.right // [macos] under the bar's notifications button
     }
 
     Item {
@@ -83,9 +83,7 @@ Item {
 
         anchors.verticalCenter: parent.verticalCenter
         anchors.left: parent.left
-        // [macos] floats 8 px off the left edge, or 8 px right of the open sidebar
-        anchors.leftMargin: Tokens.padding.small + (sidebar.width + Tokens.padding.small) * (1 - sidebar.offsetScale)
-        clip: sidebar.visible
+        anchors.leftMargin: Tokens.padding.small // [macos] floats 8 px off the left edge
 
         implicitWidth: session.implicitWidth * (1 - session.offsetScale)
         implicitHeight: session.implicitHeight
@@ -94,7 +92,7 @@ Item {
             id: session
 
             screenState: root.screenState
-            sidebarVisible: sidebar.visible
+            sidebarVisible: false // [macos] the sidebar is on the other edge now
 
             anchors.verticalCenter: parent.verticalCenter
             anchors.right: parent.right
@@ -137,15 +135,15 @@ Item {
         popouts: popoutsWrapper.content
 
         anchors.bottom: parent.bottom
-        anchors.left: parent.left
-        anchors.leftMargin: Tokens.padding.small // [macos] floats 8 px off the screen edges
+        anchors.right: parent.right
+        anchors.rightMargin: Tokens.padding.small // [macos] floats 8 px off the screen edges
     }
 
     Toasts.Toasts {
         id: toasts
 
         anchors.bottom: sidebar.visible ? parent.bottom : utilities.top
-        anchors.left: sidebar.right
+        anchors.right: sidebar.left // [macos] sidebar on the right edge
         anchors.margins: Tokens.padding.medium
     }
 
@@ -156,7 +154,7 @@ Item {
 
         anchors.top: notifications.bottom
         anchors.bottom: utilities.top
-        anchors.left: parent.left
+        anchors.right: parent.right // [macos] under the bar's notifications button
         anchors.topMargin: -notifications.anchors.topMargin
     }
 }

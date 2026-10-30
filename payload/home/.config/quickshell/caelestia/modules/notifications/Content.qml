@@ -184,7 +184,7 @@ Item {
             Anim {
                 target: notif
                 property: "x"
-                to: (notif.x > 0 ? root.implicitWidth : -root.implicitWidth) * 2 // [macos] leaves the way it came (left edge) unless swiped right
+                to: (notif.x >= 0 ? root.implicitWidth : -root.implicitWidth) * 2
                 duration: Tokens.anim.durations.normal
                 easing: Tokens.anim.emphasized
             }

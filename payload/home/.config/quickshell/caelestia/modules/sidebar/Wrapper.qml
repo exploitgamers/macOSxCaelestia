@@ -15,8 +15,8 @@ Item {
     property real offsetScale: shouldBeActive ? 0 : 1
 
     visible: offsetScale < 1
-    anchors.leftMargin: Tokens.padding.small - (implicitWidth + Tokens.padding.small + 5) * offsetScale // [macos] left edge, floating 8 px off it
-    implicitWidth: Tokens.sizes.sidebar.width - Tokens.padding.small * 2 // [macos] 8 px off the left edge, right edge 8 px short of where the fused panel ended
+    anchors.rightMargin: Tokens.padding.small - (implicitWidth + Tokens.padding.small + 5) * offsetScale // [macos] right edge, floating 8 px off it
+    implicitWidth: Tokens.sizes.sidebar.width - Tokens.padding.small * 2 // [macos] 8 px off the right edge, left edge 8 px short of where the fused panel ended
     opacity: 1 - offsetScale
 
     Behavior on offsetScale {

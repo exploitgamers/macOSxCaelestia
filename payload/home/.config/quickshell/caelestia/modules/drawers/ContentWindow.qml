@@ -269,7 +269,7 @@ StyledWindow {
             // [macos] one glass sheet down to the bottom of the utilities attached below it
             implicitHeight: panels.utilities.visible ? panels.utilities.y + panels.utilities.height - panel.y : panel.height
             exclude: panels.sidebar.offsetScale > 0.08 ? [] : [utilsBg]
-            bottomRightRadius: Math.max(0, Math.min(1, panels.sidebar.offsetScale / 0.3)) * radius // [macos] left edge
+            bottomLeftRadius: Math.max(0, Math.min(1, panels.sidebar.offsetScale / 0.3)) * radius
         }
 
         PanelBg {
@@ -298,7 +298,7 @@ StyledWindow {
             panel: panels.utilities
             deformAmount: panels.sidebar.visible ? 0.1 : 0.15
             exclude: panels.sidebar.offsetScale > 0.08 ? [] : [sidebarBg]
-            topRightRadius: Math.max(0, Math.min(1, panels.sidebar.offsetScale / 0.3)) * radius // [macos] left edge
+            topLeftRadius: Math.max(0, Math.min(1, panels.sidebar.offsetScale / 0.3)) * radius
         }
 
         // [macos] no popoutBg blob: a drop-down is a floating glass panel of its own (bar/popouts/ClipWrapper.qml)

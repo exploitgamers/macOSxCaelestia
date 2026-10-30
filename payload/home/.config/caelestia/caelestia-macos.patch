@@ -265,7 +265,7 @@ index 1f3d4972..0bcbeb2b 100644
          }
      }
 diff --git a/modules/bar/Bar.qml b/modules/bar/Bar.qml
-index 1ceb9b6c..58dfcdd2 100644
+index 1ceb9b6c..26754990 100644
 --- a/modules/bar/Bar.qml
 +++ b/modules/bar/Bar.qml
 @@ -7,17 +7,20 @@ import QtQuick
@@ -567,7 +567,15 @@ index 1ceb9b6c..58dfcdd2 100644
                  }
              }
              DelegateChoice {
-@@ -134,6 +309,7 @@ ColumnLayout {
+@@ -124,6 +299,7 @@ ColumnLayout {
+                 delegate: EntryWrapper {
+                     OsIcon {
+                         objectName: "taskbarLogo"
++                        screenState: root.screenState
+                     }
+                 }
+             }
+@@ -134,6 +310,7 @@ ColumnLayout {
                          objectName: "taskbarWorkspaces"
                          screen: root.screen
                          fullscreen: root.fullscreen
@@ -575,7 +583,7 @@ index 1ceb9b6c..58dfcdd2 100644
                      }
                  }
              }
-@@ -144,6 +320,7 @@ ColumnLayout {
+@@ -144,6 +321,7 @@ ColumnLayout {
                          objectName: "taskbarActiveWindow"
                          bar: root
                          monitor: Brightness.getMonitorForScreen(root.screen)
@@ -583,7 +591,7 @@ index 1ceb9b6c..58dfcdd2 100644
                      }
                  }
              }
-@@ -152,14 +329,73 @@ ColumnLayout {
+@@ -152,14 +330,73 @@ ColumnLayout {
                  delegate: EntryWrapper {
                      Tray {
                          objectName: "taskbarTray"
@@ -657,7 +665,7 @@ index 1ceb9b6c..58dfcdd2 100644
                      }
                  }
              }
-@@ -168,6 +404,7 @@ ColumnLayout {
+@@ -168,6 +405,7 @@ ColumnLayout {
                  delegate: EntryWrapper {
                      StatusIcons {
                          objectName: "taskbarStatusIcons"
@@ -665,7 +673,7 @@ index 1ceb9b6c..58dfcdd2 100644
                      }
                  }
              }
-@@ -189,13 +426,270 @@ ColumnLayout {
+@@ -189,13 +427,270 @@ ColumnLayout {
          default property Item item
          readonly property string entryId: modelData.id
  
@@ -1456,7 +1464,7 @@ index 00000000..d034b150
 +    }
 +}
 diff --git a/modules/bar/components/OsIcon.qml b/modules/bar/components/OsIcon.qml
-index a4546fd5..88b04fd7 100644
+index a4546fd5..9fb36e7d 100644
 --- a/modules/bar/components/OsIcon.qml
 +++ b/modules/bar/components/OsIcon.qml
 @@ -1,4 +1,5 @@
@@ -1465,12 +1473,14 @@ index a4546fd5..88b04fd7 100644
  import Caelestia.Config
  import qs.components
  import qs.components.effects
-@@ -8,16 +9,17 @@ import qs.utils
+@@ -8,16 +9,19 @@ import qs.utils
  Item {
      id: root
  
 -    implicitWidth: Math.round(Tokens.font.body.large.pointSize * 1.2)
 -    implicitHeight: Math.round(Tokens.font.body.large.pointSize * 1.2)
++    required property ScreenState screenState
++
 +    // [macos] as tall as the other pills (the bar's inner width)
 +    implicitWidth: Tokens.sizes.bar.innerWidth
 +    implicitHeight: Tokens.sizes.bar.innerWidth
@@ -1484,12 +1494,12 @@ index a4546fd5..88b04fd7 100644
 -            const screenState = ShellState.forActive();
 -            screenState.launcher = !screenState.launcher;
 -        }
-+        // [macos] open the dock's Apps launcher instead of Caelestia's own
-+        onClicked: Quickshell.execDetached(["qs", "-c", "macos", "ipc", "call", "launcher", "toggle"])
++        // [macos] the power menu (session), like the Apple menu; the power button became notifications
++        onClicked: root.screenState.session = !root.screenState.session
      }
  
      Loader {
-@@ -30,6 +32,8 @@ Item {
+@@ -30,6 +34,8 @@ Item {
          id: caelestiaLogo
  
          Logo {
@@ -1498,7 +1508,7 @@ index a4546fd5..88b04fd7 100644
              implicitWidth: Math.round(Tokens.font.body.large.pointSize * 1.6)
              implicitHeight: Math.round(Tokens.font.body.large.pointSize * 1.6)
          }
-@@ -40,8 +44,10 @@ Item {
+@@ -40,8 +46,10 @@ Item {
  
          ColouredIcon {
              source: SysInfo.osLogo
@@ -1512,10 +1522,10 @@ index a4546fd5..88b04fd7 100644
 +    HoverWash {} // [macos] the bar's one hover hint
  }
 diff --git a/modules/bar/components/Power.qml b/modules/bar/components/Power.qml
-index 0740e14b..6d1b69a1 100644
+index 0740e14b..ce71562f 100644
 --- a/modules/bar/components/Power.qml
 +++ b/modules/bar/components/Power.qml
-@@ -8,15 +8,17 @@ Item {
+@@ -8,17 +8,20 @@ Item {
  
      required property ScreenState screenState
  
@@ -1535,15 +1545,21 @@ index 0740e14b..6d1b69a1 100644
 -        implicitHeight: icon.implicitHeight + Tokens.padding.small
 +        implicitHeight: Tokens.sizes.bar.innerWidth
          radius: Tokens.rounding.full
-         onClicked: root.screenState.session = !root.screenState.session
+-        onClicked: root.screenState.session = !root.screenState.session
++        // [macos] the "power" entry is the notifications button now (the logo opens the power menu)
++        onClicked: root.screenState.sidebar = !root.screenState.sidebar
      }
-@@ -27,7 +29,7 @@ Item {
+ 
+     MaterialIcon {
+@@ -26,8 +29,8 @@ Item {
+ 
          anchors.centerIn: parent
  
-         text: "power_settings_new"
+-        text: "power_settings_new"
 -        color: Colours.palette.m3error
 -        fontStyle: Tokens.font.icon.builders.small.weight(Font.Bold).build()
-+        color: pillInk.c(Colours.palette.m3error) // [macos] adaptive (BarInk)
++        text: "notifications"
++        color: pillInk.c(Colours.palette.m3secondary) // [macos] adaptive (BarInk), like the status icons
 +        fontStyle: Tokens.font.icon.builders.small.weight(Font.Bold).scale(Tokens.sizes.bar.innerWidth / 26).build() // [macos] with the bar
      }
  }
@@ -4700,7 +4716,7 @@ index a474448d..323a58ea 100644
          spacing: Tokens.spacing.small
  
 diff --git a/modules/drawers/ContentWindow.qml b/modules/drawers/ContentWindow.qml
-index 212682f9..33dd8bc6 100644
+index 212682f9..db9b004b 100644
 --- a/modules/drawers/ContentWindow.qml
 +++ b/modules/drawers/ContentWindow.qml
 @@ -18,6 +18,7 @@ StyledWindow {
@@ -4876,7 +4892,7 @@ index 212682f9..33dd8bc6 100644
          }
  
          PanelBg {
-@@ -191,28 +253,32 @@ StyledWindow {
+@@ -191,18 +253,21 @@ StyledWindow {
          PanelBg {
              id: sessionBg
  
@@ -4898,10 +4914,9 @@ index 212682f9..33dd8bc6 100644
 +            // [macos] one glass sheet down to the bottom of the utilities attached below it
 +            implicitHeight: panels.utilities.visible ? panels.utilities.y + panels.utilities.height - panel.y : panel.height
              exclude: panels.sidebar.offsetScale > 0.08 ? [] : [utilsBg]
--            bottomLeftRadius: Math.max(0, Math.min(1, panels.sidebar.offsetScale / 0.3)) * radius
-+            bottomRightRadius: Math.max(0, Math.min(1, panels.sidebar.offsetScale / 0.3)) * radius // [macos] left edge
+             bottomLeftRadius: Math.max(0, Math.min(1, panels.sidebar.offsetScale / 0.3)) * radius
          }
- 
+@@ -210,9 +275,10 @@ StyledWindow {
          PanelBg {
              id: osdBg
  
@@ -4929,8 +4944,7 @@ index 212682f9..33dd8bc6 100644
              panel: panels.utilities
              deformAmount: panels.sidebar.visible ? 0.1 : 0.15
              exclude: panels.sidebar.offsetScale > 0.08 ? [] : [sidebarBg]
--            topLeftRadius: Math.max(0, Math.min(1, panels.sidebar.offsetScale / 0.3)) * radius
-+            topRightRadius: Math.max(0, Math.min(1, panels.sidebar.offsetScale / 0.3)) * radius // [macos] left edge
+             topLeftRadius: Math.max(0, Math.min(1, panels.sidebar.offsetScale / 0.3)) * radius
          }
  
 -        PanelBg {
@@ -5187,7 +5201,7 @@ index fe72730c..d6809be4 100644
          implicitWidth: 1
          implicitHeight: 1
 diff --git a/modules/drawers/Interactions.qml b/modules/drawers/Interactions.qml
-index 3d94a528..013c7239 100644
+index 3d94a528..17bcd66e 100644
 --- a/modules/drawers/Interactions.qml
 +++ b/modules/drawers/Interactions.qml
 @@ -15,6 +15,7 @@ CustomMouseArea {
@@ -5198,7 +5212,7 @@ index 3d94a528..013c7239 100644
      required property real borderThickness
      required property bool fullscreen
  
-@@ -24,38 +25,48 @@ CustomMouseArea {
+@@ -24,38 +25,53 @@ CustomMouseArea {
      property bool utilitiesShortcutActive
  
      function withinPanelHeight(panel: Item, x: real, y: real): bool {
@@ -5231,6 +5245,11 @@ index 3d94a528..013c7239 100644
      function inRightPanel(panel: Item, x: real, y: real): bool {
 -        return x > Math.min(width - Config.border.minThickness, bar.implicitWidth + panel.x) && withinPanelHeight(panel, x, y);
 +        return x < Math.max(Config.border.minThickness, geometry.insetLeft(borderThickness) + panel.x + panel.width) && withinPanelHeight(panel, x, y);
++    }
++
++    // [macos] the sidebar is on the right edge (under the bar's notifications button); session/OSD stay left
++    function inSidebar(x: real, y: real): bool {
++        return x > Math.min(width - Config.border.minThickness, geometry.insetLeft(borderThickness) + panels.sidebar.x) && withinPanelHeight(panels.sidebar, x, y);
      }
  
      function inTopPanel(panel: Item, x: real, y: real): bool {
@@ -5255,7 +5274,7 @@ index 3d94a528..013c7239 100644
          }
      }
  
-@@ -64,6 +75,12 @@ CustomMouseArea {
+@@ -64,6 +80,12 @@ CustomMouseArea {
      hoverEnabled: true
  
      onPressed: event => dragStart = Qt.point(event.x, event.y)
@@ -5268,7 +5287,7 @@ index 3d94a528..013c7239 100644
      onContainsMouseChanged: {
          if (!containsMouse) {
              // Only hide if not activated by shortcut
-@@ -83,7 +100,7 @@ CustomMouseArea {
+@@ -83,7 +105,7 @@ CustomMouseArea {
                  bar.closeTray();
              }
  
@@ -5277,7 +5296,7 @@ index 3d94a528..013c7239 100644
                  bar.isHovered = false;
  
              if (Config.sidebar.showOnHover)
-@@ -100,20 +117,20 @@ CustomMouseArea {
+@@ -100,20 +122,20 @@ CustomMouseArea {
          const dragX = x - dragStart.x;
          const dragY = y - dragStart.y;
  
@@ -5306,18 +5325,18 @@ index 3d94a528..013c7239 100644
                  screenState.bar = false;
          }
  
-@@ -131,32 +148,32 @@ CustomMouseArea {
+@@ -131,32 +153,29 @@ CustomMouseArea {
                  root.panels.osd.hovered = true;
              }
  
 -            const showSidebar = pressed && dragStart.x > Math.min(width - Config.border.minThickness, bar.implicitWidth + panels.sidebar.x);
-+            const showSidebar = pressed && dragStart.x < Math.max(Config.border.minThickness, geometry.insetLeft(borderThickness) + panels.sidebar.x + panels.sidebar.width);
++            const showSidebar = pressed && dragStart.x > Math.min(width - Config.border.minThickness, geometry.insetLeft(borderThickness) + panels.sidebar.x);
  
              // Show sidebar on hover (top-right corner, bounded by notification panel height)
              if (Config.sidebar.showOnHover) {
                  const sidebarTriggerY = Math.max(Config.sidebar.minHoverThreshold, panels.notifications.y + panels.notifications.height + borderThickness);
 -                const showSidebarHover = x > Math.min(width - Config.border.minThickness, bar.implicitWidth + panels.sidebar.x) && y <= sidebarTriggerY;
-+                const showSidebarHover = x < Math.max(Config.border.minThickness, geometry.insetLeft(borderThickness) + panels.sidebar.x + panels.sidebar.width) && y <= sidebarTriggerY;
++                const showSidebarHover = x > Math.min(width - Config.border.minThickness, geometry.insetLeft(borderThickness) + panels.sidebar.x) && y <= sidebarTriggerY;
                  if (showSidebarHover && !screenState.sidebar)
                      screenState.sidebar = true;
              }
@@ -5331,22 +5350,20 @@ index 3d94a528..013c7239 100644
 +                else if (dragX < -Config.session.dragThreshold)
                      screenState.session = false;
  
-                 // Show sidebar on drag if in session area and session is nearly fully visible
+-                // Show sidebar on drag if in session area and session is nearly fully visible
 -                if (showSidebar && panels.session.offsetScale <= 0 && dragX < -Config.sidebar.dragThreshold)
-+                if (showSidebar && panels.session.offsetScale <= 0 && dragX > Config.sidebar.dragThreshold)
-                     screenState.sidebar = true;
--            } else if (showSidebar && dragX < -Config.sidebar.dragThreshold) {
-+            } else if (showSidebar && dragX > Config.sidebar.dragThreshold) {
+-                    screenState.sidebar = true;
+             } else if (showSidebar && dragX < -Config.sidebar.dragThreshold) {
                  // Show sidebar on drag if not in session area
                  screenState.sidebar = true;
              }
          } else {
 -            const outOfSidebar = x < width - panels.sidebar.width * (1 - panels.sidebar.offsetScale);
-+            const outOfSidebar = x > geometry.insetLeft(borderThickness) + panels.sidebar.width * (1 - panels.sidebar.offsetScale);
++            const outOfSidebar = !inSidebar(x, y);
              // Show osd on hover
              const showOsd = outOfSidebar && inRightPanel(panels.osdWrapper, x, y);
  
-@@ -172,16 +189,16 @@ CustomMouseArea {
+@@ -172,35 +191,35 @@ CustomMouseArea {
  
              // Show/hide session on drag
              if (pressed && outOfSidebar && inRightPanel(panels.sessionWrapper, dragStart.x, dragStart.y) && withinPanelHeight(panels.sessionWrapper, x, y)) {
@@ -5362,16 +5379,20 @@ index 3d94a528..013c7239 100644
              if (Config.sidebar.showOnHover && !pressed) {
                  const sidebarTriggerY = Math.max(Config.sidebar.minHoverThreshold, panels.notifications.y + panels.notifications.height + borderThickness);
 -                const showSidebarHover = x > Math.min(width - Config.border.minThickness, bar.implicitWidth + panels.sidebar.x) && y <= sidebarTriggerY;
-+                const showSidebarHover = x < Math.max(Config.border.minThickness, geometry.insetLeft(borderThickness) + panels.sidebar.x + panels.sidebar.width) && y <= sidebarTriggerY;
++                const showSidebarHover = x > Math.min(width - Config.border.minThickness, geometry.insetLeft(borderThickness) + panels.sidebar.x) && y <= sidebarTriggerY;
                  if (showSidebarHover && !screenState.sidebar) {
                      screenState.sidebar = true;
                  } else {
-@@ -192,15 +209,15 @@ CustomMouseArea {
+-                    const inSidebarArea = inRightPanel(panels.sidebar, x, y) || inRightPanel(panels.sessionWrapper, x, y);
++                    const inSidebarArea = inSidebar(x, y);
+                     if (!inSidebarArea)
+                         screenState.sidebar = false;
+                 }
              }
  
              // Hide sidebar on drag
 -            if (pressed && inRightPanel(panels.sidebar, dragStart.x, 0) && dragX > Config.sidebar.dragThreshold)
-+            if (pressed && inRightPanel(panels.sidebar, dragStart.x, 0) && dragX < -Config.sidebar.dragThreshold)
++            if (pressed && inSidebar(dragStart.x, dragStart.y) && dragX > Config.sidebar.dragThreshold)
                  screenState.sidebar = false;
          }
  
@@ -5386,7 +5407,7 @@ index 3d94a528..013c7239 100644
              if (dragY < -Config.launcher.dragThreshold)
                  screenState.launcher = true;
              else if (dragY > Config.launcher.dragThreshold)
-@@ -208,7 +225,7 @@ CustomMouseArea {
+@@ -208,7 +227,7 @@ CustomMouseArea {
          }
  
          // Show dashboard on hover
@@ -5395,7 +5416,7 @@ index 3d94a528..013c7239 100644
  
          // Always update visibility based on hover if not in shortcut mode
          if (!dashboardShortcutActive) {
-@@ -219,15 +236,21 @@ CustomMouseArea {
+@@ -219,15 +238,21 @@ CustomMouseArea {
          }
  
          // Show/hide dashboard on drag (for touchscreen devices)
@@ -5420,7 +5441,7 @@ index 3d94a528..013c7239 100644
  
          // Always update visibility based on hover if not in shortcut mode
          if (!utilitiesShortcutActive) {
-@@ -237,10 +260,13 @@ CustomMouseArea {
+@@ -237,10 +262,13 @@ CustomMouseArea {
              utilitiesShortcutActive = false;
          }
  
@@ -5438,7 +5459,7 @@ index 3d94a528..013c7239 100644
              popouts.hasCurrent = false;
              bar.closeTray();
          }
-@@ -298,7 +324,9 @@ CustomMouseArea {
+@@ -298,7 +326,9 @@ CustomMouseArea {
          function onUtilitiesChanged() {
              if (root.screenState.utilities) {
                  // Utilities became visible, immediately check if this should be shortcut mode
@@ -5450,7 +5471,7 @@ index 3d94a528..013c7239 100644
                      root.utilitiesShortcutActive = true;
                  }
 diff --git a/modules/drawers/Panels.qml b/modules/drawers/Panels.qml
-index 28a03564..3f8deede 100644
+index 28a03564..450c0038 100644
 --- a/modules/drawers/Panels.qml
 +++ b/modules/drawers/Panels.qml
 @@ -19,6 +19,7 @@ Item {
@@ -5461,7 +5482,7 @@ index 28a03564..3f8deede 100644
      required property real borderThickness
  
      readonly property alias osd: osd
-@@ -36,14 +37,17 @@ Item {
+@@ -36,15 +37,18 @@ Item {
  
      anchors.fill: parent
      anchors.margins: borderThickness
@@ -5473,21 +5494,32 @@ index 28a03564..3f8deede 100644
      Item {
          id: osdWrapper
  
-+        // [macos] the side panels (OSD, session, sidebar, notifications, utilities) live on the left edge
++        // [macos] OSD and session live on the left edge; sidebar, notifications and utilities on the right
          anchors.verticalCenter: parent.verticalCenter
 -        anchors.right: parent.right
 -        anchors.rightMargin: sessionWrapper.anchors.rightMargin + session.width * (1 - session.offsetScale)
+-        clip: sidebar.visible || session.visible
 +        anchors.left: parent.left
 +        anchors.leftMargin: sessionWrapper.anchors.leftMargin + session.width * (1 - session.offsetScale)
-         clip: sidebar.visible || session.visible
++        clip: session.visible
  
          implicitWidth: osd.implicitWidth * (1 - osd.offsetScale)
-@@ -71,15 +75,16 @@ Item {
+         implicitHeight: osd.implicitHeight
+@@ -54,7 +58,7 @@ Item {
+ 
+             screen: root.screen
+             screenState: root.screenState
+-            sidebarOrSessionVisible: sidebar.visible || session.visible
++            sidebarOrSessionVisible: session.visible
+ 
+             anchors.verticalCenter: parent.verticalCenter
+             anchors.right: parent.right
+@@ -71,16 +75,15 @@ Item {
          utilitiesPanel: utilities
  
          anchors.top: parent.top
 -        anchors.right: parent.right
-+        anchors.left: parent.left
++        anchors.right: parent.right // [macos] under the bar's notifications button
      }
  
      Item {
@@ -5496,13 +5528,22 @@ index 28a03564..3f8deede 100644
          anchors.verticalCenter: parent.verticalCenter
 -        anchors.right: parent.right
 -        anchors.rightMargin: sidebar.width * (1 - sidebar.offsetScale)
+-        clip: sidebar.visible
 +        anchors.left: parent.left
-+        // [macos] floats 8 px off the left edge, or 8 px right of the open sidebar
-+        anchors.leftMargin: Tokens.padding.small + (sidebar.width + Tokens.padding.small) * (1 - sidebar.offsetScale)
-         clip: sidebar.visible
++        anchors.leftMargin: Tokens.padding.small // [macos] floats 8 px off the left edge
  
          implicitWidth: session.implicitWidth * (1 - session.offsetScale)
-@@ -120,6 +125,7 @@ Item {
+         implicitHeight: session.implicitHeight
+@@ -89,7 +92,7 @@ Item {
+             id: session
+ 
+             screenState: root.screenState
+-            sidebarVisible: sidebar.visible
++            sidebarVisible: false // [macos] the sidebar is on the other edge now
+ 
+             anchors.verticalCenter: parent.verticalCenter
+             anchors.right: parent.right
+@@ -120,6 +123,7 @@ Item {
          id: popoutsWrapper
  
          screen: root.screen
@@ -5510,13 +5551,11 @@ index 28a03564..3f8deede 100644
          borderThickness: root.borderThickness
      }
  
-@@ -131,14 +137,15 @@ Item {
-         popouts: popoutsWrapper.content
+@@ -132,13 +136,14 @@ Item {
  
          anchors.bottom: parent.bottom
--        anchors.right: parent.right
-+        anchors.left: parent.left
-+        anchors.leftMargin: Tokens.padding.small // [macos] floats 8 px off the screen edges
+         anchors.right: parent.right
++        anchors.rightMargin: Tokens.padding.small // [macos] floats 8 px off the screen edges
      }
  
      Toasts.Toasts {
@@ -5524,24 +5563,24 @@ index 28a03564..3f8deede 100644
  
          anchors.bottom: sidebar.visible ? parent.bottom : utilities.top
 -        anchors.right: sidebar.left
-+        anchors.left: sidebar.right
++        anchors.right: sidebar.left // [macos] sidebar on the right edge
          anchors.margins: Tokens.padding.medium
      }
  
-@@ -149,7 +156,7 @@ Item {
+@@ -149,7 +154,7 @@ Item {
  
          anchors.top: notifications.bottom
          anchors.bottom: utilities.top
 -        anchors.right: parent.right
-+        anchors.left: parent.left
++        anchors.right: parent.right // [macos] under the bar's notifications button
          anchors.topMargin: -notifications.anchors.topMargin
      }
  }
 diff --git a/modules/drawers/Regions.qml b/modules/drawers/Regions.qml
-index 47ad0680..ec76c5e7 100644
+index 47ad0680..1ac14b34 100644
 --- a/modules/drawers/Regions.qml
 +++ b/modules/drawers/Regions.qml
-@@ -3,41 +3,44 @@ pragma ComponentBehavior: Bound
+@@ -3,80 +3,82 @@ pragma ComponentBehavior: Bound
  import QtQuick
  import Quickshell
  import Caelestia.Config
@@ -5591,17 +5630,18 @@ index 47ad0680..ec76c5e7 100644
  
          panel: root.panels.sessionWrapper
 -        x: root.win.width - width
+-        width: panel.width * (1 - root.panels.session.offsetScale) + root.borderThickness + sidebarRegion.width
 +        x: 0 // [macos] left edge
-         width: panel.width * (1 - root.panels.session.offsetScale) + root.borderThickness + sidebarRegion.width
++        width: panel.width * (1 - root.panels.session.offsetScale) + root.borderThickness
      }
  
-@@ -45,38 +48,39 @@ Region {
+     R {
          id: sidebarRegion
  
-         panel: root.panels.sidebar
+-        panel: root.panels.sidebar
 -        x: root.win.width - width
-+        x: 0 // [macos] left edge
-         width: panel.width * (1 - root.panels.sidebar.offsetScale) + root.borderThickness
+-        width: panel.width * (1 - root.panels.sidebar.offsetScale) + root.borderThickness
++        panel: root.panels.sidebar // [macos] right edge: the panel's own rect (it slides by its margin)
      }
  
      R {
@@ -5672,7 +5712,7 @@ index c3558b67..3a1053ed 100644
              const colour = root.urgency === "critical" ? Colours.palette.m3secondary : Colours.palette.m3outline;
  
 diff --git a/modules/notifications/Content.qml b/modules/notifications/Content.qml
-index c65d3471..2aa68c39 100644
+index c65d3471..72172928 100644
 --- a/modules/notifications/Content.qml
 +++ b/modules/notifications/Content.qml
 @@ -18,7 +18,7 @@ Item {
@@ -5698,15 +5738,6 @@ index c65d3471..2aa68c39 100644
  
          StyledListView {
              id: list
-@@ -184,7 +184,7 @@ Item {
-             Anim {
-                 target: notif
-                 property: "x"
--                to: (notif.x >= 0 ? root.implicitWidth : -root.implicitWidth) * 2
-+                to: (notif.x > 0 ? root.implicitWidth : -root.implicitWidth) * 2 // [macos] leaves the way it came (left edge) unless swiped right
-                 duration: Tokens.anim.durations.normal
-                 easing: Tokens.anim.emphasized
-             }
 diff --git a/modules/notifications/Notification.qml b/modules/notifications/Notification.qml
 index 48759b50..6e2e92b2 100644
 --- a/modules/notifications/Notification.qml
@@ -5975,7 +6006,7 @@ index ddd37542..f9c316e5 100644
  
                          MaterialIcon {
 diff --git a/modules/sidebar/Wrapper.qml b/modules/sidebar/Wrapper.qml
-index 8e24ac2c..33950196 100644
+index 8e24ac2c..e89cd806 100644
 --- a/modules/sidebar/Wrapper.qml
 +++ b/modules/sidebar/Wrapper.qml
 @@ -15,8 +15,8 @@ Item {
@@ -5984,8 +6015,8 @@ index 8e24ac2c..33950196 100644
      visible: offsetScale < 1
 -    anchors.rightMargin: (-implicitWidth - 5) * offsetScale
 -    implicitWidth: Tokens.sizes.sidebar.width
-+    anchors.leftMargin: Tokens.padding.small - (implicitWidth + Tokens.padding.small + 5) * offsetScale // [macos] left edge, floating 8 px off it
-+    implicitWidth: Tokens.sizes.sidebar.width - Tokens.padding.small * 2 // [macos] 8 px off the left edge, right edge 8 px short of where the fused panel ended
++    anchors.rightMargin: Tokens.padding.small - (implicitWidth + Tokens.padding.small + 5) * offsetScale // [macos] right edge, floating 8 px off it
++    implicitWidth: Tokens.sizes.sidebar.width - Tokens.padding.small * 2 // [macos] 8 px off the right edge, left edge 8 px short of where the fused panel ended
      opacity: 1 - offsetScale
  
      Behavior on offsetScale {
@@ -6224,6 +6255,35 @@ index 4f6cef18..f3f45e8f 100644
                  const toasts = [];
                  let count = 0;
                  for (const toast of Toaster.toasts) {
+diff --git a/services/Brightness.qml b/services/Brightness.qml
+index ac34cbc1..16dc3906 100644
+--- a/services/Brightness.qml
++++ b/services/Brightness.qml
+@@ -26,7 +26,8 @@ Singleton {
+ 
+     function getMonitor(query: string): var {
+         if (query === "active") {
+-            return monitors.find(m => Hypr.monitorFor(m.modelData)?.focused); // qmllint disable missing-property
++            // [macos] by name: HyprlandMonitor.focused can stay false while Hyprland.focusedMonitor is right (Hyprland 0.57)
++            return monitors.find(m => m.modelData.name === Hypr.focusedMonitor?.name); // qmllint disable missing-property
+         }
+ 
+         if (query.startsWith("model:")) {
+diff --git a/services/Hypr.qml b/services/Hypr.qml
+index 402417b9..eaad4457 100644
+--- a/services/Hypr.qml
++++ b/services/Hypr.qml
+@@ -90,7 +90,9 @@ Singleton {
+     }
+ 
+     function monitorFor(screen: ShellScreen): HyprlandMonitor {
+-        return Hyprland.monitorFor(screen);
++        // [macos] read monitors.values so bindings re-run once monitors load (Hyprland.monitorFor isn't
++        // tracked: a bar built before that kept null forever, e.g. the desktops pill stuck blurred)
++        return monitors.values.find(m => m.name === screen?.name) ?? null;
+     }
+ 
+     function trimWsName(name: string): string {
 diff --git a/services/IdleInhibitor.qml b/services/IdleInhibitor.qml
 index 9f556b3a..78621e76 100644
 --- a/services/IdleInhibitor.qml

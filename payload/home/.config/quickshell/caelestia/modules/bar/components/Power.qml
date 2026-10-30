@@ -20,7 +20,8 @@ Item {
         implicitWidth: implicitHeight
         implicitHeight: Tokens.sizes.bar.innerWidth
         radius: Tokens.rounding.full
-        onClicked: root.screenState.session = !root.screenState.session
+        // [macos] the "power" entry is the notifications button now (the logo opens the power menu)
+        onClicked: root.screenState.sidebar = !root.screenState.sidebar
     }
 
     MaterialIcon {
@@ -28,8 +29,8 @@ Item {
 
         anchors.centerIn: parent
 
-        text: "power_settings_new"
-        color: pillInk.c(Colours.palette.m3error) // [macos] adaptive (BarInk)
+        text: "notifications"
+        color: pillInk.c(Colours.palette.m3secondary) // [macos] adaptive (BarInk), like the status icons
         fontStyle: Tokens.font.icon.builders.small.weight(Font.Bold).scale(Tokens.sizes.bar.innerWidth / 26).build() // [macos] with the bar
     }
 }

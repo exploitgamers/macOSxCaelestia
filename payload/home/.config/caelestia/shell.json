@@ -121,6 +121,7 @@
     }
   },
   "services": {
-    "audioIncrement": 0.05
+    "audioIncrement": 0.05,
+    "brightnessIncrement": 0.05
   }
 }

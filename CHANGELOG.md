@@ -7,9 +7,16 @@ it was published (`vYYYY.MM.DD`) and can be downloaded from the GitHub releases 
 
 ## v2026.10.30
 
+- Window title bars and traffic lights build for Hyprland 0.57.
+- Brightness keys, bar scroll and the drop-down slider work again on Hyprland 0.57, in 5 % steps.
+- The distro logo at the left of the bar opens the power menu; the bell at the right opens notifications, which now slide in from the right edge.
+- Switching desktops closes an open special desktop (e.g. Discord), so its window no longer follows you.
+- The desktops pill no longer stays blurred after start-up.
+
 <!-- auto: rewritten on every publish -->
-- Built for Hyprland 0.56.2-4.1, Qt 6.12.0 and Python 3.14.
-- Updated: Dock & widgets settings.
+- Built for Hyprland 0.57.0-1.1, Qt 6.12.0 and Python 3.14.
+- Package updates: hyprland 0.56.2-4.1 → 0.57.0-1.1.
+- Updated: App themes and icons; Dock & widgets settings; Hyprland config; Top bar (Caelestia); Window title bars.
 
 ## v2026.10.29
 

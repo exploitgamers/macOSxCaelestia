@@ -3,7 +3,7 @@ caelestia-cli 1.1.3-1
 caelestia-firefox-theme 1.0.0-1
 caelestia-shell 2.5.0-1
 darkly-bin 0.5.40-1
-hyprland 0.56.2-4.1
+hyprland 0.57.0-1.1
 hyprmod 0.4.0-3
 libcava 1.0.0-1
 pwvucontrol 0.5.3-2

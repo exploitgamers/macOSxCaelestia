@@ -41,15 +41,13 @@ Region {
 
         panel: root.panels.sessionWrapper
         x: 0 // [macos] left edge
-        width: panel.width * (1 - root.panels.session.offsetScale) + root.borderThickness + sidebarRegion.width
+        width: panel.width * (1 - root.panels.session.offsetScale) + root.borderThickness
     }
 
     R {
         id: sidebarRegion
 
-        panel: root.panels.sidebar
-        x: 0 // [macos] left edge
-        width: panel.width * (1 - root.panels.sidebar.offsetScale) + root.borderThickness
+        panel: root.panels.sidebar // [macos] right edge: the panel's own rect (it slides by its margin)
     }
 
     R {

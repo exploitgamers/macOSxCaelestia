@@ -1039,6 +1039,22 @@ hl.on("workspace.active", function()
     if ws and not ws.special and ws.id > 0 then desk_touch(ws.id) end
 end)
 
+-- An open special desktop (Equibop on special:communication…) overlays every desktop, so its
+-- window seemed to follow you: close it when that display's normal desktop changes (Super+1-9,
+-- swipes, Super+Tab…). Keyed per display, so moving between displays closes nothing.
+local desk_by_mon = {} -- monitor name -> regular desktop id
+hl.on("workspace.active", function()
+    local mon = hl.get_active_monitor()
+    local ws = mon and mon.active_workspace
+    if not ws then return end
+    local prev = desk_by_mon[mon.name]
+    desk_by_mon[mon.name] = ws.id
+    local special = mon.active_special_workspace
+    if prev and prev ~= ws.id and special and special.name and special.name ~= "" then
+        hl.dispatch(hl.dsp.workspace.toggle_special((special.name:gsub("^special:", ""))))
+    end
+end)
+
 local deskswitch = nil -- { list = { ids }, idx }
 local SUPER_KEYS = { [133] = true, [134] = true }
 

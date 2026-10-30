@@ -1,18 +1,18 @@
 diff --git a/hyprbars/barDeco.cpp b/hyprbars/barDeco.cpp
-index c27653d..1c7b4f6 100644
+index e57f77b..a45af34 100644
 --- a/hyprbars/barDeco.cpp
 +++ b/hyprbars/barDeco.cpp
-@@ -19,6 +19,9 @@
+@@ -21,6 +21,9 @@
  #include <hyprland/src/animation/AnimationManager.hpp>
  #include <hyprland/src/protocols/LayerShell.hpp>
  #include <hyprland/src/event/EventBus.hpp>
-+#include <hyprland/src/managers/EventManager.hpp>
++#include <hyprland/src/ipc/s2/S2.hpp>
 +#include <hyprland/src/managers/fullscreen/FullscreenController.hpp>
 +#include <hyprland/src/pointer/cursor/CursorShapeOverrideController.hpp>
  #include <hyprland/src/layout/LayoutManager.hpp>
  #include <hyprland/src/render/OpenGL.hpp>
  #include <hyprland/src/state/MonitorState.hpp>
-@@ -28,6 +31,30 @@
+@@ -30,6 +33,30 @@
  
  #include <climits>
  
@@ -20,16 +20,16 @@ index c27653d..1c7b4f6 100644
 +// signal Hyprland's mouse:272 binds send for other drags. The bar consumes its
 +// press, so binds never see it — without this, edge widgets open mid-drag.
 +static void announceDrag(bool dragging) {
-+    if (g_pEventManager)
-+        g_pEventManager->postEvent(SHyprIPCEvent{"custom", dragging ? "macdrag>>1" : "macdrag>>0"});
++    if (IPC::Socket2::sock())
++        IPC::Socket2::sock()->postEvent({"custom", dragging ? "macdrag>>1" : "macdrag>>0"});
 +}
 +
 +// Announce plain clicks on the bar ("custom>>macbarclick>>left|right|double"): the bar
 +// consumes its presses, so Hyprland's mouse binds (the window menu in hypr-qol.lua)
 +// never see them. The macos shell forwards these to mac_bar_click().
 +static void announceClick(const char* what) {
-+    if (g_pEventManager)
-+        g_pEventManager->postEvent(SHyprIPCEvent{"custom", std::string("macbarclick>>") + what});
++    if (IPC::Socket2::sock())
++        IPC::Socket2::sock()->postEvent({"custom", std::string("macbarclick>>") + what});
 +}
 +
 +static const char* topEdgeCursor(uint8_t edge) {
@@ -43,7 +43,7 @@ index c27653d..1c7b4f6 100644
  using namespace Render::GL;
  
  static CHyprColor configColor(Config::INTEGER color) {
-@@ -83,6 +110,11 @@ std::string CHyprBar::getDisplayName() {
+@@ -85,6 +112,11 @@ std::string CHyprBar::getDisplayName() {
      return "Hyprbar";
  }
  
@@ -53,9 +53,9 @@ index c27653d..1c7b4f6 100644
 +}
 +
  bool CHyprBar::inputIsValid() {
-     if (m_hidden)
+     if (!g_pGlobalState->config.enabled->value() || m_hidden)
          return false;
-@@ -103,7 +135,16 @@ bool CHyprBar::inputIsValid() {
+@@ -105,7 +137,16 @@ bool CHyprBar::inputIsValid() {
      auto                    focusState = Desktop::focusState();
      auto                    window     = focusState->window();
  
@@ -66,14 +66,14 @@ index c27653d..1c7b4f6 100644
 +    // Only for a bar that is on screen: every bar sees every click, and one on another desktop
 +    // (or minimised) at the same spot would take it (focus it, switching desktops, or close it).
 +    const auto SELF        = m_pWindow.lock();
-+    const bool SHOWN       = SELF && SELF->m_isMapped && !SELF->isHidden() && SELF->m_workspace && SELF->m_workspace->isVisible();
++    const bool SHOWN       = SELF && SELF->mapped() && !SELF->isHidden() && SELF->m_workspace && SELF->m_workspace->visible();
 +    const bool PADDINGONLY = SHOWN && WINDOWATCURSOR && !realBox(WINDOWATCURSOR).containsPoint(MOUSE) && assignedBoxGlobal().containsPoint(MOUSE);
 +    // A hidden/minimised window can still be the focused one: its bar must not take clicks then.
 +    if (!SHOWN || (WINDOWATCURSOR != m_pWindow && m_pWindow != window && !PADDINGONLY))
          return false;
  
      PHLLS    foundSurface = nullptr;
-@@ -123,6 +164,25 @@ bool CHyprBar::inputIsValid() {
+@@ -125,6 +166,25 @@ bool CHyprBar::inputIsValid() {
  }
  
  void CHyprBar::onMouseButton(Event::SCallbackInfo& info, IPointer::SButtonEvent e) {
@@ -99,7 +99,7 @@ index c27653d..1c7b4f6 100644
      if (!inputIsValid())
          return;
  
-@@ -131,6 +191,23 @@ void CHyprBar::onMouseButton(Event::SCallbackInfo& info, IPointer::SButtonEvent
+@@ -133,6 +193,23 @@ void CHyprBar::onMouseButton(Event::SCallbackInfo& info, IPointer::SButtonEvent
          return;
      }
  
@@ -123,9 +123,9 @@ index c27653d..1c7b4f6 100644
      handleDownEvent(info, std::nullopt);
  }
  
-@@ -154,6 +231,20 @@ void CHyprBar::onMouseMove(Vector2D coords) {
-     if (g_pGlobalState->config.iconOnHover->value())
-         damageOnButtonHover();
+@@ -168,6 +245,20 @@ void CHyprBar::onMouseMove(Vector2D coords) {
+         }
+     }
  
 +    // Resize cursor on the window's real top edge (see topResizeEdge). This hook
 +    // runs before Hyprland's own border-cursor logic, so unsetting here never
@@ -144,16 +144,16 @@ index c27653d..1c7b4f6 100644
      if (!m_bDragPending || m_bTouchEv || !validMapped(m_pWindow) || m_touchId != 0)
          return;
  
-@@ -170,6 +261,7 @@ void CHyprBar::onTouchMove(Event::SCallbackInfo& info, ITouch::SMotionEvent e) {
-     const auto COORDS = Vector2D(PMONITOR->m_position.x + e.pos.x * PMONITOR->m_size.x, PMONITOR->m_position.y + e.pos.y * PMONITOR->m_size.y);
+@@ -180,6 +271,7 @@ void CHyprBar::onTouchMove(Event::SCallbackInfo& info, ITouch::SMotionEvent e) {
+         return;
  
      if (!m_bDraggingThis) {
 +        announceDrag(true);
          // Initial setup for dragging a window.
-         g_pKeybindManager->m_dispatchers["setfloating"]("activewindow");
-         g_pKeybindManager->m_dispatchers["resizewindowpixel"]("exact 50% 50%,activewindow");
-@@ -180,6 +272,47 @@ void CHyprBar::onTouchMove(Event::SCallbackInfo& info, ITouch::SMotionEvent e) {
-     m_bDraggingThis = true;
+         (void)Config::Actions::floatWindow(Config::Actions::eTogglableAction::TOGGLE_ACTION_ENABLE, m_pWindow.lock());
+         // Pin it so you can change workspaces while dragging a window
+@@ -190,6 +282,47 @@ void CHyprBar::onTouchMove(Event::SCallbackInfo& info, ITouch::SMotionEvent e) {
+     }
  }
  
 +// The window's real top edge is the top of this bar. Treat a band reaching as far
@@ -184,12 +184,12 @@ index c27653d..1c7b4f6 100644
 +    // (e.g. its traffic lights): then that window gets the click, not a resize.
 +    if (!realBox(PWINDOW).containsPoint(MOUSE)) {
 +        for (const auto& w : Desktop::windowState()->windows()) {
-+            if (w != PWINDOW && w->m_isMapped && !w->isHidden() && w->m_workspace && w->m_workspace->isVisible() && realBox(w).containsPoint(MOUSE))
++            if (w != PWINDOW && w->mapped() && !w->isHidden() && w->m_workspace && w->m_workspace->visible() && realBox(w).containsPoint(MOUSE))
 +                return Layout::CORNER_NONE;
 +        }
 +    }
 +
-+    const double CORNER = PWINDOW->rounding() + *PBORDERSIZE + 10;
++    const double CORNER = PWINDOW->presentation().rounding() + *PBORDERSIZE + 10;
 +    if (MOUSE.x < BAR.x + CORNER)
 +        return Layout::CORNER_TOPLEFT;
 +    if (MOUSE.x > BAR.x + BAR.w - CORNER)
@@ -200,15 +200,15 @@ index c27653d..1c7b4f6 100644
  void CHyprBar::handleDownEvent(Event::SCallbackInfo& info, std::optional<ITouch::SDownEvent> touchEvent) {
      m_bTouchEv = touchEvent.has_value();
      if (m_bTouchEv)
-@@ -215,6 +348,7 @@ void CHyprBar::handleDownEvent(Event::SCallbackInfo& info, std::optional<ITouch:
+@@ -225,6 +358,7 @@ void CHyprBar::handleDownEvent(Event::SCallbackInfo& info, std::optional<ITouch:
              if (m_bTouchEv)
-                 g_pKeybindManager->m_dispatchers["settiled"]("activewindow");
-             g_pKeybindManager->m_dispatchers["mouse"]("0movewindow");
+                 (void)Config::Actions::floatWindow(Config::Actions::eTogglableAction::TOGGLE_ACTION_DISABLE);
+             g_layoutManager->endDragTarget();
 +            announceDrag(false);
-             Log::logger->log(Log::DEBUG, "[hyprbars] Dragging ended on {:x}", (uintptr_t)PWINDOW.get());
+             LOG(Log::DEBUG, "[hyprbars] Dragging ended on {:x}", (uintptr_t)PWINDOW.get());
          }
  
-@@ -239,6 +373,7 @@ void CHyprBar::handleDownEvent(Event::SCallbackInfo& info, std::optional<ITouch:
+@@ -253,6 +387,7 @@ void CHyprBar::handleDownEvent(Event::SCallbackInfo& info, std::optional<ITouch:
      if (!ON_DOUBLE_CLICK.empty() &&
          std::chrono::duration_cast<std::chrono::milliseconds>(Time::steadyNow() - m_lastMouseDown).count() < 400 /* Arbitrary delay I found suitable */) {
          Config::Supplementary::executor()->spawn(ON_DOUBLE_CLICK);
@@ -216,7 +216,7 @@ index c27653d..1c7b4f6 100644
          m_bDragPending = false;
      } else {
          m_lastMouseDown = Time::steadyNow();
-@@ -247,7 +382,10 @@ void CHyprBar::handleDownEvent(Event::SCallbackInfo& info, std::optional<ITouch:
+@@ -261,7 +396,10 @@ void CHyprBar::handleDownEvent(Event::SCallbackInfo& info, std::optional<ITouch:
  }
  
  void CHyprBar::handleUpEvent(Event::SCallbackInfo& info) {
@@ -228,15 +228,15 @@ index c27653d..1c7b4f6 100644
          return;
  
      if (m_bCancelledDown)
-@@ -258,12 +396,17 @@ void CHyprBar::handleUpEvent(Event::SCallbackInfo& info) {
+@@ -272,12 +410,17 @@ void CHyprBar::handleUpEvent(Event::SCallbackInfo& info) {
      if (m_bDraggingThis) {
-         g_pKeybindManager->changeMouseBindMode(MBIND_INVALID);
+         g_layoutManager->endDragTarget();
          m_bDraggingThis = false;
 +        announceDrag(false);
          if (m_bTouchEv)
              (void)Config::Actions::floatWindow(Config::Actions::eTogglableAction::TOGGLE_ACTION_DISABLE);
  
-         Log::logger->log(Log::DEBUG, "[hyprbars] Dragging ended on {:x}", (uintptr_t)m_pWindow.lock().get());
+         LOG(Log::DEBUG, "[hyprbars] Dragging ended on {:x}", (uintptr_t)m_pWindow.lock().get());
      }
  
 +    // pressed and released without moving: a click (drags clear m_bDragPending on the first move)
@@ -246,28 +246,15 @@ index c27653d..1c7b4f6 100644
      m_bDragPending = false;
      m_bTouchEv     = false;
      m_touchId      = 0;
-@@ -272,6 +415,7 @@ void CHyprBar::handleUpEvent(Event::SCallbackInfo& info) {
+@@ -286,6 +429,7 @@ void CHyprBar::handleUpEvent(Event::SCallbackInfo& info) {
  void CHyprBar::handleMovement() {
-     g_pKeybindManager->changeMouseBindMode(MBIND_MOVE);
+     g_layoutManager->beginDragTarget(m_pWindow.lock()->layoutTarget(), MBIND_MOVE);
      m_bDraggingThis = true;
 +    announceDrag(true);
-     Log::logger->log(Log::DEBUG, "[hyprbars] Dragging initiated on {:x}", (uintptr_t)m_pWindow.lock().get());
+     LOG(Log::DEBUG, "[hyprbars] Dragging initiated on {:x}", (uintptr_t)m_pWindow.lock().get());
      return;
  }
-@@ -285,8 +429,10 @@ bool CHyprBar::doButtonPress(Config::INTEGER barPadding, Config::INTEGER barButt
-         Vector2D   currentPos = Vector2D{(BUTTONSRIGHT ? BARBUF.x - barButtonPadding - b.size - offset : offset), (BARBUF.y - b.size) / 2.0}.floor();
- 
-         if (VECINRECT(COORDS, currentPos.x, currentPos.y, currentPos.x + b.size + barButtonPadding, currentPos.y + b.size)) {
--            // hit on close
--            g_pKeybindManager->m_dispatchers["exec"](b.cmd);
-+            // Run the button's command with the same spawner the double-click uses.
-+            // (The legacy m_dispatchers["exec"] doesn't exist under the Lua config,
-+            //  so upstream's call silently did nothing.)
-+            Config::Supplementary::executor()->spawn(b.cmd);
-             return true;
-         }
- 
-@@ -350,6 +496,10 @@ void CHyprBar::renderBarButtons(CBox* barBox, const float scale, const float a)
+@@ -367,6 +511,10 @@ void CHyprBar::renderBarButtons(Render::CRenderContext& ctx, CBox* barBox, const
      const auto visibleCount    = getVisibleButtonCount(BARBUTTONPADDING, BARPADDING, Vector2D{barBox->w, barBox->h}, scale);
      const bool INVALIDATEICONS = m_bButtonsDirty || m_bWindowSizeChanged;
  
@@ -278,7 +265,7 @@ index c27653d..1c7b4f6 100644
      int        offset = BARPADDING * scale;
      for (size_t i = 0; i < visibleCount; ++i) {
          auto&      button           = g_pGlobalState->buttons[i];
-@@ -358,8 +508,12 @@ void CHyprBar::renderBarButtons(CBox* barBox, const float scale, const float a)
+@@ -375,8 +523,12 @@ void CHyprBar::renderBarButtons(Render::CRenderContext& ctx, CBox* barBox, const
  
          auto       color = button.bgcol;
  
@@ -292,7 +279,7 @@ index c27653d..1c7b4f6 100644
              if (INVALIDATEICONS && button.userfg && button.iconTex)
                  button.iconTex = nullptr;
          }
-@@ -370,6 +524,18 @@ void CHyprBar::renderBarButtons(CBox* barBox, const float scale, const float a)
+@@ -387,6 +539,18 @@ void CHyprBar::renderBarButtons(Render::CRenderContext& ctx, CBox* barBox, const
                            scaledButtonSize};
          buttonBox.round();
  
@@ -303,24 +290,25 @@ index c27653d..1c7b4f6 100644
 +            haloBox.round();
 +            auto haloCol = button.bgcol;
 +            haloCol.a    = 0.38 * a;
-+            g_pHyprOpenGL->renderRect(haloBox, haloCol, {.round = static_cast<int>(std::round(haloBox.w / 2.0)), .roundingPower = 2.F});
++            g_pHyprOpenGL->renderRect(ctx, haloBox, haloCol, {.round = static_cast<int>(std::round(haloBox.w / 2.0)), .roundingPower = 2.F});
 +            // and darken it slightly, like a pressed-ready macOS light
 +            color = CHyprColor(color.r * 0.82, color.g * 0.82, color.b * 0.82, color.a);
 +        }
 +
-         g_pHyprOpenGL->renderRect(buttonBox, color, {.round = static_cast<int>(std::round(scaledButtonSize / 2.0)), .roundingPower = 2.F});
+         g_pHyprOpenGL->renderRect(ctx, buttonBox, color, {.round = sc<int>(std::round(scaledButtonSize / 2.0)), .roundingPower = 2.F});
  
          offset += scaledButtonsPad + scaledButtonSize;
-@@ -405,7 +571,7 @@ void CHyprBar::renderBarButtonsText(CBox* barBox, const float scale, const float
+@@ -427,8 +591,7 @@ void CHyprBar::renderBarButtonsText(Render::CRenderContext& ctx, CBox* barBox, c
              // render icon
              auto fgcol = button.userfg ? button.fgcol : (button.bgcol.r + button.bgcol.g + button.bgcol.b < 1) ? CHyprColor(0xFFFFFFFF) : CHyprColor(0xFF000000);
  
--            button.iconTex = g_pHyprRenderer->renderText(button.icon, fgcol, std::round(button.size * 0.62 * scale), false, "sans", scaledButtonSize);
-+            button.iconTex = g_pHyprRenderer->renderText(button.icon, fgcol, std::round(button.size * 0.8 * scale), false, "sans", scaledButtonSize, 700);
+-            button.iconTex =
+-                g_pHyprRenderer->renderText(button.icon, fgcol, std::round(button.size * 0.62 * scale), false, g_pGlobalState->config.barTextFont->value(), scaledButtonSize);
++            button.iconTex      = g_pHyprRenderer->renderText(button.icon, fgcol, std::round(button.size * 0.8 * scale), false, "sans", scaledButtonSize, 700);
+             button.m_fIconScale = scale;
          }
  
-         if (!button.iconTex || button.iconTex->m_texID == 0)
-@@ -664,28 +830,34 @@ void CHyprBar::updateRules() {
+@@ -702,28 +865,34 @@ void CHyprBar::updateRules() {
          m_bTitleColorChanged = true;
  }
  
@@ -340,7 +328,7 @@ index c27653d..1c7b4f6 100644
 +    uint32_t   mask   = 0;
 +    size_t     i      = 0;
      for (auto& b : g_pGlobalState->buttons) {
-         const auto BARBUF     = Vector2D{(int)assignedBoxGlobal().w, HEIGHT};
+         const auto BARBUF     = Vector2D{assignedBoxGlobal().w, sc<double>(HEIGHT)};
          Vector2D   currentPos = Vector2D{(BUTTONSRIGHT ? BARBUF.x - BARBUTTONPADDING - b.size - offset : offset), (BARBUF.y - b.size) / 2.0}.floor();
 -
 -        bool       hover = VECINRECT(COORDS, currentPos.x, currentPos.y, currentPos.x + b.size + BARBUTTONPADDING, currentPos.y + b.size);
@@ -368,26 +356,26 @@ index c27653d..1c7b4f6 100644
      }
  }
 diff --git a/hyprbars/barDeco.hpp b/hyprbars/barDeco.hpp
-index a3b4e2d..6e766ac 100644
+index d0d54d5..d4801db 100644
 --- a/hyprbars/barDeco.hpp
 +++ b/hyprbars/barDeco.hpp
-@@ -66,6 +66,7 @@ class CHyprBar : public IHyprWindowDecoration {
-     bool                       m_hidden             = false;
+@@ -68,6 +68,7 @@ class CHyprBar : public IHyprWindowDecoration {
      bool                       m_bTitleColorChanged = false;
      bool                       m_bButtonHovered     = false;
+     bool                       m_bBarHovered        = false;
 +    uint32_t                   m_iLastHoverMask     = 0;
      bool                       m_bLastEnabledState  = false;
      bool                       m_bWindowHasFocus    = false;
      std::optional<CHyprColor>  m_bForcedBarColor;
-@@ -82,6 +83,7 @@ class CHyprBar : public IHyprWindowDecoration {
-     void renderBarButtons(CBox* barBox, const float scale, const float a);
-     void renderBarButtonsText(CBox* barBox, const float scale, const float a);
+@@ -85,6 +86,7 @@ class CHyprBar : public IHyprWindowDecoration {
+     void renderBarButtons(Render::CRenderContext& ctx, CBox* barBox, const float scale, const float a);
+     void renderBarButtonsText(Render::CRenderContext& ctx, CBox* barBox, const float scale, const float a);
      void damageOnButtonHover();
 +    uint32_t hoverMask();
  
      bool inputIsValid();
      void onMouseButton(Event::SCallbackInfo& info, IPointer::SButtonEvent e);
-@@ -109,7 +111,13 @@ class CHyprBar : public IHyprWindowDecoration {
+@@ -113,7 +115,13 @@ class CHyprBar : public IHyprWindowDecoration {
      bool                m_bDraggingThis  = false;
      bool                m_bTouchEv       = false;
      bool                m_bDragPending   = false;

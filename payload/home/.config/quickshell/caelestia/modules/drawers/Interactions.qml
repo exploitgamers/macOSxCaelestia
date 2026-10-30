@@ -52,6 +52,11 @@ CustomMouseArea {
         return x < Math.max(Config.border.minThickness, geometry.insetLeft(borderThickness) + panel.x + panel.width) && withinPanelHeight(panel, x, y);
     }
 
+    // [macos] the sidebar is on the right edge (under the bar's notifications button); session/OSD stay left
+    function inSidebar(x: real, y: real): bool {
+        return x > Math.min(width - Config.border.minThickness, geometry.insetLeft(borderThickness) + panels.sidebar.x) && withinPanelHeight(panels.sidebar, x, y);
+    }
+
     function inTopPanel(panel: Item, x: real, y: real): bool {
         const panelHeight = panel.height * (1 - (panel.offsetScale ?? 0)); // qmllint disable missing-property
         return y < Math.max(Config.border.minThickness, geometry.insetTop(Config.border.thickness) + panelHeight) && withinPanelWidth(panel, x, y);
@@ -148,12 +153,12 @@ CustomMouseArea {
                 root.panels.osd.hovered = true;
             }
 
-            const showSidebar = pressed && dragStart.x < Math.max(Config.border.minThickness, geometry.insetLeft(borderThickness) + panels.sidebar.x + panels.sidebar.width);
+            const showSidebar = pressed && dragStart.x > Math.min(width - Config.border.minThickness, geometry.insetLeft(borderThickness) + panels.sidebar.x);
 
             // Show sidebar on hover (top-right corner, bounded by notification panel height)
             if (Config.sidebar.showOnHover) {
                 const sidebarTriggerY = Math.max(Config.sidebar.minHoverThreshold, panels.notifications.y + panels.notifications.height + borderThickness);
-                const showSidebarHover = x < Math.max(Config.border.minThickness, geometry.insetLeft(borderThickness) + panels.sidebar.x + panels.sidebar.width) && y <= sidebarTriggerY;
+                const showSidebarHover = x > Math.min(width - Config.border.minThickness, geometry.insetLeft(borderThickness) + panels.sidebar.x) && y <= sidebarTriggerY;
                 if (showSidebarHover && !screenState.sidebar)
                     screenState.sidebar = true;
             }
@@ -165,15 +170,12 @@ CustomMouseArea {
                 else if (dragX < -Config.session.dragThreshold)
                     screenState.session = false;
 
-                // Show sidebar on drag if in session area and session is nearly fully visible
-                if (showSidebar && panels.session.offsetScale <= 0 && dragX > Config.sidebar.dragThreshold)
-                    screenState.sidebar = true;
-            } else if (showSidebar && dragX > Config.sidebar.dragThreshold) {
+            } else if (showSidebar && dragX < -Config.sidebar.dragThreshold) {
                 // Show sidebar on drag if not in session area
                 screenState.sidebar = true;
             }
         } else {
-            const outOfSidebar = x > geometry.insetLeft(borderThickness) + panels.sidebar.width * (1 - panels.sidebar.offsetScale);
+            const outOfSidebar = !inSidebar(x, y);
             // Show osd on hover
             const showOsd = outOfSidebar && inRightPanel(panels.osdWrapper, x, y);
 
@@ -198,18 +200,18 @@ CustomMouseArea {
             // Show/hide sidebar on hover
             if (Config.sidebar.showOnHover && !pressed) {
                 const sidebarTriggerY = Math.max(Config.sidebar.minHoverThreshold, panels.notifications.y + panels.notifications.height + borderThickness);
-                const showSidebarHover = x < Math.max(Config.border.minThickness, geometry.insetLeft(borderThickness) + panels.sidebar.x + panels.sidebar.width) && y <= sidebarTriggerY;
+                const showSidebarHover = x > Math.min(width - Config.border.minThickness, geometry.insetLeft(borderThickness) + panels.sidebar.x) && y <= sidebarTriggerY;
                 if (showSidebarHover && !screenState.sidebar) {
                     screenState.sidebar = true;
                 } else {
-                    const inSidebarArea = inRightPanel(panels.sidebar, x, y) || inRightPanel(panels.sessionWrapper, x, y);
+                    const inSidebarArea = inSidebar(x, y);
                     if (!inSidebarArea)
                         screenState.sidebar = false;
                 }
             }
 
             // Hide sidebar on drag
-            if (pressed && inRightPanel(panels.sidebar, dragStart.x, 0) && dragX < -Config.sidebar.dragThreshold)
+            if (pressed && inSidebar(dragStart.x, dragStart.y) && dragX > Config.sidebar.dragThreshold)
                 screenState.sidebar = false;
         }
 
