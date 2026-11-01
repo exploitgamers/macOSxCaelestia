@@ -68,7 +68,7 @@
       },
       {
         "id": "weather-1",
-        "order": -529,
+        "order": -531,
         "pos": {
           "HDMI-A-1": {
             "x": 1546,
@@ -85,7 +85,7 @@
       },
       {
         "id": "profile-1",
-        "order": 3,
+        "order": -530,
         "pos": {
           "HDMI-A-1": {
             "x": 1546,
