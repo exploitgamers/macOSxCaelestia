@@ -1288,12 +1288,14 @@ hl.config({
 ----------------
 
 hl.config({
-    -- Lets the existing "game" window tag (rules.lua: immediate = true) actually tear,
-    -- removing a frame of input latency in fullscreen games
-    general = { allow_tearing = true },
-    -- Variable refresh only for fullscreen apps (avoids desktop flicker)
-    misc = { vrr = 2 },
-    -- Direct scanout for fullscreen games: skip compositing entirely
+    -- No tearing: i915 rejects the async page flips (EINVAL) and Hyprland falls back to a full HDMI
+    -- modeset — the screen blanked and froze ~300 ms on every switch in/out of the game (tested 2026-10-31).
+    -- No VRR: neither display is VRR-capable.
+    general = { allow_tearing = false },
+    misc = { vrr = 0 },
+    -- Direct scanout for fullscreen games (content type "game", see the Sober rule): the game's
+    -- frames go straight to the screen. Needs nothing on the Overlay layer over the game (the
+    -- macos shell and Caelestia's drawers step off it). Tested clean 2026-10-31.
     render = { direct_scanout = 2 },
 })
 
@@ -1420,8 +1422,10 @@ end)
 hl.env("LIBVA_DRIVER_NAME", "iHD")
 
 hl.config({
-    -- Tell the compositor when content is video/game (better scheduling, VRR, scanout)
-    render = { send_content_type = true },
+    -- Don't pass the content type (game/video) on to the monitor: on i915 a change of the HDMI
+    -- "content type" forces a full modeset, so the screen went black and froze ~300 ms on every
+    -- switch in/out of a fullscreen game (2026-10-31). Hyprland still uses it for direct scanout.
+    render = { send_content_type = false },
     -- Launching mpv/imv from foot replaces the terminal instead of stacking a window
     misc = { enable_swallow = true, swallow_regex = "^(foot)$" },
 })
@@ -1451,11 +1455,14 @@ hl.window_rule({
     ["hyprbars:no_bar"] = true,
 })
 
--- Max fps for Roblox (Sober, Vulkan): tear instead of waiting for vsync when fullscreen (allow_tearing
--- is on above), like Caelestia's "game" tag does for Steam games; and never dim or idle it.
+-- Max fps for Roblox (Sober, Vulkan): immediate = tear instead of waiting for vsync, inert while
+-- allow_tearing is off above (kept so it works if tearing is ever re-enabled); never dim or idle it.
+-- content = "game": Sober doesn't send a content type; tells Hyprland it's a game, which direct
+-- scanout = 2 needs (static: applies when the window opens). Kept off the monitor: send_content_type.
 mac_sober_rule = hl.window_rule({
     name = "mac-sober-maxfps",
     match = { class = "^org\\.vinegarhq\\.Sober$" },
     immediate = true,
+    content = "game",
     idle_inhibit = "fullscreen",
 })

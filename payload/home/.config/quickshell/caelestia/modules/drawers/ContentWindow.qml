@@ -74,7 +74,9 @@ StyledWindow {
 
     name: "drawers"
     WlrLayershell.exclusionMode: ExclusionMode.Ignore
-    WlrLayershell.layer: (fsTransitionProg > 0 && contentItem.Config.general.showOverFullscreen) || (hasSpecialWorkspace && hasFullscreenOnNormalWs) ? WlrLayer.Overlay : WlrLayer.Top
+    // [macos] not over a fullscreen game: any Overlay-layer surface blocks Hyprland's direct scanout and
+    // tearing, so every game frame was composited on the iGPU (banners/OSD wait until the game leaves fullscreen)
+    WlrLayershell.layer: (fsTransitionProg > 0 && contentItem.Config.general.showOverFullscreen && !hasFullscreenGame) || (hasSpecialWorkspace && hasFullscreenOnNormalWs) ? WlrLayer.Overlay : WlrLayer.Top
     // [macos] the side panel takes the keyboard while open (with its focus grab), so Esc closes it
     WlrLayershell.keyboardFocus: screenState.launcher || screenState.session || screenState.sidebar || popoutTakesKeys ? WlrKeyboardFocus.OnDemand : WlrKeyboardFocus.None
 

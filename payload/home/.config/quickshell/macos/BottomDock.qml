@@ -340,6 +340,9 @@ PanelWindow {
 
     // ── Window ───────────────────────────────────────────────────────────
     screen: modelData
+    // unmapped over a fullscreen game (it has no reveal strip there): an Overlay-layer surface
+    // blocks Hyprland's direct scanout and tearing for the game (FullscreenBar.qml)
+    visible: !Shared.gameFullscreenOn(modelData)
     color: "transparent"
     anchors.bottom: true
     anchors.left: true

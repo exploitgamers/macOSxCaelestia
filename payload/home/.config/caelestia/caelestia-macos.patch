@@ -4716,7 +4716,7 @@ index a474448d..323a58ea 100644
          spacing: Tokens.spacing.small
  
 diff --git a/modules/drawers/ContentWindow.qml b/modules/drawers/ContentWindow.qml
-index 212682f9..db9b004b 100644
+index 212682f9..dcca72ac 100644
 --- a/modules/drawers/ContentWindow.qml
 +++ b/modules/drawers/ContentWindow.qml
 @@ -18,6 +18,7 @@ StyledWindow {
@@ -4747,11 +4747,15 @@ index 212682f9..db9b004b 100644
      readonly property real shadowOpacity: 0.7 * (1 - fsTransitionProg)
      readonly property real borderLayoutThickness: hasFullscreen ? 0 : contentItem.Config.border.thickness
  
-@@ -68,9 +75,68 @@ StyledWindow {
+@@ -67,10 +74,71 @@ StyledWindow {
+ 
      name: "drawers"
      WlrLayershell.exclusionMode: ExclusionMode.Ignore
-     WlrLayershell.layer: (fsTransitionProg > 0 && contentItem.Config.general.showOverFullscreen) || (hasSpecialWorkspace && hasFullscreenOnNormalWs) ? WlrLayer.Overlay : WlrLayer.Top
+-    WlrLayershell.layer: (fsTransitionProg > 0 && contentItem.Config.general.showOverFullscreen) || (hasSpecialWorkspace && hasFullscreenOnNormalWs) ? WlrLayer.Overlay : WlrLayer.Top
 -    WlrLayershell.keyboardFocus: screenState.launcher || screenState.session ? WlrKeyboardFocus.OnDemand : WlrKeyboardFocus.None
++    // [macos] not over a fullscreen game: any Overlay-layer surface blocks Hyprland's direct scanout and
++    // tearing, so every game frame was composited on the iGPU (banners/OSD wait until the game leaves fullscreen)
++    WlrLayershell.layer: (fsTransitionProg > 0 && contentItem.Config.general.showOverFullscreen && !hasFullscreenGame) || (hasSpecialWorkspace && hasFullscreenOnNormalWs) ? WlrLayer.Overlay : WlrLayer.Top
 +    // [macos] the side panel takes the keyboard while open (with its focus grab), so Esc closes it
 +    WlrLayershell.keyboardFocus: screenState.launcher || screenState.session || screenState.sidebar || popoutTakesKeys ? WlrKeyboardFocus.OnDemand : WlrKeyboardFocus.None
 +
@@ -4818,7 +4822,7 @@ index 212682f9..db9b004b 100644
  
      anchors.top: true
      anchors.bottom: true
-@@ -85,26 +151,18 @@ StyledWindow {
+@@ -85,26 +153,18 @@ StyledWindow {
          CAnim {}
      }
  
@@ -4852,7 +4856,7 @@ index 212682f9..db9b004b 100644
          panels: panels
          win: root
      }
-@@ -121,6 +179,8 @@ StyledWindow {
+@@ -121,6 +181,8 @@ StyledWindow {
                  return true;
              if (panels.popouts.currentName.startsWith("traymenu") && (panels.popouts.current as StackView)?.depth > 1)
                  return true;
@@ -4861,7 +4865,7 @@ index 212682f9..db9b004b 100644
              return false;
          }
          windows: [root]
-@@ -149,10 +209,12 @@ StyledWindow {
+@@ -149,10 +211,12 @@ StyledWindow {
      Item {
          anchors.fill: parent
          opacity: root.surfaceColour.a
@@ -4876,7 +4880,7 @@ index 212682f9..db9b004b 100644
              shadowColor: Qt.alpha(Colours.palette.m3shadow, Math.max(0, root.shadowOpacity))
          }
  
-@@ -167,11 +229,11 @@ StyledWindow {
+@@ -167,11 +231,11 @@ StyledWindow {
              anchors.fill: parent
              anchors.margins: -50 // Make border thicker to smooth out bulge from closed drawers
              group: blobGroup
@@ -4892,7 +4896,7 @@ index 212682f9..db9b004b 100644
          }
  
          PanelBg {
-@@ -191,18 +253,21 @@ StyledWindow {
+@@ -191,18 +255,21 @@ StyledWindow {
          PanelBg {
              id: sessionBg
  
@@ -4916,7 +4920,7 @@ index 212682f9..db9b004b 100644
              exclude: panels.sidebar.offsetScale > 0.08 ? [] : [utilsBg]
              bottomLeftRadius: Math.max(0, Math.min(1, panels.sidebar.offsetScale / 0.3)) * radius
          }
-@@ -210,9 +275,10 @@ StyledWindow {
+@@ -210,9 +277,10 @@ StyledWindow {
          PanelBg {
              id: osdBg
  
@@ -4928,7 +4932,7 @@ index 212682f9..db9b004b 100644
              implicitWidth: panels.osd.width
          }
  
-@@ -220,32 +286,22 @@ StyledWindow {
+@@ -220,32 +288,22 @@ StyledWindow {
              id: notifsBg
  
              panel: panels.notifications
@@ -4966,7 +4970,7 @@ index 212682f9..db9b004b 100644
      }
  
      Interactions {
-@@ -256,6 +312,7 @@ StyledWindow {
+@@ -256,6 +314,7 @@ StyledWindow {
          screenState: root.screenState
          panels: panels
          bar: bar
@@ -4974,7 +4978,7 @@ index 212682f9..db9b004b 100644
          borderThickness: root.borderLayoutThickness
          fullscreen: root.hasFullscreen
  
-@@ -265,6 +322,7 @@ StyledWindow {
+@@ -265,6 +324,7 @@ StyledWindow {
              screen: root.screen
              screenState: root.screenState
              bar: bar
@@ -4982,7 +4986,7 @@ index 212682f9..db9b004b 100644
              borderThickness: root.borderThickness
  
              utilities.horizontalStretch: (sidebarBg.rawDeformMatrix.m11 - 1) / 2 + 1
-@@ -291,20 +349,24 @@ StyledWindow {
+@@ -291,20 +351,24 @@ StyledWindow {
              utilities.transform: Matrix4x4 {
                  matrix: utilsBg.deformMatrix
              }
@@ -5012,7 +5016,7 @@ index 212682f9..db9b004b 100644
  
              fullscreen: root.hasFullscreen
          }
-@@ -337,13 +399,25 @@ StyledWindow {
+@@ -337,13 +401,25 @@ StyledWindow {
      component PanelBg: BlobRect {
          required property Item panel
          property real deformAmount: 0.15

@@ -80,7 +80,8 @@ PanelWindow {
     // Stays mapped while closed (invisible + click-through via the empty mask):
     // re-creating the surface on every open cost several late frames at the
     // start of the animation, and keeping it alive also preloads the icons.
-    visible: true
+    // Parked over a fullscreen game it unmaps (direct scanout, FullscreenBar.qml).
+    visible: !parked || !Shared.gameFullscreenOn(modelData)
     anchors.bottom: true
     // Closed: parked below the screen. Hyprland re-blurs a mapped blur layer's whole box on every
     // frame anything beneath it changes, even fully transparent (~20 % of the GPU work of every

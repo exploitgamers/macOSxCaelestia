@@ -232,7 +232,8 @@ PanelWindow {
     // Always mapped (click-through via the mask while closed), like the Apps
     // launcher: unmapping as soon as the render-thread fade began destroyed the
     // window mid-animation and crashed the shell (QQuickAnimatorProxyJob).
-    visible: true
+    // Parked (after the fade) over a fullscreen game it unmaps (direct scanout, FullscreenBar.qml).
+    visible: !parked || !Shared.gameFullscreenOn(modelData)
     // the panel's resting rectangle, not `item: panel`: an item region is mapped through the
     // panel's open animation (scale/offset) when set, and isn't rebuilt as that animation runs
     mask: Region {

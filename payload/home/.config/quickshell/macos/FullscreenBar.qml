@@ -40,6 +40,9 @@ PanelWindow {
     onActiveChanged: if (!active) shown = false
 
     screen: modelData
+    // unmapped over a fullscreen game (inactive there anyway): any Overlay-layer surface stops
+    // Hyprland's direct scanout and tearing for the game, compositing every frame on the iGPU
+    visible: !Shared.gameFullscreenOn(modelData)
     color: "transparent"
     anchors.top: true
     anchors.left: true

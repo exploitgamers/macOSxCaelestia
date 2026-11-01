@@ -82,8 +82,9 @@ Scope {
     implicitHeight: picker.here || slide.opacity > 0.01 ? picker.stripH + 20 : 1
     exclusionMode: ExclusionMode.Ignore
     mask: Region {}
-    // stays mapped (empty, no input): the copy's layer, mapped on each drag, then stacks above it
-    visible: true
+    // stays mapped (empty, no input): the copy's layer, mapped on each drag, then stacks above it;
+    // not over a fullscreen game (direct scanout, FullscreenBar.qml)
+    visible: !Shared.gameFullscreenOn(picker.modelData)
 
     WlrLayershell.namespace: "macos-launcher" // blurred like the launcher
     WlrLayershell.layer: WlrLayer.Overlay
