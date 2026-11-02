@@ -5,6 +5,12 @@ it was published (`vYYYY.MM.DD`) and can be downloaded from the GitHub releases 
 
 ## Unreleased
 
+## v2026.11.02
+
+<!-- auto: rewritten on every publish -->
+- Built for Hyprland 0.57.0-1.1, Qt 6.12.0 and Python 3.14.
+- Updated: Dock & widgets settings.
+
 ## v2026.11.01
 
 <!-- auto: rewritten on every publish -->
