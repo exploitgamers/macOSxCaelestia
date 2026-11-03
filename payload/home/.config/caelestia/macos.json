@@ -68,7 +68,7 @@
       },
       {
         "id": "weather-1",
-        "order": -561,
+        "order": -577,
         "pos": {
           "HDMI-A-1": {
             "x": 1546,
@@ -102,7 +102,7 @@
       },
       {
         "id": "music-1",
-        "order": -560,
+        "order": -576,
         "pos": {
           "HDMI-A-1": {
             "x": 1546,
@@ -130,7 +130,7 @@
       },
       {
         "id": "battery-1",
-        "order": -1,
+        "order": -3,
         "pos": {
           "HDMI-A-1": {
             "x": 1545,
