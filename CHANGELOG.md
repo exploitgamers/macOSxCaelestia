@@ -15,8 +15,21 @@ it was published (`vYYYY.MM.DD`) and can be downloaded from the GitHub releases 
 
 ## Unreleased
 
+## v2026.11.04
+
 - Pressing the volume or brightness keys briefly opens the volume/brightness drop-down under the top bar again
   (moving the mouse used to close it at once).
+- Apps opened from the dock get the desktop session's settings again. Some apps, such as ZapZap, failed to
+  start after the shells had been restarted from a terminal.
+- Desktop widgets can be customised: right-click one and choose Edit. The options are clock style and city,
+  first day of the week, weather location and units, which batteries or system meters to show, the Notes text
+  size, the timer presets and the Photos folder.
+- Apple-style icons across the dock's menus, Spotlight, the launcher, Settings and the widget gallery, and in the
+  top bar: battery, Wi-Fi, volume and brightness symbols, round Control Center toggles, and notification icons.
+
+<!-- auto: rewritten on every publish -->
+- Built for Hyprland 0.57.0-1.1, Qt 6.12.0 and Python 3.14.
+- Updated: Dock & widgets settings; Helper commands; Shell UI (Dock, Spotlight, widgets); Top bar (Caelestia).
 
 ## v2026.11.03
 

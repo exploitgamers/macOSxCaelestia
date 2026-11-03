@@ -1,0 +1,20 @@
+# Sourced by rice-restart and rice-ensure-shells. Apps launched from the dock inherit the shells'
+# environment, so the shells must get the session's, never the caller's: started from a terminal or a
+# Claude tool shell they lacked DISPLAY/XDG_SESSION_TYPE and Hyprland's hl.env settings (ZapZap fell
+# back to X11 with no display and aborted), and carried Claude Code's variables, its auth token
+# included, into every app (2026-11-03).
+
+# session_start CMD: run CMD (a fixed command line without quotes) the way Hyprland runs any app
+session_start() {
+    # the login session = the oldest live instance (nested test Hyprlands are newer and leave stale dirs behind)
+    if HYPRLAND_INSTANCE_SIGNATURE=$(hyprctl instances 2>/dev/null | sed -n 's/^instance \([^:]*\):.*/\1/p' |
+        sort -t_ -k2 -n | head -1) hyprctl eval "hl.exec_cmd(\"$1\")" 2>/dev/null | grep -qx ok; then
+        return 0
+    fi
+    # no Hyprland to ask: start it here, minus Claude Code's variables (a dock-launched `claude` with
+    # CLAUDE_CODE_CHILD_SESSION set doesn't save its transcript, 2026-10-10)
+    (
+        for v in $(env | sed -n 's/^\(CLAUDE[A-Z_]*\|ANTHROPIC[A-Z_]*\|AI_AGENT\)=.*/\1/p'); do unset "$v"; done
+        exec setsid sh -c "$1" >/dev/null 2>&1
+    ) &
+}

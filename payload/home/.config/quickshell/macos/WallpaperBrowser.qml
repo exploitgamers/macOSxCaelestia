@@ -324,12 +324,12 @@ PanelWindow {
                 visible: th.busy
                 color: Qt.rgba(0, 0, 0, 0.45)
 
-                Text {
+                Symbol {
                     anchors.centerIn: parent
-                    text: "progress_activity"
+                    name: "progress_activity"
+                    size: 26
+                    weight: 600
                     color: "white"
-                    font.family: "Material Symbols Rounded"
-                    font.pixelSize: 26
 
                     RotationAnimation on rotation {
                         running: th.busy
@@ -435,15 +435,16 @@ PanelWindow {
                 acceptedButtons: Qt.NoButton
             }
 
-            Text {
+            Symbol { // toolbar chevron, bold like the title beside it
                 id: back
 
                 x: 92
                 anchors.verticalCenter: parent.verticalCenter
-                text: "chevron_left"
+                name: "chevron_left"
+                size: 26
+                weight: 600
                 color: wb.showAll ? Theme.fg : Theme.alpha(Theme.fg, 0.25)
-                font.family: "Material Symbols Rounded"
-                font.pixelSize: 26
+                Behavior on color { ColorAnimation { duration: 160 } }
 
                 MouseArea {
                     anchors.fill: parent
@@ -476,15 +477,15 @@ PanelWindow {
                 border.width: searchBox.activeFocus ? 2 : 0
                 border.color: Theme.alpha(Theme.primary, 0.6)
 
-                Text {
+                Symbol {
                     id: lens
 
                     x: 8
                     anchors.verticalCenter: parent.verticalCenter
-                    text: "search"
+                    name: "search"
+                    size: 16
+                    weight: 400
                     color: Theme.fgDim
-                    font.family: "Material Symbols Rounded"
-                    font.pixelSize: 16
                 }
 
                 TextInput {

@@ -20,15 +20,15 @@ Item {
         color: hover.hovered ? Theme.alpha(Theme.fg, tap.pressed ? 0.16 : 0.09) : "transparent"
     }
 
-    Text {
+    Symbol { // multicolor: folders blue, images purple, PDFs red… (Theme.symbolTints), else the accent
         id: glyph
 
         anchors.verticalCenter: parent.verticalCenter
-        text: root.icon
+        name: root.icon
+        mode: "multicolor"
+        size: 18
+        weight: 500
         color: Theme.primary
-        font.family: "Material Symbols Rounded"
-        font.variableAxes: { "FILL": 1 }
-        font.pixelSize: 18
     }
 
     Column {

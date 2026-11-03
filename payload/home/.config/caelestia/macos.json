@@ -68,7 +68,7 @@
       },
       {
         "id": "weather-1",
-        "order": -577,
+        "order": -883,
         "pos": {
           "HDMI-A-1": {
             "x": 1546,
@@ -102,7 +102,7 @@
       },
       {
         "id": "music-1",
-        "order": -576,
+        "order": -882,
         "pos": {
           "HDMI-A-1": {
             "x": 1546,
@@ -175,7 +175,7 @@
       },
       {
         "id": "shortcuts-1",
-        "order": -7,
+        "order": -9,
         "screen": "",
         "size": "medium",
         "smartRotate": true,
@@ -186,7 +186,7 @@
       },
       {
         "id": "files-1",
-        "order": -6,
+        "order": -8,
         "pos": {},
         "screen": "",
         "size": "medium",

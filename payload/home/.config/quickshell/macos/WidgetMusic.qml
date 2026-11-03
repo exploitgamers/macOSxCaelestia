@@ -55,13 +55,13 @@ Item {
             }
         }
 
-        Text {
+        Symbol {
             anchors.centerIn: parent
-            text: ctl.icon
+            name: ctl.icon
             color: ctl.primary ? Theme.fgOnPrimary : Theme.fg
-            font.family: "Material Symbols Rounded"
-            font.pixelSize: ctl.iconSize
-            font.variableAxes: { "FILL": 1 }
+            size: ctl.iconSize
+            fill: true
+            weight: 600
         }
 
         HoverHandler {
@@ -82,17 +82,21 @@ Item {
         }
     }
 
-    Text {
+    Column {
         visible: !root.player
         anchors.centerIn: parent
-        horizontalAlignment: Text.AlignHCenter
-        text: "music_note\n"
-        color: Theme.alpha(Theme.fg, 0.35)
-        font.family: "Material Symbols Rounded"
-        font.pixelSize: 42
+        spacing: 6
+
+        // Apple Music's pink note
+        Symbol {
+            anchors.horizontalCenter: parent.horizontalCenter
+            name: "music_note"
+            mode: "multicolor"
+            fill: true
+            size: 42
+        }
 
         Text {
-            anchors.bottom: parent.bottom
             anchors.horizontalCenter: parent.horizontalCenter
             text: "Not Playing"
             color: Theme.fgDim
@@ -121,13 +125,13 @@ Item {
             sourceSize.height: 280
         }
 
-        Text {
+        Symbol {
             visible: !(root.player?.trackArtUrl)
             anchors.centerIn: parent
-            text: "music_note"
-            color: Theme.alpha(Theme.fg, 0.4)
-            font.family: "Material Symbols Rounded"
-            font.pixelSize: parent.width * 0.4
+            name: "music_note"
+            mode: "multicolor"
+            fill: true
+            size: parent.width * 0.4
         }
     }
 

@@ -168,13 +168,12 @@ PanelWindow {
                     sourceSize.height: 160
                 }
 
-                Text {
+                Symbol { // no artwork: the Music app's pink note
                     anchors.centerIn: parent
                     visible: !(win.player?.trackArtUrl)
-                    text: "󰝚"
-                    color: Theme.primary
-                    font.family: Theme.iconFont
-                    font.pixelSize: 34
+                    name: "music_note"
+                    mode: "multicolor"
+                    size: 36
                 }
 
                 MouseArea {
@@ -251,22 +250,23 @@ PanelWindow {
 
                     Repeater {
                         model: [
-                            { icon: "󰒮", act: () => win.player?.previous(), ok: win.player?.canGoPrevious ?? false },
-                            { icon: win.player?.isPlaying ? "󰏤" : "󰐊", act: () => win.player?.togglePlaying(), ok: win.player?.canTogglePlaying ?? false },
-                            { icon: "󰒭", act: () => win.player?.next(), ok: win.player?.canGoNext ?? false }
+                            { icon: "fast_rewind", act: () => win.player?.previous(), ok: win.player?.canGoPrevious ?? false },
+                            { icon: win.player?.isPlaying ? "pause" : "play_arrow", act: () => win.player?.togglePlaying(), ok: win.player?.canTogglePlaying ?? false },
+                            { icon: "fast_forward", act: () => win.player?.next(), ok: win.player?.canGoNext ?? false }
                         ]
 
-                        delegate: Text {
+                        delegate: Symbol { // backward.fill / play.fill / forward.fill
                             id: btn
 
                             required property var modelData
 
-                            text: modelData.icon
+                            name: modelData.icon
+                            fill: true
+                            size: modelData.icon === "pause" || modelData.icon === "play_arrow" ? 30 : 26
                             color: btnMouse.containsMouse ? Theme.primary : Theme.fg
                             opacity: modelData.ok ? 1 : 0.35
-                            font.family: Theme.iconFont
-                            font.pixelSize: 22
                             scale: btnSpring.value
+                            Behavior on color { ColorAnimation { duration: 150 } }
 
                             Spring {
                                 id: btnSpring

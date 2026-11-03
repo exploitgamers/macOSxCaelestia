@@ -353,7 +353,14 @@ PanelWindow {
     // outside the note or Esc (WidgetNotes). If the keyboard slips away with no such press,
     // it's taken back (twice at most). No HyprlandFocusGrab: it swallowed the first click
     // outside (e.g. the dock icon you meant to open). Only the display with that note asks.
-    readonly property bool editingHere: Shared.noteEditingId !== "" && items.some(w => w.id === Shared.noteEditingId)
+    readonly property bool editingHere: (Shared.noteEditingId !== "" && items.some(w => w.id === Shared.noteEditingId)) || editorOpen
+    // Edit Widget (WidgetCard): the item whose card shows its options; it takes the keyboard the
+    // same way (text fields, Esc). Cleared once that item isn't a front card here (removed,
+    // stack cycled, moved to another display), so the keyboard is always handed back.
+    property string editId: ""
+    readonly property bool editorOpen: editId !== "" && groups.some(g => g.members[0]?.id === editId)
+    // a tick later: writing editId while editorOpen is still notifying is a binding loop
+    onEditorOpenChanged: if (!editorOpen) Qt.callLater(() => { if (!editorOpen) editId = ""; })
     property bool noteKeyArmed: false // false while editing: the exclusive grab
     property int noteRegrabs: 0
     // None unless editing: an on-demand layer keeps the keyboard after any desktop click,

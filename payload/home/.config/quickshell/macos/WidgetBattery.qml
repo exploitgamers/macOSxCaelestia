@@ -8,10 +8,12 @@ Item {
 
     property string size: "small"
     property string widgetId: ""
+    property var options: ({}) // Edit "Batteries"…: show all | laptop | devices
 
     readonly property var devices: {
-        const list = UPower.devices.values.filter(d => d.isPresent && (d.isLaptopBattery
-            || (d.type !== UPowerDeviceType.LinePower && d.percentage > 0 && d.nativePath !== "")));
+        const show = options.show ?? "all";
+        const list = UPower.devices.values.filter(d => d.isPresent && (d.isLaptopBattery ? show !== "devices"
+            : show !== "laptop" && d.type !== UPowerDeviceType.LinePower && d.percentage > 0 && d.nativePath !== ""));
         list.sort((a, b) => (b.isLaptopBattery ? 1 : 0) - (a.isLaptopBattery ? 1 : 0));
         return list.slice(0, 4);
     }
@@ -66,6 +68,8 @@ Item {
 
                 readonly property real level: modelData.percentage
                 readonly property bool low: level <= 0.2 && !root.charging(modelData)
+                // Apple's battery colours: green, yellow when getting low, red at 20 % (charging = green)
+                readonly property color tint: root.charging(modelData) ? Theme.sys.green : low ? Theme.sys.red : level <= 0.4 ? Theme.sys.yellow : Theme.sys.green
 
                 spacing: 6
 
@@ -78,28 +82,28 @@ Item {
                         anchors.fill: parent
                         value: cell.level
                         thickness: root.size === "small" && root.devices.length === 1 ? 9 : 6
-                        colour: cell.low ? "#ff5f57" : root.charging(cell.modelData) ? "#30d158" : Theme.primary
+                        colour: cell.tint
                     }
 
-                    Text {
+                    Symbol {
                         anchors.centerIn: parent
-                        text: root.iconFor(cell.modelData)
-                        color: Theme.fg
-                        font.family: "Material Symbols Rounded"
-                        font.pixelSize: parent.width * 0.38
+                        name: root.iconFor(cell.modelData)
+                        fill: true
+                        size: parent.width * 0.38
+                        weight: 400
                     }
 
                     // charging bolt badge
-                    Text {
+                    Symbol {
                         visible: root.charging(cell.modelData)
                         anchors.horizontalCenter: parent.horizontalCenter
                         anchors.top: parent.top
                         anchors.topMargin: parent.width * 0.12
-                        text: "bolt"
-                        color: "#30d158"
-                        font.family: "Material Symbols Rounded"
-                        font.variableAxes: { "FILL": 1 }
-                        font.pixelSize: parent.width * 0.2
+                        name: "bolt"
+                        fill: true
+                        color: Theme.sys.green
+                        size: parent.width * 0.2
+                        weight: 600
                     }
                 }
 

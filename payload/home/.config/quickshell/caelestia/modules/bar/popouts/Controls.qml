@@ -24,6 +24,7 @@ Column {
         id: bar
 
         property string icon
+        property real iconFill: 1
         property real value
         property real to: 1
         signal moved(real value)
@@ -38,13 +39,13 @@ Column {
         width: 260
         height: Tokens.sizes.osd.sliderWidth
         radius: height / 2
-        color: Colours.tPalette.m3surfaceContainer
+        color: Qt.alpha(Colours.palette.m3onSurface, 0.12) // [macos] Control Center: a translucent track…
 
         Rectangle {
             width: Math.max(bar.height, bar.width * bar.frac)
             height: parent.height
             radius: parent.radius
-            color: Colours.palette.m3primary
+            color: Colours.light ? "white" : Qt.rgba(1, 1, 1, 0.92) // [macos] …with a white level
 
             Behavior on width {
                 enabled: !barMouse.pressed
@@ -56,7 +57,8 @@ Column {
             x: (bar.height - width) / 2
             anchors.verticalCenter: parent.verticalCenter
             text: bar.icon
-            color: Colours.palette.m3onPrimary
+            fill: bar.iconFill
+            color: Qt.rgba(0, 0, 0, 0.55) // [macos] the symbol sits on the white level, in gray
         }
 
         StyledText {
@@ -65,7 +67,7 @@ Column {
             anchors.verticalCenter: parent.verticalCenter
             text: Math.round(bar.shown * 100) + "%"
             font: Tokens.font.body.small
-            color: bar.frac > 0.85 ? Colours.palette.m3onPrimary : Colours.palette.m3onSurfaceVariant
+            color: bar.frac > 0.85 ? Qt.rgba(0, 0, 0, 0.55) : Colours.palette.m3onSurfaceVariant // [macos] over the white level
         }
 
         CustomMouseArea {
@@ -100,7 +102,8 @@ Column {
 
     Bar {
         visible: root.monitor !== undefined && root.monitor !== null
-        icon: `brightness_${(Math.round(value * 6) + 1)}`
+        icon: "light_mode" // [macos] sun.min / sun.max: outline when dim, filled when bright
+        iconFill: value >= 0.5 ? 1 : 0
         value: root.monitor?.brightness ?? 0
         onMoved: v => root.monitor?.setBrightness(v)
         onStepped: dir => root.monitor?.setBrightness(root.monitor.brightness + dir * GlobalConfig.services.brightnessIncrement)

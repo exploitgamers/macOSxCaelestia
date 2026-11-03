@@ -22,18 +22,18 @@ LazyLoader {
         id: win
 
         readonly property var pages: [
-            { id: "wifi", name: "Wi-Fi", icon: "wifi", color: "#0a84ff" },
-            { id: "bluetooth", name: "Bluetooth", icon: "bluetooth", color: "#0a84ff" },
-            { id: "sound", name: "Sound", icon: "volume_up", color: "#ff375f" },
-            { id: "appearance", name: "Appearance", icon: "palette", color: "#5e5ce6" },
-            { id: "desktop", name: "Desktop & Dock", icon: "dock_to_bottom", color: "#0a84ff" },
-            { id: "widgets", name: "Widgets", icon: "widgets", color: "#30d158" },
-            { id: "windows", name: "Windows", icon: "web_asset", color: "#64d2ff" },
-            { id: "menubar", name: "Menu Bar", icon: "toolbar", color: "#bf5af2" },
-            { id: "displays", name: "Displays & Battery", icon: "brightness_6", color: "#ff9f0a" },
-            { id: "keyboard", name: "Keyboard", icon: "keyboard", color: "#8e8e93" },
-            { id: "maintenance", name: "Maintenance", icon: "build", color: "#8e8e93" },
-            { id: "more", name: "Other Settings", icon: "apps", color: "#8e8e93" }
+            { id: "wifi", name: "Wi-Fi", icon: "wifi", color: "blue" },
+            { id: "bluetooth", name: "Bluetooth", icon: "bluetooth", color: "blue" },
+            { id: "sound", name: "Sound", icon: "volume_up", color: "pink" },
+            { id: "appearance", name: "Appearance", icon: "contrast", color: "#2c2c2e" },
+            { id: "desktop", name: "Desktop & Dock", icon: "dock_to_bottom", color: "#2c2c2e" },
+            { id: "widgets", name: "Widgets", icon: "widgets", color: "blue" },
+            { id: "windows", name: "Windows", icon: "web_asset", color: "cyan" },
+            { id: "menubar", name: "Menu Bar", icon: "toolbar", color: "gray" },
+            { id: "displays", name: "Displays & Battery", icon: "brightness_6", color: "blue" },
+            { id: "keyboard", name: "Keyboard", icon: "keyboard", color: "gray" },
+            { id: "maintenance", name: "Maintenance", icon: "build", color: "gray" },
+            { id: "more", name: "Other Settings", icon: "apps", color: "gray" }
         ]
         readonly property var page: pages.find(p => p.id === Shared.settingsPage) ?? pages[0]
 
@@ -214,21 +214,12 @@ LazyLoader {
                         radius: 7
                         color: current ? Theme.alpha(Theme.primary, 0.9) : entryMouse.containsMouse ? Theme.alpha(Theme.fg, 0.07) : "transparent"
 
-                        Rectangle {
+                        SymbolTile { // System Settings: white symbol on an Apple-colour squircle
                             x: 8
                             anchors.verticalCenter: parent.verticalCenter
-                            width: 22
-                            height: 22
-                            radius: 6
-                            color: entry.modelData.color
-
-                            Text {
-                                anchors.centerIn: parent
-                                text: entry.modelData.icon
-                                color: "white"
-                                font.family: "Material Symbols Rounded"
-                                font.pixelSize: 15
-                            }
+                            size: 22
+                            name: entry.modelData.icon
+                            tint: entry.modelData.color
                         }
 
                         Text {

@@ -114,6 +114,40 @@ Singleton {
     readonly property string displayFont: "Inter Display"
     readonly property string iconFont: "JetBrainsMono Nerd Font"
 
+    // Apple's system colours (HIG), dark and light appearance: tints for Symbol (multicolor mode) and
+    // SymbolTile. Fixed hues on purpose: Apple's icons don't follow the wallpaper scheme.
+    readonly property var sys: adapter.mode === "light" ? ({
+            red: "#ff3b30", orange: "#ff9500", yellow: "#ffcc00", green: "#34c759", mint: "#00c7be", teal: "#30b0c7",
+            cyan: "#32ade6", blue: "#007aff", indigo: "#5856d6", purple: "#af52de", pink: "#ff2d55", brown: "#a2845e", gray: "#8e8e93"
+        }) : ({
+            red: "#ff453a", orange: "#ff9f0a", yellow: "#ffd60a", green: "#30d158", mint: "#63e6e2", teal: "#40c8e0",
+            cyan: "#64d2ff", blue: "#0a84ff", indigo: "#5e5ce6", purple: "#bf5af2", pink: "#ff375f", brown: "#ac8e68", gray: "#98989d"
+        })
+
+    // The colour a symbol has in Apple's multicolor rendering (sun yellow, rain cyan, heart pink…); "" = none.
+    // Extend this table rather than hard-coding tints in components.
+    readonly property var symbolTints: ({
+            clear_day: "yellow", sunny: "yellow", wb_sunny: "yellow", partly_cloudy_day: "yellow", light_mode: "yellow",
+            bedtime: "yellow", clear_night: "yellow", nightlight: "yellow", thunderstorm: "yellow", bolt: "yellow",
+            flash_on: "yellow", star: "yellow", lightbulb: "yellow", warning: "yellow", sunny_snowing: "yellow",
+            rainy: "cyan", water_drop: "cyan", humidity_percentage: "cyan", ac_unit: "cyan", weather_snowy: "cyan", snowing: "cyan",
+            cloud: "gray", foggy: "gray", air: "teal", mist: "gray",
+            favorite: "pink", music_note: "pink", library_music: "pink", graphic_eq: "pink",
+            battery_full: "green", battery_charging_full: "green", check_circle: "green", task_alt: "green", call: "green",
+            wifi: "blue", bluetooth: "blue", folder: "blue", folder_open: "blue", info: "blue", language: "blue", public: "blue",
+            error: "red", calendar_month: "red", calendar_today: "red", event: "red", record_voice_over: "red", alarm: "orange",
+            timer: "orange", local_fire_department: "orange", thermostat: "orange", whatshot: "orange",
+            photo_library: "purple", image: "purple", movie: "indigo", sticky_note_2: "yellow", checklist: "orange",
+            memory: "teal", speed: "teal", account_circle: "gray", settings: "gray", delete: "gray",
+            picture_as_pdf: "red", folder_zip: "blue", folder_code: "blue", home: "blue", download: "blue", terminal: "gray",
+            wb_twilight: "orange", nights_stay: "indigo", schedule: "orange"
+        })
+
+    function symbolTint(name: string): string {
+        const t = symbolTints[name];
+        return t ? sys[t] : "";
+    }
+
 
     FileView {
         id: shellFile

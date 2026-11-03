@@ -10,12 +10,19 @@ Item {
 
     property string size: "small"
     property string widgetId: ""
+    property var options: ({}) // Edit "Network"…: units bytes (MB/s) | bits (Mbps)
 
     property var down: [] // last 40 samples, bytes/s
     property var up: []
     property string ssid: ""
 
     function rate(b: real): string {
+        if (options.units === "bits") {
+            const bits = b * 8;
+            if (bits >= 1e6) return (bits / 1e6).toFixed(1) + " Mbps";
+            if (bits >= 1e3) return Math.round(bits / 1e3) + " Kbps";
+            return Math.round(bits) + " bps";
+        }
         if (b >= 1048576) return (b / 1048576).toFixed(1) + " MB/s";
         if (b >= 1024) return Math.round(b / 1024) + " KB/s";
         return Math.round(b) + " B/s";
@@ -83,12 +90,14 @@ Item {
 
                 spacing: 4
 
-                Text {
+                // arrow.down / arrow.up in the graph's colour for each direction (the filled circle variant muddies at 17 px)
+                Symbol {
                     anchors.verticalCenter: parent.verticalCenter
-                    text: parent.modelData.icon
+                    name: parent.modelData.icon
+                    fill: false
                     color: parent.modelData.icon === "arrow_downward" ? Theme.primary : Theme.tertiary
-                    font.family: "Material Symbols Rounded"
-                    font.pixelSize: 17
+                    size: 17
+                    weight: 600
                 }
 
                 Text {

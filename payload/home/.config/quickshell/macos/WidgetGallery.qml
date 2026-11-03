@@ -250,13 +250,12 @@ PanelWindow {
                 NumberAnimation { duration: 180; easing.type: Easing.OutBack }
             }
 
-            Text {
+            Symbol {
                 anchors.centerIn: parent
-                text: pv.added ? "check" : "add"
+                name: pv.added ? "check" : "add"
+                size: 17
+                weight: 700
                 color: "white"
-                font.family: "Material Symbols Rounded"
-                font.weight: Font.Bold
-                font.pixelSize: 17
             }
         }
 
@@ -371,15 +370,15 @@ PanelWindow {
             border.width: search.activeFocus ? 2 : 0
             border.color: Theme.alpha(Theme.primary, 0.6)
 
-            Text {
+            Symbol {
                 id: glass
 
                 x: 8
                 anchors.verticalCenter: parent.verticalCenter
-                text: "search"
+                name: "search"
+                size: 17
+                weight: 400
                 color: Theme.fgDim
-                font.family: "Material Symbols Rounded"
-                font.pixelSize: 17
             }
 
             TextInput {
@@ -428,16 +427,15 @@ PanelWindow {
                 }
             }
 
-            Text {
+            Symbol { // xmark.circle.fill
                 anchors.right: parent.right
                 anchors.rightMargin: 7
                 anchors.verticalCenter: parent.verticalCenter
                 visible: search.text !== ""
-                text: "cancel"
+                name: "cancel"
+                fill: true
+                size: 16
                 color: Theme.fgDim
-                font.family: "Material Symbols Rounded"
-                font.variableAxes: { "FILL": 1 }
-                font.pixelSize: 16
 
                 MouseArea {
                     anchors.fill: parent
@@ -470,14 +468,13 @@ PanelWindow {
                 size: 22
             }
 
-            Text {
+            SymbolTile {
                 visible: sr.kind === null
-                x: 8
+                x: 8 + (22 - size) / 2 // same box and visible size as KindIcon below
                 anchors.verticalCenter: parent.verticalCenter
-                text: "space_dashboard"
-                color: Theme.fg
-                font.family: "Material Symbols Rounded"
-                font.pixelSize: 22
+                size: 19
+                name: "space_dashboard"
+                tint: "gray"
             }
 
             Text {

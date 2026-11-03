@@ -147,13 +147,15 @@ PanelWindow {
                             }
                         }
 
-                        Text {
+                        Symbol { // empty desktop: layered (hierarchical) display symbol, accent when selected
                             visible: card.isNew || card.modelData.classes.length === 0
                             anchors.centerIn: parent
-                            text: card.isNew ? "add" : "desktop_windows"
+                            name: card.isNew ? "add" : "desktop_windows"
+                            mode: card.isNew ? "mono" : "hierarchical"
+                            size: 38
+                            weight: 400
                             color: card.selected ? Theme.primary : Theme.fgDim
-                            font.family: "Material Symbols Rounded"
-                            font.pixelSize: 38
+                            Behavior on color { ColorAnimation { duration: 160 } }
                         }
                     }
 

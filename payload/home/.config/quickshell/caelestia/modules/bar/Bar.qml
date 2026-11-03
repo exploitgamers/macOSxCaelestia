@@ -473,6 +473,7 @@ GridLayout {
                 fontStyle: Tokens.font.icon.builders.small.scale(Tokens.sizes.bar.innerWidth / 26).build() // [macos] with the bar
                 anchors.verticalCenter: parent.verticalCenter
                 text: Icons.getVolumeIcon(Audio.volume, Audio.muted) // [macos] the same symbols as the drop-down
+                fill: 1 // [macos] macOS's speaker is solid
                 color: pillInk.c(Colours.palette.m3tertiary)
 
                 // [macos] click to mute; no hover wash (a translucent blob spilling past the
@@ -496,7 +497,8 @@ GridLayout {
             MaterialIcon {
                 fontStyle: Tokens.font.icon.builders.small.scale(Tokens.sizes.bar.innerWidth / 26).build() // [macos] with the bar
                 anchors.verticalCenter: parent.verticalCenter
-                text: "brightness_6"
+                text: "light_mode" // [macos] sun.min / sun.max: outline when dim, filled when bright
+                fill: (controls.monitor?.brightness ?? 0) >= 0.5 ? 1 : 0
                 color: pillInk.c(Colours.palette.m3tertiary)
             }
 

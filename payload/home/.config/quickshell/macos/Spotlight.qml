@@ -93,22 +93,32 @@ PanelWindow {
     }
 
     readonly property var actions: [
-        { id: "lock", title: "Lock Screen", words: "lock screen away", glyph: "lock", run: () => Quickshell.execDetached(["qs", "-c", "caelestia", "ipc", "call", "lock", "lock"]) },
-        { id: "sleep", title: "Sleep", words: "sleep suspend", glyph: "bedtime", run: () => Quickshell.execDetached(["systemctl", "suspend"]) },
-        { id: "restart", title: "Restart", words: "restart reboot", glyph: "restart_alt", confirm: true, run: () => Quickshell.execDetached(["systemctl", "reboot"]) },
-        { id: "shutdown", title: "Shut Down", words: "shut down shutdown power off poweroff", glyph: "power_settings_new", confirm: true, run: () => Quickshell.execDetached(["systemctl", "poweroff"]) },
+        { id: "lock", title: "Lock Screen", words: "lock screen away", glyph: "lock", tint: "gray", run: () => Quickshell.execDetached(["qs", "-c", "caelestia", "ipc", "call", "lock", "lock"]) },
+        { id: "sleep", title: "Sleep", words: "sleep suspend", glyph: "bedtime", tint: "indigo", run: () => Quickshell.execDetached(["systemctl", "suspend"]) },
+        { id: "restart", title: "Restart", words: "restart reboot", glyph: "restart_alt", tint: "orange", confirm: true, run: () => Quickshell.execDetached(["systemctl", "reboot"]) },
+        { id: "shutdown", title: "Shut Down", words: "shut down shutdown power off poweroff", glyph: "power_settings_new", tint: "red", confirm: true, run: () => Quickshell.execDetached(["systemctl", "poweroff"]) },
         { id: "nightshift", title: "Night Shift: " + (Config.nightShift === "auto" ? "Automatic" : Config.nightShift === "on" ? "On" : "Off"),
-          words: "night shift light warm blue light filter sunset", glyph: "nightlight", run: () => NightShift.cycle() },
-        { id: "overview", title: "Mission Control", words: "mission control overview expose windows all", glyph: "grid_view", run: () => Shared.overviewOpen = true },
-        { id: "face", title: "Choose Profile Picture", words: "profile picture avatar photo face user", glyph: "account_circle", run: () => Shared.chooseProfilePicture() },
-        { id: "dnd", title: "Do Not Disturb", words: "do not disturb dnd notifications focus", glyph: "do_not_disturb_on", run: () => Quickshell.execDetached(["qs", "-c", "caelestia", "ipc", "call", "notifs", "toggleDnd"]) },
-        { id: "game", title: "Game Mode", words: "game mode gaming performance", glyph: "sports_esports", run: () => Quickshell.execDetached(["qs", "-c", "caelestia", "ipc", "call", "gameMode", "toggle"]) },
-        { id: "wallpaper", title: "Change Wallpaper", words: "change wallpaper background desktop picture wallhaven", glyph: "wallpaper", run: () => Shared.wallpaperOpen = true },
-        { id: "widgets", title: "Edit Widgets", words: "edit widgets add widget gallery desktop", glyph: "widgets", run: () => Shared.widgetEdit = true },
-        { id: "hidew", title: Config.widgetsEnabled ? "Hide Widgets" : "Show Widgets", words: "hide show widgets desktop", glyph: "visibility", run: () => Config.setWidgets("enabled", !Config.widgetsEnabled) },
-        { id: "apps", title: "Apps Launcher", words: "apps launcher launchpad all applications", glyph: "apps", run: () => Shared.toggleLauncher() },
-        { id: "settings", title: "Desktop Settings File", words: "settings preferences config dock widgets", glyph: "settings", run: () => Config.editFile() }
+          words: "night shift light warm blue light filter sunset", glyph: "nightlight", tint: "orange", run: () => NightShift.cycle() },
+        { id: "overview", title: "Mission Control", words: "mission control overview expose windows all", glyph: "grid_view", tint: "#2c2c2e", run: () => Shared.overviewOpen = true },
+        { id: "face", title: "Choose Profile Picture", words: "profile picture avatar photo face user", glyph: "account_circle", tint: "blue", run: () => Shared.chooseProfilePicture() },
+        { id: "dnd", title: "Do Not Disturb", words: "do not disturb dnd notifications focus", glyph: "do_not_disturb_on", tint: "purple", run: () => Quickshell.execDetached(["qs", "-c", "caelestia", "ipc", "call", "notifs", "toggleDnd"]) },
+        { id: "game", title: "Game Mode", words: "game mode gaming performance", glyph: "sports_esports", tint: "green", run: () => Quickshell.execDetached(["qs", "-c", "caelestia", "ipc", "call", "gameMode", "toggle"]) },
+        { id: "wallpaper", title: "Change Wallpaper", words: "change wallpaper background desktop picture wallhaven", glyph: "wallpaper", tint: "cyan", run: () => Shared.wallpaperOpen = true },
+        { id: "widgets", title: "Edit Widgets", words: "edit widgets add widget gallery desktop", glyph: "widgets", tint: "blue", run: () => Shared.widgetEdit = true },
+        { id: "hidew", title: Config.widgetsEnabled ? "Hide Widgets" : "Show Widgets", words: "hide show widgets desktop", glyph: "visibility", tint: "gray", run: () => Config.setWidgets("enabled", !Config.widgetsEnabled) },
+        { id: "apps", title: "Apps Launcher", words: "apps launcher launchpad all applications", glyph: "apps", tint: "gray", run: () => Shared.toggleLauncher() },
+        { id: "settings", title: "Desktop Settings File", words: "settings preferences config dock widgets", glyph: "settings", tint: "gray", run: () => Config.editFile() }
     ]
+
+    // macOS Spotlight shows the document's kind icon (WhiteSur's mime icons)
+    function fileIcon(name: string): string {
+        const ext = (/\.([^.]+)$/.exec(name)?.[1] ?? "").toLowerCase();
+        return /^(png|jpe?g|gif|webp|svg|avif|heic|bmp)$/.test(ext) ? "image-x-generic"
+             : /^(mp4|mkv|webm|mov|avi)$/.test(ext) ? "video-x-generic"
+             : /^(mp3|flac|ogg|opus|wav|m4a)$/.test(ext) ? "audio-x-generic"
+             : ext === "pdf" ? "application-pdf"
+             : /^(zip|tar|gz|xz|zst|7z|rar|appimage)$/.test(ext) ? "package-x-generic" : "text-x-generic";
+    }
 
     readonly property var results: {
         const q = query.trim();
@@ -119,7 +129,7 @@ PanelWindow {
 
         const v = calc(q);
         if (v !== null)
-            out.push({ section: "Calculator", title: String(v), subtitle: q + "  ·  Enter copies the result", glyph: "calculate",
+            out.push({ section: "Calculator", title: String(v), subtitle: q + "  ·  Enter copies the result", icon: "accessories-calculator",
                        run: () => Quickshell.execDetached(["wl-copy", String(v)]) });
 
         const apps = DesktopEntries.applications.values.filter(e => !e.noDisplay && [e.name, e.genericName, e.comment, ...(e.keywords ?? [])]
@@ -132,22 +142,23 @@ PanelWindow {
         for (const t of Hyprland.toplevels.values.filter(t => ((t.title ?? "") + " " + (t.lastIpcObject?.class ?? "")).toLowerCase().includes(ql)).slice(0, 3)) {
             const addr = "0x" + String(t.address).replace(/^0x/, "");
             const minimized = t.workspace?.name === "special:minimized";
-            out.push({ section: "Windows", title: t.title || "Window", subtitle: minimized ? "Minimized — restore" : "Switch to window", glyph: "select_window",
+            out.push({ section: "Windows", title: t.title || "Window", subtitle: minimized ? "Minimized — restore" : "Switch to window",
+                       icon: DesktopEntries.heuristicLookup(t.lastIpcObject?.class ?? "")?.icon ?? (t.lastIpcObject?.class ?? ""),
                        run: () => minimized ? Quickshell.execDetached(["hyprctl", "eval", `mac_restore("${addr}")`])
                                             : Hyprland.dispatch(`hl.dsp.focus({ window = "address:${addr}" })`) });
         }
 
         for (const a of actions.filter(a => a.title.toLowerCase().includes(ql) || a.words.split(" ").some(w => w.startsWith(ql))).slice(0, 3))
             out.push({ section: "Actions", title: a.title, subtitle: confirming === a.id ? "Press Enter again to confirm" : (a.confirm ? "System" : "Action"),
-                       glyph: a.glyph, actionId: a.id, confirm: a.confirm === true, run: a.run });
+                       glyph: a.glyph, tint: a.tint, actionId: a.id, confirm: a.confirm === true, run: a.run });
 
         for (const f of files.slice(0, 5)) {
             const name = f.replace(/\/$/, "").split("/").pop();
-            out.push({ section: "Files", path: f.replace(/\/$/, ""), title: name, subtitle: f.replace(home, "~"), glyph: f.endsWith("/") ? "folder" : "draft",
+            out.push({ section: "Files", path: f.replace(/\/$/, ""), title: name, subtitle: f.replace(home, "~"), icon: f.endsWith("/") ? "folder" : fileIcon(name),
                        run: () => Quickshell.execDetached(["xdg-open", f]) });
         }
 
-        out.push({ section: "Web", title: `Search the web for “${q}”`, subtitle: "Opens your browser", glyph: "travel_explore",
+        out.push({ section: "Web", title: `Search the web for “${q}”`, subtitle: "Opens your browser", icon: "web-browser",
                    run: () => Quickshell.execDetached(["xdg-open", "https://www.google.com/search?q=" + encodeURIComponent(q)]) });
         return out;
     }
@@ -292,15 +303,15 @@ PanelWindow {
             width: parent.width
             height: 60
 
-            Text {
+            Symbol { // magnifyingglass, light like the query text
                 id: glass
 
                 x: 20
                 anchors.verticalCenter: parent.verticalCenter
-                text: "search"
+                name: "search"
+                size: 26
+                weight: 300
                 color: Theme.fgDim
-                font.family: "Material Symbols Rounded"
-                font.pixelSize: 26
             }
 
             TextInput {
@@ -419,14 +430,12 @@ PanelWindow {
                         source: item.modelData.icon !== undefined ? Quickshell.iconPath(item.modelData.icon, "application-x-executable") : ""
                     }
 
-                    Text {
+                    SymbolTile { // actions: a System-Settings tile, like Spotlight's shortcut results
                         visible: item.modelData.icon === undefined
                         anchors.centerIn: parent
-                        text: item.modelData.glyph ?? "search"
-                        color: item.current ? Theme.fgOnPrimary : Theme.primary
-                        font.family: "Material Symbols Rounded"
-                        font.variableAxes: { "FILL": 1 }
-                        font.pixelSize: 22
+                        size: 24 // = the visible square of a WhiteSur app icon in the 28 px box
+                        name: item.modelData.glyph ?? "search"
+                        tint: item.modelData.tint ?? "gray"
                     }
                 }
 

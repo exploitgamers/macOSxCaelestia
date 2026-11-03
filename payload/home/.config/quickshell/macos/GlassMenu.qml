@@ -155,16 +155,14 @@ PopupWindow {
                         color: row.hot ? Theme.alpha(Theme.primary, rowMouse.pressed ? 0.85 : 0.7) : "transparent"
                     }
 
-                    Text {
-                        visible: !row.isSep
-                        anchors.left: parent.left
-                        anchors.leftMargin: 9
+                    Symbol { // checkmark, semibold like macOS menus
+                        visible: !row.isSep && row.modelData.checked === true
+                        x: 7
                         anchors.verticalCenter: parent.verticalCenter
-                        width: 16
-                        text: row.modelData.checked ? "✓" : ""
+                        name: "check"
+                        size: 14
+                        weight: 600
                         color: row.hot ? Theme.fgOnPrimary : Theme.fg
-                        font.family: Theme.font
-                        font.pixelSize: 12
                     }
 
                     Text {
@@ -184,15 +182,15 @@ PopupWindow {
                         font.letterSpacing: 0.1
                     }
 
-                    Text {
+                    Symbol { // chevron.right
                         visible: row.hasSub
                         anchors.right: parent.right
-                        anchors.rightMargin: 9
+                        anchors.rightMargin: 6
                         anchors.verticalCenter: parent.verticalCenter
-                        text: "›"
+                        name: "chevron_right"
+                        size: 15
+                        weight: 600
                         color: row.hot ? Theme.fgOnPrimary : Theme.fgDim
-                        font.family: Theme.font
-                        font.pixelSize: 15
                     }
 
                     MouseArea {

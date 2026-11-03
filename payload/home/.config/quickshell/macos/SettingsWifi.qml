@@ -87,22 +87,23 @@ Column {
                         Keys.onEscapePressed: page.askingFor = ""
                     }
 
-                    Text {
+                    Symbol { // lock.fill, small and dim like macOS
                         visible: net.secured && !net.asking
                         anchors.verticalCenter: parent.verticalCenter
-                        text: "lock"
+                        name: "lock"
+                        fill: true
+                        size: 14
+                        weight: 400
                         color: Theme.fgDim
-                        font.family: "Material Symbols Rounded"
-                        font.pixelSize: 15
                     }
 
-                    Text {
+                    Symbol {
                         visible: !net.asking
                         anchors.verticalCenter: parent.verticalCenter
-                        text: page.strength(net.modelData) > 0.66 ? "wifi" : page.strength(net.modelData) > 0.33 ? "wifi_2_bar" : "wifi_1_bar"
+                        name: page.strength(net.modelData) > 0.66 ? "wifi" : page.strength(net.modelData) > 0.33 ? "wifi_2_bar" : "wifi_1_bar"
+                        size: 18
+                        weight: 400
                         color: Theme.fg
-                        font.family: "Material Symbols Rounded"
-                        font.pixelSize: 17
                     }
 
                     SettingsUi.Button {

@@ -7,28 +7,37 @@ Item {
 
     property string size: "small"
     property string widgetId: ""
+    property var options: ({}) // Edit "Conditions"…: location, unit (as Weather)
 
+    readonly property var w: place.src
+
+    WeatherPlace {
+        id: place
+
+        location: root.options.location ?? ""
+        unit: root.options.unit ?? "auto"
+    }
 
     readonly property var tiles: [
-        { icon: "thermostat", label: "Feels Like", value: Math.round(WeatherData.feelsLike) + "°" },
-        { icon: "humidity_percentage", label: "Humidity", value: Math.round(WeatherData.humidity) + "%" },
-        { icon: "air", label: "Wind", value: Math.round(WeatherData.wind) + " km/h" },
-        { icon: "sunny", label: "UV Index", value: Math.round(WeatherData.uv) },
-        { icon: "wb_twilight", label: "Sunrise", value: WeatherData.sunrise || "--:--" },
-        { icon: "nights_stay", label: "Sunset", value: WeatherData.sunset || "--:--" }
+        { icon: "thermostat", label: "Feels Like", value: place.t(w.feelsLike ?? 0) },
+        { icon: "humidity_percentage", label: "Humidity", value: Math.round(w.humidity ?? 0) + "%" },
+        { icon: "air", label: "Wind", value: Math.round(w.wind ?? 0) + " km/h" },
+        { icon: "sunny", label: "UV Index", value: Math.round(w.uv ?? 0) },
+        { icon: "wb_twilight", label: "Sunrise", value: w.sunrise || "--:--" },
+        { icon: "nights_stay", label: "Sunset", value: w.sunset || "--:--" }
     ]
 
     Text {
-        visible: !WeatherData.loaded
+        visible: !root.w.loaded
         anchors.centerIn: parent
-        text: WeatherData.failed ? "Weather unavailable" : "Loading…"
+        text: root.w.failed ? "Weather unavailable" : "Loading…"
         color: Theme.fgDim
         font.family: Theme.font
         font.pixelSize: 13
     }
 
     Grid {
-        visible: WeatherData.loaded
+        visible: root.w.loaded
         anchors.centerIn: parent
         columns: root.size === "small" ? 2 : 3
         rowSpacing: root.size === "small" ? 6 : 14
@@ -46,12 +55,15 @@ Item {
                 Row {
                     spacing: 3
 
-                    Text {
+                    // multicolor where Apple tints it (cyan drop, yellow sun), else the label's grey
+                    Symbol {
                         anchors.verticalCenter: parent.verticalCenter
-                        text: parent.parent.modelData.icon
+                        name: parent.parent.modelData.icon
+                        mode: "multicolor"
+                        fill: true
+                        size: 13
+                        weight: 600 // beside the semibold label
                         color: Theme.fgDim
-                        font.family: "Material Symbols Rounded"
-                        font.pixelSize: 13
                     }
 
                     Text {

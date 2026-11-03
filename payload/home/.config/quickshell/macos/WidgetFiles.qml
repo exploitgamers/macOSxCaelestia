@@ -65,13 +65,15 @@ Item {
                     anchors.centerIn: parent
                     spacing: 1
 
-                    Text {
+                    // folders in Finder blue, other places multicolor where Apple tints them
+                    Symbol {
                         anchors.horizontalCenter: parent.horizontalCenter
-                        text: tile.modelData.icon
-                        color: Theme.primary
-                        font.family: "Material Symbols Rounded"
-                        font.variableAxes: { "FILL": 1 }
-                        font.pixelSize: 20
+                        name: tile.modelData.icon
+                        mode: "multicolor"
+                        fill: true
+                        color: Theme.sys.blue
+                        size: 20
+                        weight: 500
                     }
 
                     Text {
@@ -143,13 +145,14 @@ Item {
                 Column {
                     anchors.centerIn: parent
 
-                    Text {
+                    Symbol {
                         anchors.horizontalCenter: parent.horizontalCenter
-                        text: chip.modelData.icon
-                        color: Theme.primary
-                        font.family: "Material Symbols Rounded"
-                        font.variableAxes: { "FILL": 1 }
-                        font.pixelSize: 19
+                        name: chip.modelData.icon
+                        mode: "multicolor"
+                        fill: true
+                        color: Theme.sys.blue
+                        size: 19
+                        weight: 500
                     }
 
                     Text {

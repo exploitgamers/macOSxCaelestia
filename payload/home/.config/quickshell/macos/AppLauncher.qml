@@ -207,16 +207,16 @@ PanelWindow {
                 border.color: search.activeFocus ? Theme.alpha(Theme.primary, 0.55) : "transparent"
                 Behavior on border.color { ColorAnimation { duration: 120 } }
 
-                Text {
+                Symbol {
                     id: glass
 
                     anchors.left: parent.left
                     anchors.leftMargin: 13
                     anchors.verticalCenter: parent.verticalCenter
-                    text: "󰍉"
+                    name: "search"
+                    size: 18
+                    weight: 400
                     color: Theme.fgDim
-                    font.family: Theme.iconFont
-                    font.pixelSize: 18
                 }
 
                 TextInput {
@@ -495,12 +495,13 @@ PanelWindow {
                             color: pinMouse.containsMouse ? Theme.alpha(rowItem.isSel ? Theme.fgOnPrimary : Theme.fg, 0.15) : "transparent"
                             opacity: rowItem.isSel || rowItem.pinned ? 1 : 0
 
-                            Text {
+                            Symbol { // pin / pin.fill
                                 anchors.centerIn: parent
-                                text: rowItem.pinned ? "󰐃" : "󰤰"
-                                color: rowItem.isSel ? Theme.fgOnPrimary : Theme.fgDim
-                                font.family: Theme.iconFont
-                                font.pixelSize: 16
+                                name: "keep"
+                                fill: rowItem.pinned
+                                size: 17
+                                color: rowItem.isSel ? Theme.fgOnPrimary : rowItem.pinned ? Theme.sys.orange : Theme.fgDim
+                                Behavior on color { ColorAnimation { duration: 160 } }
                             }
 
                             MouseArea {

@@ -1,3 +1,229 @@
+diff --git a/components/MaterialIcon.qml b/components/MaterialIcon.qml
+index 513244ad..a0f8dac0 100644
+--- a/components/MaterialIcon.qml
++++ b/components/MaterialIcon.qml
+@@ -3,9 +3,37 @@ import Caelestia.Config
+ import qs.services
+ 
+ StyledText {
++    id: root
++
+     property real fill
+     property int grade: Colours.light ? 0 : -25
+     property font fontStyle: Tokens.font.icon.small
++    // [macos] SF Symbols look: Medium weight like SF's menu-bar/Control Center glyphs (Material's 400 reads
++    // thin beside Inter), and the optical size set for the drawn size (Material Symbols' opsz runs 20–48)
++    property int weight: fontStyle.weight > Font.Normal ? fontStyle.weight : Font.Medium
++    // [macos] SF rendering mode: "mono", or "hierarchical" = `underlay` filled at low opacity under the
++    // glyph (e.g. the full wifi fan dimmed under a 1-bar one, like macOS's signal symbols)
++    property string mode: "mono"
++    property string underlay: text
++
++    function build(f: real): font {
++        return Tokens.font.icon.size(fontStyle.pointSize).weight(weight).vaxes(fontStyle.variableAxes).vaxis("opsz", Math.max(20, Math.min(48, fontStyle.pointSize * 4 / 3))).fill(f.toFixed(1)).grade(grade).build();
++    }
++
++    font: build(fill)
++
++    Loader {
++        z: -1
++        anchors.fill: parent
++        active: root.mode === "hierarchical"
+ 
+-    font: Tokens.font.icon.size(fontStyle.pointSize).weight(fontStyle.weight).vaxes(fontStyle.variableAxes).fill(fill.toFixed(1)).grade(grade).build()
++        sourceComponent: Text {
++            text: root.underlay
++            font: root.build(1)
++            color: Qt.alpha(root.color, 0.3)
++            renderType: root.renderType
++            horizontalAlignment: root.horizontalAlignment
++            verticalAlignment: root.verticalAlignment
++        }
++    }
+ }
+diff --git a/components/SymbolTile.qml b/components/SymbolTile.qml
+new file mode 100644
+index 00000000..61bfbf98
+--- /dev/null
++++ b/components/SymbolTile.qml
+@@ -0,0 +1,81 @@
++import QtQuick
++import Quickshell
++import Quickshell.Widgets
++import Caelestia.Config
++import qs.components.effects
++import qs.services
++
++// [macos] an app's icon the macOS way (mirrors the macos shell's SymbolTile): a full-colour app icon as
++// it is (WhiteSur icons are already squircles); a symbolic icon or no icon becomes a white symbol on a
++// squircle of an Apple system colour, lit from the top (gradient + hairline highlight).
++Item {
++    id: t
++
++    property string icon // freedesktop icon name or path; "" = draw `name`
++    property string name: "notifications" // Material Symbols fallback glyph
++    property var tint: "blue" // a Colours.sys name or a colour
++    property real size: 32
++
++    // a path is used as is; a theme name the icon theme lacks falls back to the glyph tile (no checkerboard)
++    readonly property string path: icon === "" ? "" : icon.startsWith("/") || icon.includes("://") ? icon : Quickshell.iconPath(icon, true)
++    readonly property bool tile: path === "" || icon.endsWith("symbolic")
++    readonly property color base: typeof tint === "string" && Colours.sys[tint] ? Colours.sys[tint] : tint
++
++    implicitWidth: size
++    implicitHeight: size
++
++    Rectangle {
++        anchors.fill: parent
++        visible: t.tile
++        radius: t.size * 0.2237 // Apple's icon corner ratio
++        gradient: Gradient {
++            GradientStop { position: 0; color: Qt.lighter(t.base, 1.2) }
++            GradientStop { position: 1; color: Qt.darker(t.base, 1.1) }
++        }
++
++        Rectangle { // top highlight
++            anchors.fill: parent
++            radius: parent.radius
++            color: "transparent"
++            border.width: 1
++            border.color: Qt.rgba(1, 1, 1, 0.18)
++        }
++    }
++
++    Loader {
++        anchors.centerIn: parent
++        active: t.path !== ""
++        sourceComponent: t.tile ? symbolicIcon : appIcon
++    }
++
++    Loader {
++        anchors.centerIn: parent
++        active: t.path === ""
++        sourceComponent: MaterialIcon {
++            text: t.name
++            color: "white"
++            fill: 1
++            fontStyle: Tokens.font.icon.builders.small.size(Math.max(1, Math.round(t.size * 0.6 * 0.75))).build() // px → pt
++        }
++    }
++
++    Component {
++        id: appIcon
++
++        IconImage {
++            implicitSize: t.size
++            source: t.path
++            asynchronous: true
++        }
++    }
++
++    Component {
++        id: symbolicIcon
++
++        ColouredIcon {
++            implicitSize: Math.round(t.size * 0.6)
++            source: t.path
++            colour: "white"
++        }
++    }
++}
+diff --git a/components/controls/CCToggle.qml b/components/controls/CCToggle.qml
+new file mode 100644
+index 00000000..3e923a27
+--- /dev/null
++++ b/components/controls/CCToggle.qml
+@@ -0,0 +1,59 @@
++import QtQuick
++import QtQuick.Templates
++import Caelestia.Config
++import qs.components
++import qs.services
++
++// [macos] a macOS Control Center toggle: a circle, Apple blue with a white filled symbol when on,
++// translucent gray with an outline symbol when off; the colour and fill cross-fade in 180 ms.
++// A drop-in for StyledSwitch (checkable: `checked`, `toggled()`).
++AbstractButton {
++    id: root
++
++    property string symbol
++    property real size: 28
++
++    checkable: true
++    implicitWidth: size
++    implicitHeight: size
++
++    scale: pressed ? 0.92 : 1
++
++    Behavior on scale {
++        NumberAnimation {
++            duration: 120
++            easing.type: Easing.OutCubic
++        }
++    }
++
++    background: Rectangle {
++        radius: height / 2
++        color: root.checked ? Colours.sys.blue : Qt.alpha(Colours.palette.m3onSurface, root.hovered ? 0.18 : 0.12)
++
++        Behavior on color {
++            ColorAnimation {
++                duration: 180
++                easing.type: Easing.OutCubic
++            }
++        }
++    }
++
++    contentItem: MaterialIcon {
++        horizontalAlignment: Text.AlignHCenter
++        verticalAlignment: Text.AlignVCenter
++        text: root.symbol
++        color: root.checked ? "white" : Colours.palette.m3onSurface
++        fill: root.checked ? 1 : 0
++
++        Behavior on fill {
++            NumberAnimation {
++                duration: 180
++                easing.type: Easing.OutCubic
++            }
++        }
++    }
++
++    HoverHandler {
++        cursorShape: Qt.PointingHandCursor
++    }
++}
+diff --git a/components/controls/StyledSwitch.qml b/components/controls/StyledSwitch.qml
+index 982f18da..406962ad 100644
+--- a/components/controls/StyledSwitch.qml
++++ b/components/controls/StyledSwitch.qml
+@@ -21,7 +21,7 @@ Switch {
+         color: {
+             if (root.disabled)
+                 return root.checked ? Qt.alpha(Colours.palette.m3onSurface, 0.12) : Qt.alpha(Colours.palette.m3surfaceContainerHighest, 0.38);
+-            return root.checked ? Colours.palette.m3primary : Colours.layer(Colours.palette.m3surfaceContainerHighest, root.cLayer);
++            return root.checked ? Colours.sys.blue : Colours.layer(Colours.palette.m3surfaceContainerHighest, root.cLayer); // [macos] Apple blue when on
+         }
+ 
+         implicitWidth: implicitHeight * 1.7
+@@ -34,7 +34,7 @@ Switch {
+             color: {
+                 if (root.disabled)
+                     return root.checked ? Colours.palette.m3surface : Qt.alpha(Colours.palette.m3onSurface, 0.12);
+-                return root.checked ? Colours.palette.m3onPrimary : Colours.layer(Colours.palette.m3outline, root.cLayer + 1);
++                return "white"; // [macos] macOS's knob is white, on or off
+             }
+ 
+             x: root.checked ? parent.implicitWidth - nonAnimWidth - Tokens.padding.extraSmall / 2 : Tokens.padding.extraSmall / 2
+@@ -59,6 +59,8 @@ Switch {
+             Shape {
+                 id: icon
+ 
++                visible: false // [macos] macOS's knob is plain (no M3 check / cross)
++
+                 property point start1: {
+                     if (root.pressed)
+                         return Qt.point(width * 0.2, height / 2);
 diff --git a/modules/IdleMonitors.qml b/modules/IdleMonitors.qml
 index 0ad75814..423c4b9e 100644
 --- a/modules/IdleMonitors.qml
@@ -265,7 +491,7 @@ index 1f3d4972..0bcbeb2b 100644
          }
      }
 diff --git a/modules/bar/Bar.qml b/modules/bar/Bar.qml
-index 1ceb9b6c..26754990 100644
+index 1ceb9b6c..5f02c4c4 100644
 --- a/modules/bar/Bar.qml
 +++ b/modules/bar/Bar.qml
 @@ -7,17 +7,20 @@ import QtQuick
@@ -673,7 +899,7 @@ index 1ceb9b6c..26754990 100644
                      }
                  }
              }
-@@ -189,13 +427,270 @@ ColumnLayout {
+@@ -189,13 +427,272 @@ ColumnLayout {
          default property Item item
          readonly property string entryId: modelData.id
  
@@ -726,6 +952,7 @@ index 1ceb9b6c..26754990 100644
 +                fontStyle: Tokens.font.icon.builders.small.scale(Tokens.sizes.bar.innerWidth / 26).build() // [macos] with the bar
 +                anchors.verticalCenter: parent.verticalCenter
 +                text: Icons.getVolumeIcon(Audio.volume, Audio.muted) // [macos] the same symbols as the drop-down
++                fill: 1 // [macos] macOS's speaker is solid
 +                color: pillInk.c(Colours.palette.m3tertiary)
 +
 +                // [macos] click to mute; no hover wash (a translucent blob spilling past the
@@ -749,7 +976,8 @@ index 1ceb9b6c..26754990 100644
 +            MaterialIcon {
 +                fontStyle: Tokens.font.icon.builders.small.scale(Tokens.sizes.bar.innerWidth / 26).build() // [macos] with the bar
 +                anchors.verticalCenter: parent.verticalCenter
-+                text: "brightness_6"
++                text: "light_mode" // [macos] sun.min / sun.max: outline when dim, filled when bright
++                fill: (controls.monitor?.brightness ?? 0) >= 0.5 ? 1 : 0
 +                color: pillInk.c(Colours.palette.m3tertiary)
 +            }
 +
@@ -1564,7 +1792,7 @@ index 0740e14b..ce71562f 100644
      }
  }
 diff --git a/modules/bar/components/StatusIcons.qml b/modules/bar/components/StatusIcons.qml
-index 90ad09b5..eb030647 100644
+index 90ad09b5..d1dfacc5 100644
 --- a/modules/bar/components/StatusIcons.qml
 +++ b/modules/bar/components/StatusIcons.qml
 @@ -12,7 +12,10 @@ import qs.modules.bar.components.status
@@ -1648,7 +1876,7 @@ index 90ad09b5..eb030647 100644
                          }
                      }
                  }
-@@ -120,6 +131,7 @@ StyledRect {
+@@ -120,9 +131,12 @@ StyledRect {
                      roleValue: "network"
                      delegate: EntryWrapper {
                          MaterialIcon {
@@ -1656,7 +1884,12 @@ index 90ad09b5..eb030647 100644
                              animate: true
                              text: Nmcli.activeEthernet ? "cable" : Nmcli.active ? Icons.getNetworkIcon(Nmcli.active.strength ?? 0) : "wifi_off"
                              color: root.colour
-@@ -131,6 +143,7 @@ StyledRect {
++                            mode: !Nmcli.activeEthernet && Nmcli.active ? "hierarchical" : "mono" // [macos] unlit arcs dimmed
++                            underlay: "wifi"
+                         }
+                     }
+                 }
+@@ -131,6 +145,7 @@ StyledRect {
                      delegate: EntryWrapper {
                          BluetoothStatus {
                              colour: root.colour
@@ -1664,7 +1897,7 @@ index 90ad09b5..eb030647 100644
                          }
                      }
                  }
-@@ -156,9 +169,12 @@ StyledRect {
+@@ -156,9 +171,12 @@ StyledRect {
          default property Item item
          property string name: modelData.id.toLowerCase()
  
@@ -1680,7 +1913,7 @@ index 90ad09b5..eb030647 100644
  
          implicitWidth: item?.implicitWidth ?? 0
          implicitHeight: item?.implicitHeight ?? 0
-@@ -177,4 +193,6 @@ StyledRect {
+@@ -177,4 +195,6 @@ StyledRect {
              }
          }
      }
@@ -1875,10 +2108,10 @@ index 5bc9f993..74add19c 100644
 +    }
  }
 diff --git a/modules/bar/components/status/BatteryStatus.qml b/modules/bar/components/status/BatteryStatus.qml
-index 93daed09..ca87eadc 100644
+index 93daed09..01e2ba19 100644
 --- a/modules/bar/components/status/BatteryStatus.qml
 +++ b/modules/bar/components/status/BatteryStatus.qml
-@@ -1,10 +1,12 @@
+@@ -1,23 +1,88 @@
  import QtQuick
 +import Caelestia.Config
  import Quickshell.Services.UPower
@@ -1886,16 +2119,98 @@ index 93daed09..ca87eadc 100644
  import qs.services
  import qs.utils
  
- MaterialIcon {
-+    fontStyle: Tokens.font.icon.builders.small.scale(Tokens.sizes.bar.innerWidth / 26).build() // [macos] with the bar
+-MaterialIcon {
++// [macos] macOS's menu-bar battery: a translucent outline body with a terminal nub on the right and
++// a level fill — green while charging (with a bolt), red when low on battery. No battery (desktop):
++// upstream's power-profile symbol.
++Item {
++    id: root
++
      required property color colour
  
-     animate: true
-@@ -20,4 +22,5 @@ MaterialIcon {
+-    animate: true
+-    text: {
+-        if (!UPower.displayDevice.isLaptopBattery) {
+-            if (PowerProfiles.profile === PowerProfile.PowerSaver)
+-                return "energy_savings_leaf";
+-            if (PowerProfiles.profile === PowerProfile.Performance)
+-                return "rocket_launch";
+-            return "balance";
++    readonly property var dev: UPower.displayDevice
++    readonly property bool charging: [UPowerDeviceState.Charging, UPowerDeviceState.FullyCharged, UPowerDeviceState.PendingCharge].includes(dev.state)
++    readonly property real level: Math.max(0, Math.min(1, dev.percentage))
++    readonly property bool low: UPower.onBattery && level <= 0.2
++
++    // the body is ~half the bar's height and twice as wide, like macOS's 27×13 pt glyph in a 24 pt bar
++    readonly property int bodyH: Math.round(Tokens.sizes.bar.innerWidth * 0.48)
++    readonly property int bodyW: Math.round(bodyH * 2.1)
++
++    implicitWidth: dev.isLaptopBattery ? bodyW + 2 : profile.implicitWidth
++    implicitHeight: dev.isLaptopBattery ? bodyH : profile.implicitHeight
++
++    MaterialIcon {
++        id: profile
++
++        visible: !root.dev.isLaptopBattery
++        fontStyle: Tokens.font.icon.builders.small.scale(Tokens.sizes.bar.innerWidth / 26).build() // [macos] with the bar
++        animate: true
++        text: PowerProfiles.profile === PowerProfile.PowerSaver ? "energy_savings_leaf" : PowerProfiles.profile === PowerProfile.Performance ? "rocket_launch" : "balance"
++        color: root.colour
++        fill: 1
++    }
++
++    Rectangle {
++        id: body
++
++        visible: root.dev.isLaptopBattery
++        width: root.bodyW
++        height: root.bodyH
++        radius: Math.round(height * 0.3)
++        color: "transparent"
++        border.width: 1
++        border.color: Qt.alpha(root.colour, 0.45)
++
++        Rectangle { // level
++            x: 2
++            y: 2
++            height: parent.height - 4
++            width: Math.max(height * 0.5, (parent.width - 4) * root.level)
++            radius: Math.max(1, parent.radius - 2)
++            color: root.charging ? Colours.sys.green : root.low ? Colours.sys.red : root.colour
++
++            Behavior on width {
++                Anim {}
++            }
++            Behavior on color {
++                CAnim {}
++            }
+         }
+-        return Icons.getBatteryIcon(UPower.displayDevice.percentage, [UPowerDeviceState.Charging, UPowerDeviceState.FullyCharged, UPowerDeviceState.PendingCharge].includes(UPower.displayDevice.state));
++
++        MaterialIcon { // bolt, with a thin dark outline so it reads over any fill
++            anchors.centerIn: parent
++            visible: root.charging && root.level < 1
++            text: "bolt"
++            fill: 1
++            color: "white"
++            style: Text.Outline
++            styleColor: Qt.alpha("black", 0.45)
++            fontStyle: Tokens.font.icon.builders.small.size(Math.round((root.bodyH + 2) * 0.75)).build()
++        }
++    }
++
++    Rectangle { // terminal nub
++        visible: root.dev.isLaptopBattery
++        anchors.left: body.right
++        anchors.leftMargin: 1
++        anchors.verticalCenter: body.verticalCenter
++        width: 1.5
++        height: Math.round(root.bodyH * 0.36)
++        radius: 1
++        color: Qt.alpha(root.colour, 0.45)
      }
-     color: !UPower.onBattery || UPower.displayDevice.percentage > 0.2 ? colour : Colours.palette.m3error
-     fill: 1
-+    rotation: UPower.displayDevice.isLaptopBattery ? 90 : 0 // [macos] a horizontal battery, terminal on the right
+-    color: !UPower.onBattery || UPower.displayDevice.percentage > 0.2 ? colour : Colours.palette.m3error
+-    fill: 1
  }
 diff --git a/modules/bar/components/status/BluetoothStatus.qml b/modules/bar/components/status/BluetoothStatus.qml
 index 300ebdf8..bc8c5a43 100644
@@ -3555,7 +3870,7 @@ index d9a07287..3d18fe36 100644
      ButtonGroup {
          id: sinks
 diff --git a/modules/bar/popouts/Battery.qml b/modules/bar/popouts/Battery.qml
-index 37ae38b6..59ab64e8 100644
+index 37ae38b6..3655f7ac 100644
 --- a/modules/bar/popouts/Battery.qml
 +++ b/modules/bar/popouts/Battery.qml
 @@ -5,6 +5,7 @@ import Quickshell.Services.UPower
@@ -3599,7 +3914,7 @@ index 37ae38b6..59ab64e8 100644
                      }
  
                      MaterialIcon {
-@@ -225,6 +226,52 @@ Column {
+@@ -225,6 +226,40 @@ Column {
          }
      }
  
@@ -3609,43 +3924,31 @@ index 37ae38b6..59ab64e8 100644
 +        width: parent.width
 +        height: blockRow.implicitHeight + Tokens.padding.small
 +
++        // [macos] a Control Center row: the round toggle leads, the text wraps beside it
 +        Row {
 +            id: blockRow
 +
 +            anchors.left: parent.left
-+            anchors.right: blockSwitch.left
-+            anchors.rightMargin: Tokens.spacing.medium
-+            anchors.verticalCenter: parent.verticalCenter
-+            spacing: Tokens.spacing.small
-+
-+            MaterialIcon {
-+                id: blockIcon
-+
-+                anchors.verticalCenter: parent.verticalCenter
-+                text: IdleInhibitor.enabled ? "lock_open" : "bedtime"
-+                color: IdleInhibitor.enabled ? Colours.palette.m3primary : Colours.palette.m3onSurfaceVariant
-+            }
-+
-+            // fixed width so the text wraps instead of running under the switch
-+            Column {
-+                anchors.verticalCenter: parent.verticalCenter
-+                width: blockRow.width - blockIcon.width - blockRow.spacing
-+
-+                StyledText {
-+                    width: parent.width
-+                    wrapMode: Text.WordWrap
-+                    text: Tr.tr("Block sleep and screen locking")
-+                }
-+            }
-+        }
-+
-+        StyledSwitch {
-+            id: blockSwitch
-+
 +            anchors.right: parent.right
 +            anchors.verticalCenter: parent.verticalCenter
-+            checked: IdleInhibitor.enabled
-+            onToggled: IdleInhibitor.enabled = checked
++            spacing: Tokens.spacing.medium
++
++            CCToggle {
++                id: blockSwitch
++
++                anchors.verticalCenter: parent.verticalCenter
++                symbol: "coffee"
++                checked: IdleInhibitor.enabled
++                onToggled: IdleInhibitor.enabled = checked
++            }
++
++            // fixed width so the text wraps instead of running past the edge
++            StyledText {
++                anchors.verticalCenter: parent.verticalCenter
++                width: blockRow.width - blockSwitch.width - blockRow.spacing
++                wrapMode: Text.WordWrap
++                text: Tr.tr("Block sleep and screen locking")
++            }
 +        }
 +    }
 +
@@ -3653,10 +3956,10 @@ index 37ae38b6..59ab64e8 100644
          required property Item item
  
 diff --git a/modules/bar/popouts/Bluetooth.qml b/modules/bar/popouts/Bluetooth.qml
-index 27bf5895..3bf9ae1f 100644
+index 27bf5895..27b7aa01 100644
 --- a/modules/bar/popouts/Bluetooth.qml
 +++ b/modules/bar/popouts/Bluetooth.qml
-@@ -20,8 +20,6 @@ ColumnLayout {
+@@ -20,14 +20,13 @@ ColumnLayout {
      spacing: Tokens.spacing.small
  
      StyledText {
@@ -3665,7 +3968,22 @@ index 27bf5895..3bf9ae1f 100644
          text: Tr.tr("Bluetooth")
          font: Tokens.font.body.builders.medium.weight(Font.Medium).build()
      }
-@@ -48,7 +46,6 @@ ColumnLayout {
+ 
+     Toggle {
+         label: Tr.trCtx("Enabled", "toggle label")
++        icon: "bluetooth" // [macos]
+         checked: Bluetooth.defaultAdapter?.enabled ?? false // qmllint disable unresolved-type
+         toggle.onToggled: {
+             const adapter = Bluetooth.defaultAdapter; // qmllint disable unresolved-type
+@@ -38,6 +37,7 @@ ColumnLayout {
+ 
+     Toggle {
+         label: Tr.trCtx("Discovering", "bluetooth adapter state")
++        icon: "bluetooth_searching" // [macos]
+         checked: Bluetooth.defaultAdapter?.discovering ?? false // qmllint disable unresolved-type
+         toggle.onToggled: {
+             const adapter = Bluetooth.defaultAdapter; // qmllint disable unresolved-type
+@@ -48,7 +48,6 @@ ColumnLayout {
  
      StyledText {
          Layout.topMargin: Tokens.spacing.small
@@ -3673,7 +3991,7 @@ index 27bf5895..3bf9ae1f 100644
          text: {
              const devices = Bluetooth.devices.values; // qmllint disable unresolved-type
              const connected = devices.filter(d => d.connected).length;
-@@ -73,7 +70,6 @@ ColumnLayout {
+@@ -73,7 +72,6 @@ ColumnLayout {
              readonly property bool loading: modelData.state === BluetoothDeviceState.Connecting || modelData.state === BluetoothDeviceState.Disconnecting // qmllint disable unresolved-type
  
              Layout.fillWidth: true
@@ -3681,14 +3999,37 @@ index 27bf5895..3bf9ae1f 100644
              spacing: Tokens.spacing.small
  
              opacity: 0
-@@ -190,7 +186,6 @@ ColumnLayout {
+@@ -184,22 +182,25 @@ ColumnLayout {
+         onClicked: root.popouts.detachRequested("bluetooth")
+     }
+ 
++    // [macos] a Control Center row: the round toggle leads, its label beside it
+     component Toggle: RowLayout {
+         required property string label
++        property string icon
+         property alias checked: toggle.checked
          property alias toggle: toggle
  
          Layout.fillWidth: true
 -        Layout.rightMargin: Tokens.padding.extraSmall
          spacing: Tokens.spacing.medium
  
++        CCToggle {
++            id: toggle
++
++            symbol: parent.icon
++        }
++
          StyledText {
+             Layout.fillWidth: true
+             text: parent.label
+         }
+-
+-        StyledSwitch {
+-            id: toggle
+-        }
+     }
+ }
 diff --git a/modules/bar/popouts/ClipWrapper.qml b/modules/bar/popouts/ClipWrapper.qml
 index 99785219..8069e3f8 100644
 --- a/modules/bar/popouts/ClipWrapper.qml
@@ -3905,10 +4246,10 @@ index 2ba14cdc..bf6ae12a 100644
              sourceComponent: AudioPopout {
 diff --git a/modules/bar/popouts/Controls.qml b/modules/bar/popouts/Controls.qml
 new file mode 100644
-index 00000000..4b4fb89e
+index 00000000..c63cc84d
 --- /dev/null
 +++ b/modules/bar/popouts/Controls.qml
-@@ -0,0 +1,131 @@
+@@ -0,0 +1,134 @@
 +pragma ComponentBehavior: Bound
 +
 +import QtQuick
@@ -3935,6 +4276,7 @@ index 00000000..4b4fb89e
 +        id: bar
 +
 +        property string icon
++        property real iconFill: 1
 +        property real value
 +        property real to: 1
 +        signal moved(real value)
@@ -3949,13 +4291,13 @@ index 00000000..4b4fb89e
 +        width: 260
 +        height: Tokens.sizes.osd.sliderWidth
 +        radius: height / 2
-+        color: Colours.tPalette.m3surfaceContainer
++        color: Qt.alpha(Colours.palette.m3onSurface, 0.12) // [macos] Control Center: a translucent track…
 +
 +        Rectangle {
 +            width: Math.max(bar.height, bar.width * bar.frac)
 +            height: parent.height
 +            radius: parent.radius
-+            color: Colours.palette.m3primary
++            color: Colours.light ? "white" : Qt.rgba(1, 1, 1, 0.92) // [macos] …with a white level
 +
 +            Behavior on width {
 +                enabled: !barMouse.pressed
@@ -3967,7 +4309,8 @@ index 00000000..4b4fb89e
 +            x: (bar.height - width) / 2
 +            anchors.verticalCenter: parent.verticalCenter
 +            text: bar.icon
-+            color: Colours.palette.m3onPrimary
++            fill: bar.iconFill
++            color: Qt.rgba(0, 0, 0, 0.55) // [macos] the symbol sits on the white level, in gray
 +        }
 +
 +        StyledText {
@@ -3976,7 +4319,7 @@ index 00000000..4b4fb89e
 +            anchors.verticalCenter: parent.verticalCenter
 +            text: Math.round(bar.shown * 100) + "%"
 +            font: Tokens.font.body.small
-+            color: bar.frac > 0.85 ? Colours.palette.m3onPrimary : Colours.palette.m3onSurfaceVariant
++            color: bar.frac > 0.85 ? Qt.rgba(0, 0, 0, 0.55) : Colours.palette.m3onSurfaceVariant // [macos] over the white level
 +        }
 +
 +        CustomMouseArea {
@@ -4011,7 +4354,8 @@ index 00000000..4b4fb89e
 +
 +    Bar {
 +        visible: root.monitor !== undefined && root.monitor !== null
-+        icon: `brightness_${(Math.round(value * 6) + 1)}`
++        icon: "light_mode" // [macos] sun.min / sun.max: outline when dim, filled when bright
++        iconFill: value >= 0.5 ? 1 : 0
 +        value: root.monitor?.brightness ?? 0
 +        onMoved: v => root.monitor?.setBrightness(v)
 +        onStepped: dir => root.monitor?.setBrightness(root.monitor.brightness + dir * GlobalConfig.services.brightnessIncrement)
@@ -4321,7 +4665,7 @@ index 00000000..d111f3c9
 +    }
 +}
 diff --git a/modules/bar/popouts/Network.qml b/modules/bar/popouts/Network.qml
-index 5d022e14..0773622e 100644
+index 5d022e14..fdbbe1bb 100644
 --- a/modules/bar/popouts/Network.qml
 +++ b/modules/bar/popouts/Network.qml
 @@ -27,8 +27,6 @@ ColumnLayout {
@@ -4333,7 +4677,15 @@ index 5d022e14..0773622e 100644
          text: Tr.tr("Wireless")
          font: Tokens.font.body.builders.medium.weight(Font.Medium).build()
      }
-@@ -45,7 +43,6 @@ ColumnLayout {
+@@ -37,6 +35,7 @@ ColumnLayout {
+         visible: root.view === "wireless"
+         Layout.preferredHeight: visible ? implicitHeight : 0
+         label: Tr.trCtx("Enabled", "toggle label")
++        icon: "wifi" // [macos]
+         checked: Nmcli.wifiEnabled
+         toggle.onToggled: Nmcli.enableWifi(checked)
+     }
+@@ -45,7 +44,6 @@ ColumnLayout {
          visible: root.view === "wireless"
          Layout.preferredHeight: visible ? implicitHeight : 0
          Layout.topMargin: visible ? Tokens.spacing.small : 0
@@ -4341,7 +4693,7 @@ index 5d022e14..0773622e 100644
          text: Tr.trN("%n network available", "%n networks available", Nmcli.networks.length) // qmllint disable missing-property
          color: Colours.palette.m3onSurfaceVariant
          font: Tokens.font.body.small
-@@ -71,7 +68,6 @@ ColumnLayout {
+@@ -71,7 +69,6 @@ ColumnLayout {
              visible: root.view === "wireless"
              Layout.preferredHeight: visible ? implicitHeight : 0
              Layout.fillWidth: true
@@ -4349,7 +4701,16 @@ index 5d022e14..0773622e 100644
              spacing: Tokens.spacing.small
  
              opacity: 0
-@@ -226,7 +222,6 @@ ColumnLayout {
+@@ -94,6 +91,8 @@ ColumnLayout {
+ 
+             MaterialIcon {
+                 text: Icons.getNetworkIcon(networkItem.modelData.strength)
++                mode: "hierarchical" // [macos] unlit arcs dimmed
++                underlay: "wifi"
+                 color: networkItem.modelData.active ? Colours.palette.m3primary : Colours.palette.m3onSurfaceVariant
+             }
+ 
+@@ -226,7 +225,6 @@ ColumnLayout {
          visible: root.view === "ethernet"
          Layout.preferredHeight: visible ? implicitHeight : 0
          Layout.topMargin: visible ? Tokens.padding.medium : 0
@@ -4357,7 +4718,7 @@ index 5d022e14..0773622e 100644
          text: Tr.tr("Ethernet")
          font: Tokens.font.body.builders.medium.weight(Font.Medium).build()
      }
-@@ -235,7 +230,6 @@ ColumnLayout {
+@@ -235,7 +233,6 @@ ColumnLayout {
          visible: root.view === "ethernet"
          Layout.preferredHeight: visible ? implicitHeight : 0
          Layout.topMargin: visible ? Tokens.spacing.small : 0
@@ -4365,7 +4726,7 @@ index 5d022e14..0773622e 100644
          text: Tr.trN("%n device available", "%n devices available", Nmcli.ethernetDevices.length)
          color: Colours.palette.m3onSurfaceVariant
          font: Tokens.font.body.small
-@@ -260,7 +254,6 @@ ColumnLayout {
+@@ -260,7 +257,6 @@ ColumnLayout {
              visible: root.view === "ethernet"
              Layout.preferredHeight: visible ? implicitHeight : 0
              Layout.fillWidth: true
@@ -4373,14 +4734,37 @@ index 5d022e14..0773622e 100644
              spacing: Tokens.spacing.small
  
              opacity: 0
-@@ -382,7 +375,6 @@ ColumnLayout {
+@@ -376,22 +372,25 @@ ColumnLayout {
+         target: root.popouts
+     }
+ 
++    // [macos] a Control Center row: the round toggle leads, its label beside it
+     component Toggle: RowLayout {
+         required property string label
++        property string icon
+         property alias checked: toggle.checked
          property alias toggle: toggle
  
          Layout.fillWidth: true
 -        Layout.rightMargin: Tokens.padding.extraSmall
          spacing: Tokens.spacing.medium
  
++        CCToggle {
++            id: toggle
++
++            symbol: parent.icon
++        }
++
          StyledText {
+             Layout.fillWidth: true
+             text: parent.label
+         }
+-
+-        StyledSwitch {
+-            id: toggle
+-        }
+     }
+ }
 diff --git a/modules/bar/popouts/SystemMonitor.qml b/modules/bar/popouts/SystemMonitor.qml
 new file mode 100644
 index 00000000..b2aa8be4
@@ -5205,7 +5589,7 @@ index fe72730c..d6809be4 100644
          implicitWidth: 1
          implicitHeight: 1
 diff --git a/modules/drawers/Interactions.qml b/modules/drawers/Interactions.qml
-index 3d94a528..17bcd66e 100644
+index 3d94a528..d41353de 100644
 --- a/modules/drawers/Interactions.qml
 +++ b/modules/drawers/Interactions.qml
 @@ -15,6 +15,7 @@ CustomMouseArea {
@@ -5291,7 +5675,14 @@ index 3d94a528..17bcd66e 100644
      onContainsMouseChanged: {
          if (!containsMouse) {
              // Only hide if not activated by shortcut
-@@ -83,7 +105,7 @@ CustomMouseArea {
+@@ -78,12 +100,13 @@ CustomMouseArea {
+             if (!utilitiesShortcutActive)
+                 screenState.utilities = false;
+ 
+-            if (!popouts.currentName.startsWith("traymenu") || ((popouts.current as StackView)?.depth ?? 0) <= 1) {
++            // [macos] the volume/brightness-key flash closes on its own timer, not when the pointer is elsewhere
++            if (!bar.controlsFlash && (!popouts.currentName.startsWith("traymenu") || ((popouts.current as StackView)?.depth ?? 0) <= 1)) {
+                 popouts.hasCurrent = false;
                  bar.closeTray();
              }
  
@@ -5300,7 +5691,7 @@ index 3d94a528..17bcd66e 100644
                  bar.isHovered = false;
  
              if (Config.sidebar.showOnHover)
-@@ -100,20 +122,20 @@ CustomMouseArea {
+@@ -100,20 +123,20 @@ CustomMouseArea {
          const dragX = x - dragStart.x;
          const dragY = y - dragStart.y;
  
@@ -5329,7 +5720,7 @@ index 3d94a528..17bcd66e 100644
                  screenState.bar = false;
          }
  
-@@ -131,32 +153,29 @@ CustomMouseArea {
+@@ -131,32 +154,29 @@ CustomMouseArea {
                  root.panels.osd.hovered = true;
              }
  
@@ -5367,7 +5758,7 @@ index 3d94a528..17bcd66e 100644
              // Show osd on hover
              const showOsd = outOfSidebar && inRightPanel(panels.osdWrapper, x, y);
  
-@@ -172,35 +191,35 @@ CustomMouseArea {
+@@ -172,35 +192,35 @@ CustomMouseArea {
  
              // Show/hide session on drag
              if (pressed && outOfSidebar && inRightPanel(panels.sessionWrapper, dragStart.x, dragStart.y) && withinPanelHeight(panels.sessionWrapper, x, y)) {
@@ -5411,7 +5802,7 @@ index 3d94a528..17bcd66e 100644
              if (dragY < -Config.launcher.dragThreshold)
                  screenState.launcher = true;
              else if (dragY > Config.launcher.dragThreshold)
-@@ -208,7 +227,7 @@ CustomMouseArea {
+@@ -208,7 +228,7 @@ CustomMouseArea {
          }
  
          // Show dashboard on hover
@@ -5420,7 +5811,7 @@ index 3d94a528..17bcd66e 100644
  
          // Always update visibility based on hover if not in shortcut mode
          if (!dashboardShortcutActive) {
-@@ -219,15 +238,21 @@ CustomMouseArea {
+@@ -219,15 +239,21 @@ CustomMouseArea {
          }
  
          // Show/hide dashboard on drag (for touchscreen devices)
@@ -5445,7 +5836,7 @@ index 3d94a528..17bcd66e 100644
  
          // Always update visibility based on hover if not in shortcut mode
          if (!utilitiesShortcutActive) {
-@@ -237,10 +262,13 @@ CustomMouseArea {
+@@ -237,10 +263,13 @@ CustomMouseArea {
              utilitiesShortcutActive = false;
          }
  
@@ -5459,11 +5850,11 @@ index 3d94a528..17bcd66e 100644
 +            const pos = geometry.axisPos(x, y);
 +            if ((popouts.hasCurrent && bar.isPopoutEntry(pos)) || (!popouts.hasCurrent && bar.opensOnHover(pos)))
 +                bar.checkPopout(pos);
-+        } else if ((!popouts.currentName.startsWith("traymenu") || ((popouts.current as StackView)?.depth ?? 0) <= 1) && !inPopoutArea(x, y)) {
++        } else if (!bar.controlsFlash && (!popouts.currentName.startsWith("traymenu") || ((popouts.current as StackView)?.depth ?? 0) <= 1) && !inPopoutArea(x, y)) {
              popouts.hasCurrent = false;
              bar.closeTray();
          }
-@@ -298,7 +326,9 @@ CustomMouseArea {
+@@ -298,7 +327,9 @@ CustomMouseArea {
          function onUtilitiesChanged() {
              if (root.screenState.utilities) {
                  // Utilities became visible, immediately check if this should be shortcut mode
@@ -5743,7 +6134,7 @@ index c65d3471..72172928 100644
          StyledListView {
              id: list
 diff --git a/modules/notifications/Notification.qml b/modules/notifications/Notification.qml
-index 48759b50..6e2e92b2 100644
+index 48759b50..82182bf2 100644
 --- a/modules/notifications/Notification.qml
 +++ b/modules/notifications/Notification.qml
 @@ -18,12 +18,23 @@ StyledRect {
@@ -5785,7 +6176,57 @@ index 48759b50..6e2e92b2 100644
      }
      Component.onDestruction: modelData.unlock(this)
  
-@@ -233,7 +248,7 @@ StyledRect {
+@@ -146,43 +161,12 @@ StyledRect {
+                 anchors.right: root.hasImage ? image.right : undefined
+                 anchors.bottom: root.hasImage ? image.bottom : undefined
+ 
+-                sourceComponent: StyledRect {
+-                    radius: Tokens.rounding.full
+-                    color: root.modelData.urgency === NotificationUrgency.Critical ? Colours.palette.m3error : root.modelData.urgency === NotificationUrgency.Low ? Colours.layer(Colours.palette.m3surfaceContainerHighest, 2) : Colours.palette.m3secondaryContainer
+-                    implicitWidth: root.hasImage ? Tokens.sizes.notifs.badge : TokenConfig.sizes.notifs.image
+-                    implicitHeight: root.hasImage ? Tokens.sizes.notifs.badge : TokenConfig.sizes.notifs.image
+-
+-                    Loader {
+-                        id: icon
+-
+-                        asynchronous: true
+-                        active: root.hasAppIcon
+-
+-                        anchors.centerIn: parent
+-
+-                        width: Math.round(parent.width * 0.6)
+-                        height: Math.round(parent.width * 0.6)
+-
+-                        sourceComponent: ColouredIcon {
+-                            anchors.fill: parent
+-                            source: Quickshell.iconPath(root.modelData.appIcon)
+-                            colour: root.modelData.urgency === NotificationUrgency.Critical ? Colours.palette.m3onError : root.modelData.urgency === NotificationUrgency.Low ? Colours.palette.m3onSurface : Colours.palette.m3onSecondaryContainer
+-                            layer.enabled: root.modelData.appIcon.endsWith("symbolic")
+-                        }
+-                    }
+-
+-                    Loader {
+-                        asynchronous: true
+-                        active: !root.hasAppIcon
+-                        anchors.centerIn: parent
+-                        anchors.verticalCenterOffset: 1
+-
+-                        sourceComponent: MaterialIcon {
+-                            text: Icons.getNotifIcon(root.modelData.summary, root.modelData.urgency)
+-                            color: root.modelData.urgency === NotificationUrgency.Critical ? Colours.palette.m3onError : root.modelData.urgency === NotificationUrgency.Low ? Colours.palette.m3onSurface : Colours.palette.m3onSecondaryContainer
+-                            fontStyle: Tokens.font.icon.medium
+-                        }
+-                    }
++                // [macos] the app's own icon, or a white symbol on a squircle (red if critical, gray if low)
++                sourceComponent: SymbolTile {
++                    size: root.hasImage ? Tokens.sizes.notifs.badge : TokenConfig.sizes.notifs.image
++                    icon: root.modelData.appIcon
++                    name: Icons.getNotifIcon(root.modelData.summary, root.modelData.urgency)
++                    tint: root.modelData.urgency === NotificationUrgency.Critical ? "red" : root.modelData.urgency === NotificationUrgency.Low ? "gray" : "blue"
+                 }
+             }
+ 
+@@ -233,7 +217,7 @@ StyledRect {
                  text: appNameMetrics.elidedText
                  maximumLineCount: 1
                  color: Colours.palette.m3onSurfaceVariant
@@ -5794,7 +6235,7 @@ index 48759b50..6e2e92b2 100644
  
                  opacity: root.expanded ? 1 : 0
  
-@@ -256,7 +271,10 @@ StyledRect {
+@@ -256,7 +240,10 @@ StyledRect {
              StyledText {
                  id: summary
  
@@ -5805,7 +6246,7 @@ index 48759b50..6e2e92b2 100644
                  anchors.left: image.right
                  anchors.leftMargin: Tokens.spacing.medium
  
-@@ -311,12 +329,13 @@ StyledRect {
+@@ -311,12 +298,13 @@ StyledRect {
                  id: timeSep
  
                  anchors.top: parent.top
@@ -5820,7 +6261,7 @@ index 48759b50..6e2e92b2 100644
  
                  states: State {
                      name: "expanded"
-@@ -337,6 +356,7 @@ StyledRect {
+@@ -337,6 +325,7 @@ StyledRect {
                  id: time
  
                  anchors.top: parent.top
@@ -5828,7 +6269,7 @@ index 48759b50..6e2e92b2 100644
                  anchors.left: timeSep.right
                  anchors.leftMargin: Tokens.spacing.small
  
-@@ -344,7 +364,7 @@ StyledRect {
+@@ -344,7 +333,7 @@ StyledRect {
                  horizontalAlignment: Text.AlignLeft
                  text: root.modelData.timeStr
                  color: Colours.palette.m3onSurfaceVariant
@@ -5837,7 +6278,7 @@ index 48759b50..6e2e92b2 100644
              }
  
              Item {
-@@ -352,7 +372,7 @@ StyledRect {
+@@ -352,7 +341,7 @@ StyledRect {
  
                  anchors.right: parent.right
                  anchors.top: parent.top
@@ -5846,7 +6287,7 @@ index 48759b50..6e2e92b2 100644
  
                  implicitWidth: expandIcon.implicitHeight
                  implicitHeight: expandIcon.implicitHeight
-@@ -394,7 +414,7 @@ StyledRect {
+@@ -394,7 +383,7 @@ StyledRect {
                  textFormat: root.bodyTextFormat
                  text: bodyPreviewMetrics.elidedText
                  color: Colours.palette.m3onSurfaceVariant
@@ -5855,7 +6296,7 @@ index 48759b50..6e2e92b2 100644
  
                  opacity: root.expanded ? 0 : 1
  
-@@ -426,7 +446,7 @@ StyledRect {
+@@ -426,7 +415,7 @@ StyledRect {
                  textFormat: root.bodyTextFormat
                  text: root.modelData.body
                  color: Colours.palette.m3onSurfaceVariant
@@ -5864,7 +6305,7 @@ index 48759b50..6e2e92b2 100644
                  wrapMode: Text.WrapAtWordBoundaryOrAnywhere
                  height: text ? implicitHeight : 0
  
-@@ -434,7 +454,7 @@ StyledRect {
+@@ -434,7 +423,7 @@ StyledRect {
                      if (!root.expanded)
                          return;
  
@@ -5970,7 +6411,7 @@ index 0f94f24e..6b13501e 100644
              }
          }
 diff --git a/modules/sidebar/NotifGroup.qml b/modules/sidebar/NotifGroup.qml
-index ddd37542..f9c316e5 100644
+index ddd37542..6dbdf690 100644
 --- a/modules/sidebar/NotifGroup.qml
 +++ b/modules/sidebar/NotifGroup.qml
 @@ -57,7 +57,7 @@ StyledRect {
@@ -5982,7 +6423,79 @@ index ddd37542..f9c316e5 100644
      color: Colours.layer(Colours.palette.m3surfaceContainer, 2)
  
      Behavior on implicitHeight {
-@@ -175,7 +175,7 @@ StyledRect {
+@@ -96,37 +96,18 @@ StyledRect {
+                 }
+             }
+ 
+-            Component {
+-                id: appIconComp
+-
+-                ColouredIcon {
+-                    implicitSize: Math.round(TokenConfig.sizes.notifs.image * 0.6)
+-                    source: Quickshell.iconPath(root.appIcon)
+-                    colour: root.urgency === NotificationUrgency.Critical ? Colours.palette.m3onError : root.urgency === NotificationUrgency.Low ? Colours.palette.m3onSurface : Colours.palette.m3onSecondaryContainer
+-                    layer.enabled: root.appIcon.endsWith("symbolic")
+-                }
+-            }
+-
+-            Component {
+-                id: materialIconComp
+-
+-                MaterialIcon {
+-                    text: Icons.getNotifIcon(root.activeNotifs[0]?.summary, root.urgency)
+-                    color: root.urgency === NotificationUrgency.Critical ? Colours.palette.m3onError : root.urgency === NotificationUrgency.Low ? Colours.palette.m3onSurface : Colours.palette.m3onSecondaryContainer
+-                    fontStyle: Tokens.font.icon.medium
+-                }
+-            }
+-
++            // [macos] the app's own icon, or a white symbol on a squircle (red if critical, gray if low);
++            // a picture stays round with the app icon as its badge
+             StyledClippingRect {
+                 anchors.fill: parent
+-                color: root.urgency === NotificationUrgency.Critical ? Colours.palette.m3error : root.urgency === NotificationUrgency.Low ? Colours.layer(Colours.palette.m3surfaceContainerHigh, 3) : Colours.palette.m3secondaryContainer
++                visible: root.image !== ""
+                 radius: Tokens.rounding.full
+ 
+                 Loader {
+                     asynchronous: true
+                     anchors.centerIn: parent
+-                    anchors.verticalCenterOffset: sourceComponent === materialIconComp ? 1 : 0
+-                    sourceComponent: root.image ? imageComp : root.appIcon ? appIconComp : materialIconComp
++                    active: root.image !== ""
++                    sourceComponent: imageComp
+                 }
+             }
+ 
+@@ -134,22 +115,13 @@ StyledRect {
+                 asynchronous: true
+                 anchors.right: parent.right
+                 anchors.bottom: parent.bottom
+-                active: root.appIcon && root.image
++                active: root.image === "" || root.appIcon !== ""
+ 
+-                sourceComponent: StyledRect {
+-                    implicitWidth: Tokens.sizes.notifs.badge
+-                    implicitHeight: Tokens.sizes.notifs.badge
+-
+-                    color: root.urgency === NotificationUrgency.Critical ? Colours.palette.m3error : root.urgency === NotificationUrgency.Low ? Colours.palette.m3surfaceContainerHigh : Colours.palette.m3secondaryContainer
+-                    radius: Tokens.rounding.full
+-
+-                    ColouredIcon {
+-                        anchors.centerIn: parent
+-                        implicitSize: Math.round(Tokens.sizes.notifs.badge * 0.6)
+-                        source: Quickshell.iconPath(root.appIcon)
+-                        colour: root.urgency === NotificationUrgency.Critical ? Colours.palette.m3onError : root.urgency === NotificationUrgency.Low ? Colours.palette.m3onSurface : Colours.palette.m3onSecondaryContainer
+-                        layer.enabled: root.appIcon.endsWith("symbolic")
+-                    }
++                sourceComponent: SymbolTile {
++                    size: root.image !== "" ? Tokens.sizes.notifs.badge : TokenConfig.sizes.notifs.image
++                    icon: root.appIcon
++                    name: Icons.getNotifIcon(root.activeNotifs[0]?.summary ?? "", root.urgency)
++                    tint: root.urgency === NotificationUrgency.Critical ? "red" : root.urgency === NotificationUrgency.Low ? "gray" : "blue"
+                 }
+             }
+         }
+@@ -175,7 +147,7 @@ StyledRect {
                      Layout.fillWidth: true
                      text: root.modelData
                      color: Colours.palette.m3onSurfaceVariant
@@ -5991,7 +6504,7 @@ index ddd37542..f9c316e5 100644
                      elide: Text.ElideRight
                  }
  
-@@ -183,7 +183,7 @@ StyledRect {
+@@ -183,7 +155,7 @@ StyledRect {
                      animate: true
                      text: root.activeNotifs[0]?.timeStr ?? ""
                      color: Colours.palette.m3outline
@@ -6000,7 +6513,7 @@ index ddd37542..f9c316e5 100644
                  }
  
                  StyledRect {
-@@ -211,7 +211,7 @@ StyledRect {
+@@ -211,7 +183,7 @@ StyledRect {
                              animate: true
                              text: root.notifCount
                              color: root.urgency === NotificationUrgency.Critical ? Colours.palette.m3onError : Colours.palette.m3onSurfaceVariant
@@ -6102,7 +6615,7 @@ index cdaaad0b..ebc1a08d 100644
  
      Ref {
 diff --git a/modules/utilities/cards/Toggles.qml b/modules/utilities/cards/Toggles.qml
-index 4cb09978..d0edc064 100644
+index 4cb09978..f3bd5e7a 100644
 --- a/modules/utilities/cards/Toggles.qml
 +++ b/modules/utilities/cards/Toggles.qml
 @@ -42,7 +42,7 @@ StyledRect {
@@ -6114,6 +6627,26 @@ index 4cb09978..d0edc064 100644
      color: Colours.tPalette.m3surfaceContainer
  
      ColumnLayout {
+@@ -154,11 +154,17 @@ StyledRect {
+         }
+     }
+ 
++    // [macos] Control Center style: Apple blue with a white filled symbol when on, translucent gray when
++    // off; the shape stays round (no M3 shape morph)
+     component Toggle: IconButton {
+-        inactiveColour: Colours.layer(Colours.palette.m3surfaceContainerHighest, 2)
++        activeColour: Colours.sys.blue
++        activeOnColour: "white"
++        inactiveColour: Qt.alpha(Colours.palette.m3onSurface, 0.12)
++        inactiveOnColour: Colours.palette.m3onSurface
+         fillWidth: true
+         isToggle: true
+         isRound: true
+-        shapeMorph: true
++        radiusMorph: false
++        checkedRadius: height / 2
+     }
+ }
 diff --git a/modules/utilities/toasts/ToastItem.qml b/modules/utilities/toasts/ToastItem.qml
 index 0b3a68ee..b468e0ba 100644
 --- a/modules/utilities/toasts/ToastItem.qml
@@ -6273,6 +6806,27 @@ index ac34cbc1..16dc3906 100644
          }
  
          if (query.startsWith("model:")) {
+diff --git a/services/Colours.qml b/services/Colours.qml
+index 0b644001..f59fce33 100644
+--- a/services/Colours.qml
++++ b/services/Colours.qml
+@@ -28,6 +28,16 @@ Singleton {
+     property bool cooldownPending
+     property real lastBaseTransparency
+ 
++    // [macos] Apple's system colours (HIG), light and dark — the same table as the macos shell's
++    // Theme.sys. Fixed hues on purpose: Apple's toggles and icon tiles don't follow the wallpaper scheme.
++    readonly property var sys: light ? ({
++            red: "#ff3b30", orange: "#ff9500", yellow: "#ffcc00", green: "#34c759", mint: "#00c7be", teal: "#30b0c7",
++            cyan: "#32ade6", blue: "#007aff", indigo: "#5856d6", purple: "#af52de", pink: "#ff2d55", brown: "#a2845e", gray: "#8e8e93"
++        }) : ({
++            red: "#ff453a", orange: "#ff9f0a", yellow: "#ffd60a", green: "#30d158", mint: "#63e6e2", teal: "#40c8e0",
++            cyan: "#64d2ff", blue: "#0a84ff", indigo: "#5e5ce6", purple: "#bf5af2", pink: "#ff375f", brown: "#ac8e68", gray: "#98989d"
++        })
++
+     function getLuminance(c: color): real {
+         if (c.r == 0 && c.g == 0 && c.b == 0)
+             return 0;
 diff --git a/services/Hypr.qml b/services/Hypr.qml
 index 402417b9..eaad4457 100644
 --- a/services/Hypr.qml
@@ -6422,19 +6976,41 @@ index 00000000..f5f05bc5
 +    }
 +}
 diff --git a/utils/Icons.qml b/utils/Icons.qml
-index a86f6620..b490b0cf 100644
+index a86f6620..70184277 100644
 --- a/utils/Icons.qml
 +++ b/utils/Icons.qml
-@@ -200,7 +200,7 @@ Singleton {
+@@ -175,9 +175,10 @@ Singleton {
+ 
+     function getNetworkIcon(strength: int, isSecure = false): string {
+         const level = Math.max(0, Math.min(4, Math.floor(strength / 20)));
+-        const icon = networkIcons[level];
+-
+-        return isSecure && level > 0 ? `${icon}_locked` : icon;
++        if (isSecure && level > 0)
++            return `${networkIcons[level]}_locked`;
++        // [macos] macOS's wifi symbol: the dot and arcs (draw with mode "hierarchical", underlay "wifi")
++        return ["wifi_1_bar", "wifi_1_bar", "wifi_2_bar", "wifi", "wifi"][level];
+     }
+ 
+     function getBluetoothIcon(icon: string): string {
+@@ -196,11 +197,13 @@ Singleton {
+     function getVolumeIcon(volume: real, isMuted: bool): string {
+         if (isMuted)
+             return "no_sound";
+-        if (volume >= 0.5)
++        if (volume >= 0.66) // [macos] speaker.wave.3/2/1 like macOS
              return "volume_up";
-         if (volume > 0)
+-        if (volume > 0)
++        if (volume >= 0.33)
              return "volume_down";
 -        return "volume_mute";
++        if (volume > 0)
++            return "volume_mute";
 +        return "volume_off"; // [macos] silent: a full-size speaker with a slash ("volume_mute" is a tiny bare speaker)
      }
  
      function getMicVolumeIcon(volume: real, isMuted: bool): string {
-@@ -221,6 +221,15 @@ Singleton {
+@@ -221,6 +224,15 @@ Singleton {
          return icon;
      }
  

@@ -205,13 +205,13 @@ Scope {
             }
 
             // "+" for a new desktop
-            Text {
+            Symbol {
                 visible: card.modelData.isNew
                 anchors.centerIn: parent
-                text: "add"
+                name: "add"
+                size: 26
+                weight: 400
                 color: Theme.fgDim
-                font.family: "Material Symbols Rounded"
-                font.pixelSize: 26
             }
 
             // the number, top-left

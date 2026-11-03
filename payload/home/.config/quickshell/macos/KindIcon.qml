@@ -20,19 +20,13 @@ Item {
         source: ki.entry ? Quickshell.iconPath(ki.entry.icon, "application-x-executable") : ""
     }
 
-    Rectangle {
+    SymbolTile { // like the widget gallery's app icons on macOS: the kind's Apple colour
         visible: ki.entry === null
-        anchors.fill: parent
-        radius: ki.size * 0.28
-        color: Theme.primary
-
-        Text {
-            anchors.centerIn: parent
-            text: ki.kind?.glyph ?? "widgets"
-            color: Theme.fgOnPrimary
-            font.family: "Material Symbols Rounded"
-            font.variableAxes: { "FILL": 1 }
-            font.pixelSize: ki.size * 0.64
-        }
+        anchors.centerIn: parent
+        size: Math.round(ki.size * 0.86) // the visible square of a WhiteSur app icon in the same box
+        name: ki.kind?.glyph ?? "widgets"
+        tint: ({ clock: "#2c2c2e", calendar: "red", weather: "blue", conditions: "cyan", battery: "green", system: "teal",
+                 network: "blue", profile: "gray", music: "pink", notes: "yellow", shortcuts: "indigo", photos: "orange",
+                 reminders: "orange", timer: "orange" })[ki.kind?.type] ?? "blue"
     }
 }

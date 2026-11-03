@@ -11,7 +11,9 @@ import Quickshell
 //                     Smart Stacks; decided 2026-10-09)
 //   scroll / dots     on a stack: next widget (the back edges peeking out below
 //                     are the hint)
-//   right-click       sizes, Edit Stack…, remove
+//   right-click       sizes, Edit "<Name>"…, Edit Stack…, remove
+//   Edit "<Name>"…    the front card flips over to its options (WidgetEditor); Done, Esc or a
+//                     click elsewhere flips it back
 // Card-level opacity/scale run on the render thread (Animators), so they stay smooth even
 // while the shell is busy (Hide All, cycling, appearing); x/y can't (see Behavior on x).
 Item {
@@ -36,8 +38,32 @@ Item {
 
     readonly property bool hovered: mouse.containsMouse || hoverAll.hovered
 
+    // Edit Widget: the front card turns over to its options. desk.editId is the item being
+    // edited (one per display; DesktopWidgets clears it when that item stops being a front card).
+    readonly property bool editing: desk.editId !== "" && front.id === desk.editId
+    property string flipId: "" // the item whose card turns (kept while it turns back)
+    property bool closeOnRelease: false
+    property real flipAngle: editing ? 180 : 0
+    Behavior on flipAngle {
+        enabled: !Config.reducedMotion
+        NumberAnimation { duration: 350; easing.type: Easing.InOutCubic }
+    }
+
+    function openEditor(): void {
+        card.flipId = card.front.id;
+        Shared.touchStack(card.grp.id); // Smart Rotate leaves the stack alone meanwhile
+        card.desk.editId = card.front.id;
+    }
+
+    function closeEditor(): void {
+        if (!card.editing)
+            return;
+        card.desk.contentItem.forceActiveFocus(); // first: a text field saves as it loses focus
+        card.desk.editId = "";
+    }
+
     // Sonoma dimming (see `visual` below)
-    readonly property bool dimmed: card.desk.dimmed && !PowerSaver.saving && !hovered && !dragging && !Shared.widgetEdit && !card.isDropTarget
+    readonly property bool dimmed: card.desk.dimmed && !PowerSaver.saving && !hovered && !dragging && !Shared.widgetEdit && !card.isDropTarget && card.flipAngle === 0
     property real dimAmount: dimmed ? 1 : 0
     Behavior on dimAmount {
         NumberAnimation { duration: 420; easing.type: Easing.OutCubic }
@@ -205,6 +231,10 @@ Item {
                         action: () => Config.setSmartRotate(card.grp.id, !Config.smartRotate(card.grp.id)) },
                       { separator: true });
 
+        if (WidgetTypes.hasOptions(f.type))
+            list.push({ label: card.editing ? "Done Editing" : `Edit \u201c${card.kind?.name ?? "Widget"}\u201d…`,
+                        action: () => card.editing ? card.closeEditor() : card.openEditor() }, { separator: true });
+
         if (sizes.length > 1)
             for (const s of sizes)
                 list.push({ label: WidgetTypes.sizeName(s), checked: f.size === s, action: () => card.desk.resizeWidget(f, s) });
@@ -293,7 +323,7 @@ Item {
                 card.desk.openMenu(p.x, p.y, card.menuEntries());
                 return;
             }
-            if (Shared.widgetEdit)
+            if (Shared.widgetEdit || card.editing)
                 return;
             const at = Date.now();
             Qt.callLater(() => {
@@ -309,7 +339,7 @@ Item {
             });
         }
         onWheel: w => {
-            if (!card.stacked || Date.now() - card._lastWheel < 300)
+            if (!card.stacked || card.editing || Date.now() - card._lastWheel < 300)
                 return;
             card._lastWheel = Date.now();
             card.cycle(w.angleDelta.y < 0 ? 1 : -1);
@@ -380,6 +410,14 @@ Item {
                     property bool leaving: false
                     z: leaving ? 101 : 100 - depth
                     transformOrigin: Item.Bottom
+                    readonly property bool turning: layer.entry.id === card.flipId
+                    // the 3D turn (Qt's Rotation projects it with perspective)
+                    transform: Rotation {
+                        origin.x: layer.width / 2
+                        origin.y: layer.height / 2
+                        axis { x: 0; y: 1; z: 0 }
+                        angle: layer.turning ? card.flipAngle : 0
+                    }
 
                     Component.onCompleted: {
                         y = peekFor(depth);
@@ -501,6 +539,29 @@ Item {
                         highlight: layer.depth === 0 && card.isDropTarget
                         // behind cards are plain glass: only their edges show
                         contentOpacity: layer.depth === 0 ? 1 : 0
+                        options: layer.entry.options ?? null
+                        flipped: layer.turning && card.flipAngle > 90
+                    }
+
+                    // the back side, built when the turn starts and kept until it has turned back
+                    Loader {
+                        id: editor
+
+                        anchors.fill: parent
+                        active: layer.turning && (card.editing || card.flipAngle > 0)
+                        visible: card.flipAngle > 90
+                        // turned half-way round with the card, it reads the right way
+                        transform: Rotation {
+                            origin.x: editor.width / 2
+                            axis { x: 0; y: 1; z: 0 }
+                            angle: 180
+                        }
+                        onLoaded: if (card.editing) item.forceActiveFocus()
+
+                        sourceComponent: WidgetEditor {
+                            entry: layer.entry
+                            onDone: card.closeEditor()
+                        }
                     }
                 }
             }
@@ -674,12 +735,12 @@ Item {
                 NumberAnimation { duration: Config.reducedMotion ? 0 : 200; easing.type: Easing.OutBack; easing.overshoot: 1.2 }
             }
 
-            Text {
+            Symbol {
                 anchors.centerIn: parent
-                text: "call_split"
+                name: "call_split"
                 color: splitArea.containsMouse ? Theme.fgOnPrimary : Theme.fg
-                font.family: "Material Symbols Rounded"
-                font.pixelSize: 15
+                size: 15
+                weight: 600
             }
 
             // name on hover
@@ -717,7 +778,7 @@ Item {
 
         // never from a note's text while typing (a drag there selects); the
         // rest of the card always drags. `dragging`: passing over the text mid-drag keeps it
-        enabled: card.dragging || !(card.frontBody?.content?.textHovered ?? false)
+        enabled: card.dragging || (!card.editing && !(card.frontBody?.content?.textHovered ?? false))
 
         property real startX
         property real startY
@@ -757,6 +818,19 @@ Item {
         function onWindowDragChanged(): void {
             if (!Shared.windowDrag && card.dragging)
                 card.drop();
+            // a left press off the card ends editing, on its release (dropping the layer's
+            // keyboard while the button is held lost the release bind, see WidgetNotes)
+            if (Shared.windowDrag)
+                card.closeOnRelease = card.editing && !card.hovered;
+            else if (card.closeOnRelease) {
+                card.closeOnRelease = false;
+                card.closeEditor();
+            }
+        }
+
+        // the keyboard couldn't be kept (DesktopWidgets.keyLost)
+        function onStopNoteEditing(): void {
+            card.closeEditor();
         }
     }
 }

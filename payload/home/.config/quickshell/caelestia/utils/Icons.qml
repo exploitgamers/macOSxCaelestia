@@ -175,9 +175,10 @@ Singleton {
 
     function getNetworkIcon(strength: int, isSecure = false): string {
         const level = Math.max(0, Math.min(4, Math.floor(strength / 20)));
-        const icon = networkIcons[level];
-
-        return isSecure && level > 0 ? `${icon}_locked` : icon;
+        if (isSecure && level > 0)
+            return `${networkIcons[level]}_locked`;
+        // [macos] macOS's wifi symbol: the dot and arcs (draw with mode "hierarchical", underlay "wifi")
+        return ["wifi_1_bar", "wifi_1_bar", "wifi_2_bar", "wifi", "wifi"][level];
     }
 
     function getBluetoothIcon(icon: string): string {
@@ -196,10 +197,12 @@ Singleton {
     function getVolumeIcon(volume: real, isMuted: bool): string {
         if (isMuted)
             return "no_sound";
-        if (volume >= 0.5)
+        if (volume >= 0.66) // [macos] speaker.wave.3/2/1 like macOS
             return "volume_up";
-        if (volume > 0)
+        if (volume >= 0.33)
             return "volume_down";
+        if (volume > 0)
+            return "volume_mute";
         return "volume_off"; // [macos] silent: a full-size speaker with a slash ("volume_mute" is a tiny bare speaker)
     }
 

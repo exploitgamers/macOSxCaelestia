@@ -26,6 +26,7 @@ ColumnLayout {
 
     Toggle {
         label: Tr.trCtx("Enabled", "toggle label")
+        icon: "bluetooth" // [macos]
         checked: Bluetooth.defaultAdapter?.enabled ?? false // qmllint disable unresolved-type
         toggle.onToggled: {
             const adapter = Bluetooth.defaultAdapter; // qmllint disable unresolved-type
@@ -36,6 +37,7 @@ ColumnLayout {
 
     Toggle {
         label: Tr.trCtx("Discovering", "bluetooth adapter state")
+        icon: "bluetooth_searching" // [macos]
         checked: Bluetooth.defaultAdapter?.discovering ?? false // qmllint disable unresolved-type
         toggle.onToggled: {
             const adapter = Bluetooth.defaultAdapter; // qmllint disable unresolved-type
@@ -180,21 +182,25 @@ ColumnLayout {
         onClicked: root.popouts.detachRequested("bluetooth")
     }
 
+    // [macos] a Control Center row: the round toggle leads, its label beside it
     component Toggle: RowLayout {
         required property string label
+        property string icon
         property alias checked: toggle.checked
         property alias toggle: toggle
 
         Layout.fillWidth: true
         spacing: Tokens.spacing.medium
 
+        CCToggle {
+            id: toggle
+
+            symbol: parent.icon
+        }
+
         StyledText {
             Layout.fillWidth: true
             text: parent.label
-        }
-
-        StyledSwitch {
-            id: toggle
         }
     }
 }

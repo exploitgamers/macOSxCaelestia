@@ -134,6 +134,8 @@ QtObject {
             height: 20
             radius: 10
             color: "white"
+            border.width: 0.5 // the knob's edge shadow, as on a macOS switch
+            border.color: Qt.rgba(0, 0, 0, 0.12)
 
             Behavior on x {
                 NumberAnimation { duration: 180; easing.type: Easing.OutCubic }
@@ -305,14 +307,14 @@ QtObject {
             font.pixelSize: 12
         }
 
-        Text {
+        Symbol { // chevron.up.chevron.down
             anchors.right: parent.right
             anchors.rightMargin: 6
             anchors.verticalCenter: parent.verticalCenter
-            text: "unfold_more"
+            name: "unfold_more"
+            size: 16
+            weight: 600
             color: Theme.fgDim
-            font.family: "Material Symbols Rounded"
-            font.pixelSize: 16
         }
 
         MouseArea {

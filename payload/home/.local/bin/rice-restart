@@ -4,10 +4,7 @@
 # which let duplicate docks pile up.
 # Usage: rice-restart            dock/launcher/widgets (qs -c macos)
 #        rice-restart all        also Caelestia
-# Don't pass Claude Code's session markers on to the desktop: apps launched from
-# the dock inherit the shells' environment, and a `claude` started there with
-# CLAUDE_CODE_CHILD_SESSION set doesn't save its transcript (2026-10-10).
-for v in $(env | sed -n 's/^\(CLAUDE[A-Z_]*\)=.*/\1/p'); do unset "$v"; done
+. "$HOME/.local/bin/rice-session-env"   # session_start: shells get the session's environment, not the caller's
 set -u
 PATH="$HOME/.local/bin:$PATH"
 kill_config() { # $1 = config dir name; also kills its monitor children (nmcli/gsettings monitor), which a SIGTERMed shell leaves orphaned
@@ -22,14 +19,14 @@ if [ "${1:-}" = "all" ]; then
     # Caelestia forgets "Block sleep and screen locking" on restart: carry it over
     inhibit=$("$HOME/.local/bin/qs" -c caelestia ipc call idleInhibitor isEnabled 2>/dev/null || true)
     kill_config caelestia
-    setsid caelestia shell -d >/dev/null 2>&1 &
+    session_start "caelestia shell -d"
     if [ "$inhibit" = true ]; then
         # setsid: a plain `( … ) &` died with the caller's shell (e.g. a tool run), so the switch was lost
         # check isEnabled: `ipc call` exits 0 on "Target not found." while the new shell is still loading
         setsid sh -c 'q="$HOME/.local/bin/qs"; for i in $(seq 20); do sleep 1; "$q" -c caelestia ipc call idleInhibitor enable >/dev/null 2>&1; [ "$("$q" -c caelestia ipc call idleInhibitor isEnabled 2>/dev/null)" = true ] && exit; done' >/dev/null 2>&1 &
     fi
 fi
-setsid qs -c macos -d >/dev/null 2>&1 &
+session_start "$HOME/.local/bin/qs -c macos -d"
 sleep 3
 for c in macos caelestia; do
     n=0

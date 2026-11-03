@@ -154,11 +154,17 @@ StyledRect {
         }
     }
 
+    // [macos] Control Center style: Apple blue with a white filled symbol when on, translucent gray when
+    // off; the shape stays round (no M3 shape morph)
     component Toggle: IconButton {
-        inactiveColour: Colours.layer(Colours.palette.m3surfaceContainerHighest, 2)
+        activeColour: Colours.sys.blue
+        activeOnColour: "white"
+        inactiveColour: Qt.alpha(Colours.palette.m3onSurface, 0.12)
+        inactiveOnColour: Colours.palette.m3onSurface
         fillWidth: true
         isToggle: true
         isRound: true
-        shapeMorph: true
+        radiusMorph: false
+        checkedRadius: height / 2
     }
 }

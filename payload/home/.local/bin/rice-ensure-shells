@@ -3,10 +3,7 @@
 # never duplicates). Hyprland runs this after every monitor change: Caelestia has
 # exited when the laptop panel was reconnected, taking the wallpaper, side bar and
 # edge panels with it.
-# Don't pass Claude Code's session markers on to the desktop: apps launched from
-# the dock inherit the shells' environment, and a `claude` started there with
-# CLAUDE_CODE_CHILD_SESSION set doesn't save its transcript (2026-10-10).
-for v in $(env | sed -n 's/^\(CLAUDE[A-Z_]*\)=.*/\1/p'); do unset "$v"; done
+. "$HOME/.local/bin/rice-session-env"   # session_start: shells get the session's environment, not the caller's
 PATH="$HOME/.local/bin:$PATH"
 running() { # $1 = config dir name
     for pid in $(pgrep -x quickshell); do
@@ -21,8 +18,8 @@ exec 9>"${XDG_RUNTIME_DIR:-/tmp}/rice-ensure-shells.lock"
 flock -n 9 || exit 0
 
 started=""
-running caelestia || { setsid caelestia shell -d >/dev/null 2>&1 & started="$started caelestia"; }
-running macos || { setsid qs -c macos -d >/dev/null 2>&1 & started="$started macos"; }
+running caelestia || { session_start "caelestia shell -d"; started="$started caelestia"; }
+running macos || { session_start "$HOME/.local/bin/qs -c macos -d"; started="$started macos"; }
 
 # hold the lock until what we started shows up (max ~10 s)
 for name in $started; do

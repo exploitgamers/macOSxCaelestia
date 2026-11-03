@@ -8,6 +8,7 @@ Item {
 
     property string size: "small"
     property string widgetId: ""
+    property var options: ({}) // Edit "Calendar"…: firstDay auto|sun|mon, weekNumbers
 
     SystemClock {
         id: clock
@@ -16,7 +17,16 @@ Item {
     }
 
     readonly property date today: clock.date
-    readonly property int firstDay: Qt.locale().firstDayOfWeek % 7 // 0 = Sunday
+    readonly property int firstDay: options.firstDay === "sun" ? 0 : options.firstDay === "mon" ? 1 : Qt.locale().firstDayOfWeek % 7 // 0 = Sunday
+    readonly property bool weekNumbers: options.weekNumbers === true && size !== "small"
+    readonly property int columns: weekNumbers ? 8 : 7
+
+    // ISO 8601 week number of the week holding `d`
+    function isoWeek(d: date): int {
+        const t = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+        t.setUTCDate(t.getUTCDate() + 4 - (t.getUTCDay() || 7));
+        return Math.ceil(((t - Date.UTC(t.getUTCFullYear(), 0, 1)) / 86400000 + 1) / 7);
+    }
     property int monthOffset: 0 // large size: ‹ › browse months
     readonly property date shown: new Date(today.getFullYear(), today.getMonth() + monthOffset, 1)
     readonly property bool thisMonth: monthOffset === 0
@@ -32,7 +42,18 @@ Item {
             out.push(d >= 1 && d <= days ? d : 0);
         }
         // drop a trailing empty week
-        return out.slice(35).every(d => d === 0) ? out.slice(0, 35) : out;
+        const weeks = out.slice(35).every(d => d === 0) ? out.slice(0, 35) : out;
+        if (!weekNumbers)
+            return weeks;
+        // a leading cell per week holds its number, stored negative (-1…-53)
+        const rows = [];
+        for (let w = 0; w < weeks.length; w += 7) {
+            const d = weeks.slice(w, w + 7).find(v => v > 0);
+            rows.push(-isoWeek(new Date(y, m, d)));
+            for (let i = 0; i < 7; i++)
+                rows.push(weeks[w + i]);
+        }
+        return rows;
     }
 
     // Weekday + big date (small, and the left half of medium)
@@ -45,7 +66,7 @@ Item {
 
         Text {
             text: Qt.formatDateTime(root.today, "dddd").toUpperCase()
-            color: Theme.primary
+            color: Theme.sys.red // Apple Calendar's red
             font.family: Theme.font
             font.pixelSize: 13
             font.weight: Font.Bold
@@ -79,7 +100,7 @@ Item {
         width: root.size === "medium" ? root.width / 2 : root.width - 36
         spacing: root.size === "large" ? 8 : 2
 
-        readonly property real cellW: width / 7
+        readonly property real cellW: width / root.columns
         readonly property real cellH: root.size === "large" ? 38 : 17
 
         Item {
@@ -90,7 +111,7 @@ Item {
                 id: monthName
 
                 text: Qt.formatDateTime(root.size === "large" ? root.shown : root.today, root.size === "large" ? "MMMM yyyy" : "MMMM").toUpperCase()
-                color: Theme.primary
+                color: Theme.sys.red
                 font.family: Theme.font
                 font.pixelSize: root.size === "large" ? 15 : 11
                 font.weight: Font.Bold
@@ -117,12 +138,12 @@ Item {
                         visible: modelData.step !== 0 || !root.thisMonth
                         color: navArea.containsMouse ? Theme.alpha(Theme.fg, 0.12) : "transparent"
 
-                        Text {
+                        Symbol {
                             anchors.centerIn: parent
-                            text: parent.modelData.icon
-                            color: Theme.fg
-                            font.family: "Material Symbols Rounded"
-                            font.pixelSize: 20
+                            name: parent.modelData.icon
+                            size: 20
+                            weight: 600 // next to the bold month name
+                            color: parent.modelData.step === 0 ? Theme.sys.red : Theme.fg
                         }
 
                         MouseArea {
@@ -139,6 +160,12 @@ Item {
         }
 
         Row {
+            Item {
+                visible: root.weekNumbers
+                width: month.cellW
+                height: 1
+            }
+
             Repeater {
                 model: 7
 
@@ -157,7 +184,7 @@ Item {
         }
 
         Grid {
-            columns: 7
+            columns: root.columns
 
             Repeater {
                 model: root.cells
@@ -166,6 +193,7 @@ Item {
                     required property int modelData
 
                     readonly property bool isToday: root.thisMonth && modelData === root.today.getDate()
+                    readonly property bool weekCell: modelData < 0
 
                     width: month.cellW
                     height: month.cellH
@@ -176,16 +204,16 @@ Item {
                         width: Math.min(parent.width, parent.height) - (root.size === "large" ? 4 : 1)
                         height: width
                         radius: width / 2
-                        color: Theme.primary
+                        color: Theme.sys.red
                     }
 
                     Text {
                         anchors.centerIn: parent
-                        text: parent.modelData || ""
-                        color: parent.isToday ? Theme.fgOnPrimary : Theme.fg
+                        text: parent.weekCell ? -parent.modelData : parent.modelData || ""
+                        color: parent.isToday ? "white" : parent.weekCell ? Theme.alpha(Theme.fg, 0.4) : Theme.fg
                         font.family: Theme.font
-                        font.pixelSize: root.size === "large" ? 16 : 10
-                        font.weight: parent.isToday ? Font.Bold : Font.Normal
+                        font.pixelSize: (root.size === "large" ? 16 : 10) - (parent.weekCell ? 3 : 0)
+                        font.weight: parent.isToday ? Font.Bold : parent.weekCell ? Font.DemiBold : Font.Normal
                         font.features: { "tnum": 1 }
                     }
                 }

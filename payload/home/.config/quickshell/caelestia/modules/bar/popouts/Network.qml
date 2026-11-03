@@ -35,6 +35,7 @@ ColumnLayout {
         visible: root.view === "wireless"
         Layout.preferredHeight: visible ? implicitHeight : 0
         label: Tr.trCtx("Enabled", "toggle label")
+        icon: "wifi" // [macos]
         checked: Nmcli.wifiEnabled
         toggle.onToggled: Nmcli.enableWifi(checked)
     }
@@ -90,6 +91,8 @@ ColumnLayout {
 
             MaterialIcon {
                 text: Icons.getNetworkIcon(networkItem.modelData.strength)
+                mode: "hierarchical" // [macos] unlit arcs dimmed
+                underlay: "wifi"
                 color: networkItem.modelData.active ? Colours.palette.m3primary : Colours.palette.m3onSurfaceVariant
             }
 
@@ -369,21 +372,25 @@ ColumnLayout {
         target: root.popouts
     }
 
+    // [macos] a Control Center row: the round toggle leads, its label beside it
     component Toggle: RowLayout {
         required property string label
+        property string icon
         property alias checked: toggle.checked
         property alias toggle: toggle
 
         Layout.fillWidth: true
         spacing: Tokens.spacing.medium
 
+        CCToggle {
+            id: toggle
+
+            symbol: parent.icon
+        }
+
         StyledText {
             Layout.fillWidth: true
             text: parent.label
-        }
-
-        StyledSwitch {
-            id: toggle
         }
     }
 }

@@ -54,6 +54,63 @@ Singleton {
 
     readonly property var categories: ["Essentials", "System", "Media", "Productivity"]
 
+    // Per-widget options (right-click → Edit "<Name>"…, WidgetEditor on the card's back), saved
+    // as items[i].options; a missing or malformed value means the default, so old layouts are unchanged.
+    //   segmented: choices [[value, label], …]   toggle: bool   text: string (placeholder when empty)
+    readonly property var weatherOptions: [
+        { key: "location", label: "Location", type: "text", def: "", placeholder: Config.weatherLocation || "My Location" },
+        { key: "unit", label: "Temperature", type: "segmented", def: "auto", choices: [["auto", "Default"], ["C", "°C"], ["F", "°F"]] }
+    ]
+    readonly property var optionSpecs: ({
+        clock: [
+            { key: "style", label: "Style", type: "segmented", def: "analog", choices: [["analog", "Analog"], ["digital", "Digital"]] },
+            { key: "city", label: "City", type: "text", def: "", placeholder: "Local Time" }
+        ],
+        calendar: [
+            { key: "firstDay", label: "Week Starts On", type: "segmented", def: "auto", choices: [["auto", "Default"], ["sun", "Sun"], ["mon", "Mon"]] },
+            { key: "weekNumbers", label: "Week Numbers", type: "toggle", def: false }
+        ],
+        weather: weatherOptions,
+        conditions: weatherOptions,
+        battery: [
+            { key: "show", label: "Show", type: "segmented", def: "all", choices: [["all", "All"], ["laptop", "Laptop"], ["devices", "Devices"]] }
+        ],
+        system: [
+            { key: "cpu", label: "CPU", type: "toggle", def: true },
+            { key: "gpu", label: "GPU", type: "toggle", def: true },
+            { key: "memory", label: "Memory", type: "toggle", def: true },
+            { key: "disk", label: "Disk", type: "toggle", def: true }
+        ],
+        network: [
+            { key: "units", label: "Speed In", type: "segmented", def: "bytes", choices: [["bytes", "MB/s"], ["bits", "Mbps"]] }
+        ],
+        notes: [
+            { key: "textSize", label: "Text Size", type: "segmented", def: "m", choices: [["s", "Small"], ["m", "Medium"], ["l", "Large"]] }
+        ],
+        timer: [
+            { key: "presets", label: "Presets (minutes)", type: "text", def: "", placeholder: "1, 5, 10, 25" }
+        ],
+        photos: [
+            { key: "folder", label: "Folder", type: "text", def: "", placeholder: "Pictures & Downloads" }
+        ]
+    })
+
+    function hasOptions(type: string): bool {
+        return (optionSpecs[type] ?? []).length > 0;
+    }
+
+    // every option of `type`, from saved `raw` (any shape: wrong types fall back to the default)
+    function options(type: string, raw: var): var {
+        const src = raw && typeof raw === "object" && !Array.isArray(raw) ? raw : {}, out = {};
+        for (const o of optionSpecs[type] ?? []) {
+            const v = src[o.key];
+            out[o.key] = o.type === "toggle" ? (typeof v === "boolean" ? v : o.def)
+                : o.type === "segmented" ? (o.choices.some(c => c[0] === v) ? v : o.def)
+                : (typeof v === "string" ? v : o.def);
+        }
+        return out;
+    }
+
     function matches(k: var, q: string): bool {
         q = q.trim().toLowerCase();
         return !q || [k.name, k.description, k.category, k.type].some(s => s.toLowerCase().includes(q));

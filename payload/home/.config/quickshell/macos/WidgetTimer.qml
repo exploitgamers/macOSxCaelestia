@@ -8,15 +8,20 @@ Item {
 
     property string size: "small"
     property string widgetId: ""
+    property var options: ({}) // Edit "Timer"…: presets, e.g. "3, 15, 45, 90" (minutes)
 
     property real total: 0      // seconds
     property real remaining: 0  // seconds
     property bool running: false
     property real endsAt: 0     // ms timestamp while running
     readonly property bool active: total > 0
-    readonly property var presets: [1, 5, 10, 25]
+    // up to four positive numbers from the option, else the usual four
+    readonly property var presets: {
+        const own = String(options.presets ?? "").split(/[^0-9.]+/).map(Number).filter(n => n > 0 && n <= 1440).slice(0, 4);
+        return own.length ? own : [1, 5, 10, 25];
+    }
 
-    function start(min: int): void {
+    function start(min: real): void {
         total = min * 60;
         remaining = total;
         endsAt = Date.now() + total * 1000;
@@ -46,7 +51,7 @@ Item {
             root.remaining = Math.max(0, (root.endsAt - Date.now()) / 1000);
             if (root.remaining === 0) {
                 root.running = false;
-                Quickshell.execDetached(["notify-send", "-a", "Timer", "-i", "alarm", "Timer done", `${Math.round(root.total / 60)} minute timer finished`]);
+                Quickshell.execDetached(["notify-send", "-a", "Timer", "-i", "alarm", "Timer done", `${+(root.total / 60).toFixed(1)} minute timer finished`]);
                 root.total = 0;
             }
         }
@@ -62,15 +67,27 @@ Item {
         width: root.size === "small" ? 62 : 70
         height: root.size === "small" ? 30 : 34
         radius: height / 2
-        color: area.containsMouse ? Theme.alpha(Theme.primary, area.pressed ? 1 : 0.85) : Theme.alpha(Theme.fg, 0.09)
+        // Apple's Timer orange
+        color: area.containsMouse ? Theme.alpha(Theme.sys.orange, area.pressed ? 1 : 0.85) : Theme.alpha(Theme.fg, 0.09)
 
         Text {
+            visible: !chip.glyph
             anchors.centerIn: parent
-            text: chip.glyph || chip.label
-            color: area.containsMouse ? Theme.fgOnPrimary : Theme.fg
-            font.family: chip.glyph ? "Material Symbols Rounded" : Theme.font
-            font.pixelSize: chip.glyph ? 20 : 13
+            text: chip.label
+            color: area.containsMouse ? "white" : Theme.fg
+            font.family: Theme.font
+            font.pixelSize: 13
             font.weight: Font.DemiBold
+        }
+
+        Symbol {
+            visible: chip.glyph !== ""
+            anchors.centerIn: parent
+            name: chip.glyph
+            fill: true
+            size: 20
+            weight: 600
+            color: area.containsMouse ? "white" : Theme.fg
         }
 
         MouseArea {
@@ -87,7 +104,7 @@ Item {
         x: 16
         y: 13
         text: "Timer"
-        color: Theme.primary
+        color: Theme.sys.orange
         font.family: Theme.font
         font.pixelSize: 13
         font.weight: Font.Bold
@@ -106,7 +123,7 @@ Item {
             model: root.presets
 
             Chip {
-                required property int modelData
+                required property real modelData
 
                 label: modelData + " min"
                 onActivated: root.start(modelData)
@@ -132,7 +149,7 @@ Item {
                 anchors.fill: parent
                 value: root.total > 0 ? root.remaining / root.total : 0
                 thickness: 7
-                colour: root.running ? Theme.primary : Theme.fgDim
+                colour: root.running ? Theme.sys.orange : Theme.fgDim
             }
 
             Text {

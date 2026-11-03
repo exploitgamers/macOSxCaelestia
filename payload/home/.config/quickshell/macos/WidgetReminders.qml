@@ -108,7 +108,7 @@ Item {
 
         Text {
             text: "Reminders"
-            color: Theme.primary
+            color: Theme.sys.orange
             font.family: Theme.font
             font.pixelSize: 13
             font.weight: Font.Bold
@@ -164,18 +164,18 @@ Item {
                         width: 16
                         height: 16
                         radius: 8
-                        color: row.modelData.done ? Theme.primary : "transparent"
+                        // Apple Reminders' orange
+                        color: row.modelData.done ? Theme.sys.orange : "transparent"
                         border.width: 1.5
-                        border.color: row.modelData.done ? Theme.primary : Theme.fgDim
+                        border.color: row.modelData.done ? Theme.sys.orange : Theme.fgDim
 
-                        Text {
+                        Symbol {
                             anchors.centerIn: parent
                             visible: row.modelData.done
-                            text: "check"
-                            color: Theme.fgOnPrimary
-                            font.family: "Material Symbols Rounded"
-                            font.weight: Font.Bold
-                            font.pixelSize: 12
+                            name: "check"
+                            color: "white"
+                            size: 12
+                            weight: 700
                         }
 
                         MouseArea {
@@ -223,15 +223,16 @@ Item {
         radius: Theme.panelRadius - 12
         color: Theme.alpha(Theme.fg, input.activeFocus ? 0.12 : 0.07)
 
-        Text {
+        Symbol {
             id: plus
 
             x: 7
             anchors.verticalCenter: parent.verticalCenter
-            text: "add"
-            color: Theme.primary
-            font.family: "Material Symbols Rounded"
-            font.pixelSize: 16
+            name: "add_circle"
+            fill: true
+            color: Theme.sys.orange
+            size: 16
+            weight: 600
         }
 
         TextInput {

@@ -100,7 +100,8 @@ CustomMouseArea {
             if (!utilitiesShortcutActive)
                 screenState.utilities = false;
 
-            if (!popouts.currentName.startsWith("traymenu") || ((popouts.current as StackView)?.depth ?? 0) <= 1) {
+            // [macos] the volume/brightness-key flash closes on its own timer, not when the pointer is elsewhere
+            if (!bar.controlsFlash && (!popouts.currentName.startsWith("traymenu") || ((popouts.current as StackView)?.depth ?? 0) <= 1)) {
                 popouts.hasCurrent = false;
                 bar.closeTray();
             }
@@ -268,7 +269,7 @@ CustomMouseArea {
             const pos = geometry.axisPos(x, y);
             if ((popouts.hasCurrent && bar.isPopoutEntry(pos)) || (!popouts.hasCurrent && bar.opensOnHover(pos)))
                 bar.checkPopout(pos);
-        } else if ((!popouts.currentName.startsWith("traymenu") || ((popouts.current as StackView)?.depth ?? 0) <= 1) && !inPopoutArea(x, y)) {
+        } else if (!bar.controlsFlash && (!popouts.currentName.startsWith("traymenu") || ((popouts.current as StackView)?.depth ?? 0) <= 1) && !inPopoutArea(x, y)) {
             popouts.hasCurrent = false;
             bar.closeTray();
         }

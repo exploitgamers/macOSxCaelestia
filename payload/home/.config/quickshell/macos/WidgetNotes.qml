@@ -9,6 +9,7 @@ Item {
 
     property string size: "small"
     property string widgetId: ""
+    property var options: ({}) // Edit "Notes"…: textSize s | m | l
 
     readonly property bool preview: widgetId === ""
     // focus, not activeFocus: activeFocus needs the keyboard, which the layer only
@@ -100,7 +101,7 @@ Item {
             selectionColor: Theme.alpha(Theme.primary, 0.5)
             selectedTextColor: root.ink
             font.family: Theme.font
-            font.pixelSize: 14
+            font.pixelSize: ({ s: 12, l: 18 })[root.options.textSize] ?? 14
             text: root.preview ? "Groceries\n• Oat milk\n• Coffee beans" : ""
             onTextChanged: if (!root.preview && file.ready) save.restart()
             onCursorRectangleChanged: {

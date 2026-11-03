@@ -134,9 +134,9 @@ PanelWindow {
 
             Repeater {
                 model: [
-                    { colour: "#ff5f57", glyph: "×", enabled: true, action: () => win.top?.close() },
-                    { colour: "#febc2e", glyph: "−", enabled: false, action: () => {} },
-                    { colour: "#28c840", glyph: "+", enabled: true, action: () => win.dispatchOnWindow('hl.dsp.window.fullscreen({ mode = "fullscreen", window = "%ADDR%" })') }
+                    { colour: "#ff5f57", glyph: "close", enabled: true, action: () => win.top?.close() },
+                    { colour: "#febc2e", glyph: "remove", enabled: false, action: () => {} },
+                    { colour: "#28c840", glyph: "close_fullscreen", enabled: true, action: () => win.dispatchOnWindow('hl.dsp.window.fullscreen({ mode = "fullscreen", window = "%ADDR%" })') }
                 ]
 
                 delegate: Item {
@@ -170,13 +170,13 @@ PanelWindow {
                         }
                     }
 
-                    Text {
+                    Symbol { // the traffic-light marks; green = exit full screen (arrows inward)
                         anchors.centerIn: parent
-                        text: light.modelData.glyph
+                        name: light.modelData.glyph
                         visible: lightsHover.hovered && light.modelData.enabled
-                        color: Qt.rgba(0, 0, 0, 0.75)
-                        font.pixelSize: 11
-                        font.bold: true
+                        size: 11
+                        weight: 700
+                        color: Qt.rgba(0, 0, 0, 0.6)
                     }
 
                     MouseArea {

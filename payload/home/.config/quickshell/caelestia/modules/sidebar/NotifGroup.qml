@@ -96,37 +96,18 @@ StyledRect {
                 }
             }
 
-            Component {
-                id: appIconComp
-
-                ColouredIcon {
-                    implicitSize: Math.round(TokenConfig.sizes.notifs.image * 0.6)
-                    source: Quickshell.iconPath(root.appIcon)
-                    colour: root.urgency === NotificationUrgency.Critical ? Colours.palette.m3onError : root.urgency === NotificationUrgency.Low ? Colours.palette.m3onSurface : Colours.palette.m3onSecondaryContainer
-                    layer.enabled: root.appIcon.endsWith("symbolic")
-                }
-            }
-
-            Component {
-                id: materialIconComp
-
-                MaterialIcon {
-                    text: Icons.getNotifIcon(root.activeNotifs[0]?.summary, root.urgency)
-                    color: root.urgency === NotificationUrgency.Critical ? Colours.palette.m3onError : root.urgency === NotificationUrgency.Low ? Colours.palette.m3onSurface : Colours.palette.m3onSecondaryContainer
-                    fontStyle: Tokens.font.icon.medium
-                }
-            }
-
+            // [macos] the app's own icon, or a white symbol on a squircle (red if critical, gray if low);
+            // a picture stays round with the app icon as its badge
             StyledClippingRect {
                 anchors.fill: parent
-                color: root.urgency === NotificationUrgency.Critical ? Colours.palette.m3error : root.urgency === NotificationUrgency.Low ? Colours.layer(Colours.palette.m3surfaceContainerHigh, 3) : Colours.palette.m3secondaryContainer
+                visible: root.image !== ""
                 radius: Tokens.rounding.full
 
                 Loader {
                     asynchronous: true
                     anchors.centerIn: parent
-                    anchors.verticalCenterOffset: sourceComponent === materialIconComp ? 1 : 0
-                    sourceComponent: root.image ? imageComp : root.appIcon ? appIconComp : materialIconComp
+                    active: root.image !== ""
+                    sourceComponent: imageComp
                 }
             }
 
@@ -134,22 +115,13 @@ StyledRect {
                 asynchronous: true
                 anchors.right: parent.right
                 anchors.bottom: parent.bottom
-                active: root.appIcon && root.image
+                active: root.image === "" || root.appIcon !== ""
 
-                sourceComponent: StyledRect {
-                    implicitWidth: Tokens.sizes.notifs.badge
-                    implicitHeight: Tokens.sizes.notifs.badge
-
-                    color: root.urgency === NotificationUrgency.Critical ? Colours.palette.m3error : root.urgency === NotificationUrgency.Low ? Colours.palette.m3surfaceContainerHigh : Colours.palette.m3secondaryContainer
-                    radius: Tokens.rounding.full
-
-                    ColouredIcon {
-                        anchors.centerIn: parent
-                        implicitSize: Math.round(Tokens.sizes.notifs.badge * 0.6)
-                        source: Quickshell.iconPath(root.appIcon)
-                        colour: root.urgency === NotificationUrgency.Critical ? Colours.palette.m3onError : root.urgency === NotificationUrgency.Low ? Colours.palette.m3onSurface : Colours.palette.m3onSecondaryContainer
-                        layer.enabled: root.appIcon.endsWith("symbolic")
-                    }
+                sourceComponent: SymbolTile {
+                    size: root.image !== "" ? Tokens.sizes.notifs.badge : TokenConfig.sizes.notifs.image
+                    icon: root.appIcon
+                    name: Icons.getNotifIcon(root.activeNotifs[0]?.summary ?? "", root.urgency)
+                    tint: root.urgency === NotificationUrgency.Critical ? "red" : root.urgency === NotificationUrgency.Low ? "gray" : "blue"
                 }
             }
         }

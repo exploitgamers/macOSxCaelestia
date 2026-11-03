@@ -54,7 +54,7 @@ copy .config/Thunar "${JUNK[@]}"
 copy .config/xfce4/xfconf/xfce-perchannel-xml/thunar.xml
 copy .config/starship.toml
 copy .config/btop/btop.conf
-for b in qs quickshell rice-caelestia-overlay rice-doctor rice-ensure-shells rice-icon-tiles rice-nothp \
+for b in qs quickshell rice-caelestia-overlay rice-doctor rice-ensure-shells rice-icon-tiles rice-nothp rice-session-env \
     rice-restart rice-term-colors rice-thunar-usb rice-usb-notify; do
     copy ".local/bin/$b"
 done

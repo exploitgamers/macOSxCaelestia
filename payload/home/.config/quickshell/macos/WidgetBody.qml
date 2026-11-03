@@ -17,6 +17,8 @@ Item {
     property real lift: 0          // 0..1: hover / drag elevation (deeper shadow)
     property real contentOpacity: 1
     property bool highlight: false // a dragged widget would stack onto this one
+    property var options: null      // the item's saved options (WidgetTypes.options fills defaults)
+    property bool flipped: false    // the back side (WidgetEditor) is showing: content hidden at once
 
     Behavior on lift {
         NumberAnimation { duration: 220; easing.type: Easing.OutCubic }
@@ -70,7 +72,7 @@ Item {
         source: root.kind ? root.kind.file : ""
         asynchronous: false
         opacity: root.contentOpacity
-        visible: opacity > 0.01 || root.contentOpacity > 0
+        visible: !root.flipped && (opacity > 0.01 || root.contentOpacity > 0)
 
         Behavior on opacity {
             OpacityAnimator { duration: 160; easing.type: Easing.OutCubic }
@@ -82,6 +84,13 @@ Item {
         property: "size"
         value: root.size
         when: loader.item !== null
+    }
+
+    Binding {
+        target: loader.item
+        property: "options"
+        value: WidgetTypes.options(root.type, root.options)
+        when: loader.item !== null && WidgetTypes.hasOptions(root.type)
     }
 
     Binding {

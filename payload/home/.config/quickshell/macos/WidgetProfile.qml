@@ -49,12 +49,12 @@ Item {
             anchors.centerIn: parent
             spacing: 6
 
-            Text {
+            Symbol {
                 anchors.verticalCenter: parent.verticalCenter
-                text: act.icon
-                color: Theme.fg
-                font.family: "Material Symbols Rounded"
-                font.pixelSize: 17
+                name: act.icon
+                fill: true
+                size: 17
+                weight: 500
             }
 
             Text {

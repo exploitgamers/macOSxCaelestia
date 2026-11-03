@@ -232,43 +232,31 @@ Column {
         width: parent.width
         height: blockRow.implicitHeight + Tokens.padding.small
 
+        // [macos] a Control Center row: the round toggle leads, the text wraps beside it
         Row {
             id: blockRow
 
             anchors.left: parent.left
-            anchors.right: blockSwitch.left
-            anchors.rightMargin: Tokens.spacing.medium
-            anchors.verticalCenter: parent.verticalCenter
-            spacing: Tokens.spacing.small
-
-            MaterialIcon {
-                id: blockIcon
-
-                anchors.verticalCenter: parent.verticalCenter
-                text: IdleInhibitor.enabled ? "lock_open" : "bedtime"
-                color: IdleInhibitor.enabled ? Colours.palette.m3primary : Colours.palette.m3onSurfaceVariant
-            }
-
-            // fixed width so the text wraps instead of running under the switch
-            Column {
-                anchors.verticalCenter: parent.verticalCenter
-                width: blockRow.width - blockIcon.width - blockRow.spacing
-
-                StyledText {
-                    width: parent.width
-                    wrapMode: Text.WordWrap
-                    text: Tr.tr("Block sleep and screen locking")
-                }
-            }
-        }
-
-        StyledSwitch {
-            id: blockSwitch
-
             anchors.right: parent.right
             anchors.verticalCenter: parent.verticalCenter
-            checked: IdleInhibitor.enabled
-            onToggled: IdleInhibitor.enabled = checked
+            spacing: Tokens.spacing.medium
+
+            CCToggle {
+                id: blockSwitch
+
+                anchors.verticalCenter: parent.verticalCenter
+                symbol: "coffee"
+                checked: IdleInhibitor.enabled
+                onToggled: IdleInhibitor.enabled = checked
+            }
+
+            // fixed width so the text wraps instead of running past the edge
+            StyledText {
+                anchors.verticalCenter: parent.verticalCenter
+                width: blockRow.width - blockSwitch.width - blockRow.spacing
+                wrapMode: Text.WordWrap
+                text: Tr.tr("Block sleep and screen locking")
+            }
         }
     }
 

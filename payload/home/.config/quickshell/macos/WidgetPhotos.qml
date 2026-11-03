@@ -1,5 +1,6 @@
 import QtQuick
 import Quickshell
+import Quickshell.Io
 import Quickshell.Widgets
 
 // Photos widget: your newest pictures and screenshots (~/Pictures, ~/Downloads).
@@ -10,9 +11,40 @@ Item {
 
     property string size: "small"
     property string widgetId: ""
+    property var options: ({}) // Edit "Photos"…: folder (empty = Pictures & Downloads)
 
     readonly property int count: size === "small" ? 1 : size === "medium" ? 3 : 9
-    readonly property var shown: AppData.photos.slice(0, count)
+    // "~/x" and "x" (relative to home) both mean ~/x
+    readonly property string folder: {
+        const f = String(options.folder ?? "").trim();
+        return !f ? "" : f.startsWith("/") ? f : Quickshell.env("HOME") + "/" + f.replace(/^~\/?/, "");
+    }
+    property var own: []
+    readonly property var shown: (folder ? own : AppData.photos).slice(0, count)
+
+    // the chosen folder's newest images (the path is an argument, never part of the script)
+    Process {
+        id: scan
+
+        command: ["sh", "-c", "find \"$1\" -maxdepth 3 -type f \\( -iname '*.png' -o -iname '*.jpg' -o -iname '*.jpeg' -o -iname '*.webp' \\) -printf '%T@ %p\\n' 2>/dev/null | sort -rn | head -9 | cut -d' ' -f2-", "sh", root.folder]
+        stdout: StdioCollector {
+            onStreamFinished: root.own = text.trim() ? text.trim().split("\n") : []
+        }
+    }
+
+    onFolderChanged: {
+        own = [];
+        if (folder)
+            Qt.callLater(() => scan.running = true); // after `command` has the new path
+    }
+    Component.onCompleted: if (folder) scan.running = true
+
+    Timer {
+        running: root.folder !== "" && root.widgetId !== ""
+        interval: 30000
+        repeat: true
+        onTriggered: scan.running = true
+    }
 
     Text {
         visible: root.shown.length === 0
@@ -57,7 +89,7 @@ Item {
         y: 13
         appId: "thunar"
         title: "Photos"
-        command: ["thunar", Quickshell.env("HOME") + "/Pictures"]
+        command: ["thunar", root.folder || Quickshell.env("HOME") + "/Pictures"]
     }
 
     Grid {

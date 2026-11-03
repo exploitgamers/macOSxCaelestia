@@ -135,6 +135,8 @@ StyledRect {
                             animate: true
                             text: Nmcli.activeEthernet ? "cable" : Nmcli.active ? Icons.getNetworkIcon(Nmcli.active.strength ?? 0) : "wifi_off"
                             color: root.colour
+                            mode: !Nmcli.activeEthernet && Nmcli.active ? "hierarchical" : "mono" // [macos] unlit arcs dimmed
+                            underlay: "wifi"
                         }
                     }
                 }

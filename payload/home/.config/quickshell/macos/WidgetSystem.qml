@@ -8,22 +8,28 @@ Item {
 
     property string size: "small"
     property string widgetId: ""
+    property var options: ({}) // Edit "System"…: cpu, gpu, memory, disk toggles
 
     // GpuType lives in Caelestia.Config (whose Config would shadow ours): 3 = None
     readonly property bool hasGpu: Gpu.type !== 3 && !Gpu.detecting
-    readonly property var stats: [
-        { label: "CPU", value: SysStats.cpu },
-        ...(hasGpu ? [{ label: "GPU", value: Gpu.percentage }] : []),
-        { label: "Memory", value: SysStats.mem },
-        { label: "Disk", value: SysStats.disk }
+    readonly property var allStats: [
+        { key: "cpu", label: "CPU", value: SysStats.cpu },
+        ...(hasGpu ? [{ key: "gpu", label: "GPU", value: Gpu.percentage }] : []),
+        { key: "memory", label: "Memory", value: SysStats.mem },
+        { key: "disk", label: "Disk", value: SysStats.disk }
     ]
+    // the ones switched on (all of them if every one is off, so the widget is never blank)
+    readonly property var stats: {
+        const on = allStats.filter(s => options[s.key] !== false);
+        return on.length ? on : allStats;
+    }
 
     ServiceRef {
         service: Gpu
     }
 
     function tint(v: real): color {
-        return v > 0.9 ? "#ff5f57" : v > 0.75 ? "#febc2e" : Theme.primary;
+        return v > 0.9 ? Theme.sys.red : v > 0.75 ? Theme.sys.yellow : Theme.primary;
     }
 
     // small: three labelled bars

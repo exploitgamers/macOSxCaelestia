@@ -41,12 +41,22 @@ Column {
         Row {
             spacing: 8
 
-            Text {
+            Rectangle { // macOS device badge: blue circle when connected, grey when not
                 anchors.verticalCenter: parent.verticalCenter
-                text: page.glyph(dev.modelData.icon)
-                color: dev.modelData.connected ? Theme.primary : Theme.fgDim
-                font.family: "Material Symbols Rounded"
-                font.pixelSize: 18
+                width: 26
+                height: 26
+                radius: 13
+                color: dev.modelData.connected ? Theme.sys.blue : Theme.alpha(Theme.fg, 0.12)
+                Behavior on color { ColorAnimation { duration: 180 } }
+
+                Symbol {
+                    anchors.centerIn: parent
+                    name: page.glyph(dev.modelData.icon)
+                    size: 16
+                    fill: true
+                    color: dev.modelData.connected ? "white" : Theme.fg
+                    Behavior on color { ColorAnimation { duration: 180 } }
+                }
             }
 
             SettingsUi.Button {
