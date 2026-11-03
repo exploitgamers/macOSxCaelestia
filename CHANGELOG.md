@@ -3,7 +3,20 @@
 What changed in each release of the installer, newest first. Every release is named after the day
 it was published (`vYYYY.MM.DD`) and can be downloaded from the GitHub releases page.
 
+**How to read the automatic lines:**
+
+- *Built for Hyprland 0.57.0-1.1, Qt 6.12.0 and Python 3.14* lists the versions the bundled parts were made for.
+  Hyprland draws the windows, Qt draws the top bar and dock, Python runs the helper tools. If your system has
+  different versions, the installer adapts or warns you (see Known limits in the README).
+- *Package updates: a 1.0 → 1.1* means a bundled app or library moved to a newer version.
+- *Updated: …* names the parts of the desktop whose settings or code changed: the dock and widgets, the top bar
+  (Caelestia), the window title bars, the Hyprland settings (window behaviour and shortcuts), the app themes and icons,
+  the helper commands (`rice-*`), or the wallpaper.
+
 ## Unreleased
+
+- Pressing the volume or brightness keys briefly opens the volume/brightness drop-down under the top bar again
+  (moving the mouse used to close it at once).
 
 ## v2026.11.03
 
