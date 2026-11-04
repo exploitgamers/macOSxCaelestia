@@ -28,6 +28,7 @@ it was published (`vYYYY.MM.DD`) and can be downloaded from the GitHub releases 
   top bar: battery, Wi-Fi, volume and brightness symbols, round Control Center toggles, and notification icons.
 - With "Block sleep and screen locking" (Keep awake) on, closing the laptop lid no longer sleeps or locks it:
   the laptop keeps running and only the screen goes dark. Opening the lid turns the screen back on.
+- Keep awake now stays on when the top bar restarts; it only turns off when you log out or restart the laptop.
 
 <!-- auto: rewritten on every publish -->
 - Built for Hyprland 0.57.0-1.1, Qt 6.12.0 and Python 3.14.

@@ -10,9 +10,35 @@ Singleton {
     property alias enabled: props.enabled
     readonly property alias enabledSince: props.enabledSince
 
+    property bool restoring // [macos]
+
     onEnabledChanged: {
-        if (enabled)
+        if (restoring)
+            return;
+        if (enabled) {
             props.enabledSince = new Date();
+            saved.setText(props.enabledSince.toISOString()); // [macos]
+        } else {
+            Quickshell.execDetached(["rm", "-f", saved.path]); // [macos]
+        }
+    }
+
+    // [macos] survive shell restarts (rice-restart), not log-outs or reboots: the flag lives in XDG_RUNTIME_DIR.
+    // PersistentProperties alone only survives reloads, so a restart silently turned Keep awake off.
+    FileView {
+        id: saved
+
+        path: `${Quickshell.env("XDG_RUNTIME_DIR")}/caelestia-keep-awake`
+        printErrors: false // missing file = off
+        onLoaded: {
+            if (props.enabled)
+                return;
+            const since = new Date(text().trim());
+            root.restoring = true;
+            props.enabledSince = isNaN(since) ? new Date() : since;
+            props.enabled = true;
+            root.restoring = false;
+        }
     }
 
     PersistentProperties {
