@@ -2,7 +2,7 @@
 
 A macOS-style Linux desktop in one file: a top bar with floating pills, a permanent dock,
 Spotlight search, desktop widgets, a Mission-Control-style Overview, window title bars with
-traffic lights (the red, yellow and green buttons) and frosted glass.
+traffic lights (the red, yellow and green buttons), frosted glass and Apple-style icons.
 
 It's built on [Hyprland](https://hypr.land), the [Caelestia](https://github.com/caelestia-dots/shell) shell
 and [Quickshell](https://quickshell.org). New to these words? See [Words you might not know](#words-you-might-not-know).
@@ -105,8 +105,14 @@ Example: `bash macOSxCaelestia.run --dry-run`.
 - **Super** is the Windows key (⌘ Command on a Mac keyboard).
 - Super+Space: Spotlight search · Super+I: Desktop Settings · Super on its own: app launcher.
 - `rice-doctor` (type it in a terminal): health check of the desktop (Quickshell/Qt match, title-bar plugin, shells running).
-- Weather uses your rough location from your internet address. To set a city instead, put it in
-  `widgets.weatherLocation` in `~/.config/caelestia/macos.json`.
+- **Widgets:** right-click a desktop widget and choose Edit to change it: clock style and city, first day of the
+  week, weather location and units, which batteries or system meters to show, Notes text size, timer presets and
+  the Photos folder.
+- Weather uses your rough location from your internet address. To use a city instead, set it in the weather widget's Edit options.
+- **Keep the laptop running with the lid closed:** click the battery in the top bar and turn on "Block sleep and
+  screen locking". Closing the lid then only turns the screen off; the laptop doesn't sleep or lock. That also means
+  anyone who opens the lid gets your desktop without a password, so turn it off when you leave the laptop somewhere.
+  It turns itself off when you restart.
 
 ## Troubleshooting
 
