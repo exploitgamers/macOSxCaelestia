@@ -1236,14 +1236,20 @@ end
 
 -- Clamshell: closing the lid with an external monitor turns the panel off
 -- (windows move to the external screen); opening it brings the panel back.
--- Without an external monitor the lid is left to logind (suspend).
+-- Without an external monitor logind suspends, unless Keep awake is on (Caelestia then holds
+-- logind's lid lock): the laptop keeps running, unlocked, so only the panel goes dark (2026-11-04).
 hl.bind("switch:on:Lid Switch", function()
     if external_count() > 0 then
         hl.monitor({ output = laptop, disabled = true })
+    else
+        hl.dispatch(hl.dsp.dpms({ action = "disable", monitor = laptop }))
     end
 end, { locked = true })
 
-hl.bind("switch:off:Lid Switch", laptop_on, { locked = true })
+hl.bind("switch:off:Lid Switch", function()
+    laptop_on()
+    hl.dispatch(hl.dsp.dpms({ action = "enable", monitor = laptop }))
+end, { locked = true })
 
 -- Unplugging the last external monitor while the lid is closed would leave
 -- no screen at all; always fall back to the laptop panel.

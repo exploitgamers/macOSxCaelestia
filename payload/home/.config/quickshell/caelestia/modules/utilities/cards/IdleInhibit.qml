@@ -56,7 +56,7 @@ StyledRect {
 
             StyledText {
                 Layout.fillWidth: true
-                text: IdleInhibitor.enabled ? Tr.trCtx("Preventing sleep mode", "idle inhibitor") : Tr.trCtx("Normal power management", "idle inhibitor")
+                text: IdleInhibitor.enabled ? Tr.trCtx("No sleep or lock, even with the lid closed", "idle inhibitor") : Tr.trCtx("Normal power management", "idle inhibitor") // [macos] lid text
                 color: Colours.palette.m3onSurfaceVariant
                 font: Tokens.font.body.small
                 elide: Text.ElideRight

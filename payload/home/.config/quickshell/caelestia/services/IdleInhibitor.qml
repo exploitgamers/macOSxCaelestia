@@ -36,11 +36,13 @@ Singleton {
 
     // [macos] the switch says "Block sleep" too: hold a logind sleep lock while it's on.
     // `cat` on our stdin pipe, not `sleep infinity`: Quickshell leaves children running when it is
-    // killed or crashes, so the lock outlived the shell; cat ends at EOF once the shell is gone
+    // killed or crashes, so the lock outlived the shell; cat ends at EOF once the shell is gone.
+    // handle-lid-switch: logind's lid suspend ignores sleep locks (LidSwitchIgnoreInhibited), so take the lid
+    // over too — the laptop keeps running, unlocked, with the lid closed (hypr-qol.lua turns the panel off)
     Process {
         running: props.enabled
         stdinEnabled: true
-        command: ["systemd-inhibit", "--what=idle:sleep", "--who=Caelestia", "--why=Block sleep and screen locking switch", "--mode=block", "cat"]
+        command: ["systemd-inhibit", "--what=idle:sleep:handle-lid-switch", "--who=Caelestia", "--why=Block sleep and screen locking switch (lid closed too)", "--mode=block", "cat"]
     }
 
     IpcHandler {

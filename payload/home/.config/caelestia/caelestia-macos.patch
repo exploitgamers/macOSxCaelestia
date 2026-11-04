@@ -3870,7 +3870,7 @@ index d9a07287..3d18fe36 100644
      ButtonGroup {
          id: sinks
 diff --git a/modules/bar/popouts/Battery.qml b/modules/bar/popouts/Battery.qml
-index 37ae38b6..3655f7ac 100644
+index 37ae38b6..4bfe9207 100644
 --- a/modules/bar/popouts/Battery.qml
 +++ b/modules/bar/popouts/Battery.qml
 @@ -5,6 +5,7 @@ import Quickshell.Services.UPower
@@ -3947,7 +3947,7 @@ index 37ae38b6..3655f7ac 100644
 +                anchors.verticalCenter: parent.verticalCenter
 +                width: blockRow.width - blockSwitch.width - blockRow.spacing
 +                wrapMode: Text.WordWrap
-+                text: Tr.tr("Block sleep and screen locking")
++                text: Tr.tr("Block sleep and screen locking, even with the lid closed") // [macos] IdleInhibitor takes the lid over
 +            }
 +        }
 +    }
@@ -6589,7 +6589,7 @@ index 9e6160c2..52c98ea2 100644
          asynchronous: true
          active: root.shouldBeActive || root.visible
 diff --git a/modules/utilities/cards/IdleInhibit.qml b/modules/utilities/cards/IdleInhibit.qml
-index c38465a2..9bbbab0d 100644
+index c38465a2..1dbaecc5 100644
 --- a/modules/utilities/cards/IdleInhibit.qml
 +++ b/modules/utilities/cards/IdleInhibit.qml
 @@ -13,7 +13,7 @@ StyledRect {
@@ -6601,6 +6601,15 @@ index c38465a2..9bbbab0d 100644
      color: Colours.tPalette.m3surfaceContainer
      clip: true
  
+@@ -56,7 +56,7 @@ StyledRect {
+ 
+             StyledText {
+                 Layout.fillWidth: true
+-                text: IdleInhibitor.enabled ? Tr.trCtx("Preventing sleep mode", "idle inhibitor") : Tr.trCtx("Normal power management", "idle inhibitor")
++                text: IdleInhibitor.enabled ? Tr.trCtx("No sleep or lock, even with the lid closed", "idle inhibitor") : Tr.trCtx("Normal power management", "idle inhibitor") // [macos] lid text
+                 color: Colours.palette.m3onSurfaceVariant
+                 font: Tokens.font.body.small
+                 elide: Text.ElideRight
 diff --git a/modules/utilities/cards/Record.qml b/modules/utilities/cards/Record.qml
 index cdaaad0b..ebc1a08d 100644
 --- a/modules/utilities/cards/Record.qml
@@ -6843,20 +6852,22 @@ index 402417b9..eaad4457 100644
  
      function trimWsName(name: string): string {
 diff --git a/services/IdleInhibitor.qml b/services/IdleInhibitor.qml
-index 9f556b3a..78621e76 100644
+index 9f556b3a..b9b73734 100644
 --- a/services/IdleInhibitor.qml
 +++ b/services/IdleInhibitor.qml
-@@ -34,6 +34,15 @@ Singleton {
+@@ -34,6 +34,17 @@ Singleton {
          }
      }
  
 +    // [macos] the switch says "Block sleep" too: hold a logind sleep lock while it's on.
 +    // `cat` on our stdin pipe, not `sleep infinity`: Quickshell leaves children running when it is
-+    // killed or crashes, so the lock outlived the shell; cat ends at EOF once the shell is gone
++    // killed or crashes, so the lock outlived the shell; cat ends at EOF once the shell is gone.
++    // handle-lid-switch: logind's lid suspend ignores sleep locks (LidSwitchIgnoreInhibited), so take the lid
++    // over too — the laptop keeps running, unlocked, with the lid closed (hypr-qol.lua turns the panel off)
 +    Process {
 +        running: props.enabled
 +        stdinEnabled: true
-+        command: ["systemd-inhibit", "--what=idle:sleep", "--who=Caelestia", "--why=Block sleep and screen locking switch", "--mode=block", "cat"]
++        command: ["systemd-inhibit", "--what=idle:sleep:handle-lid-switch", "--who=Caelestia", "--why=Block sleep and screen locking switch (lid closed too)", "--mode=block", "cat"]
 +    }
 +
      IpcHandler {

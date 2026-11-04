@@ -26,10 +26,12 @@ it was published (`vYYYY.MM.DD`) and can be downloaded from the GitHub releases 
   size, the timer presets and the Photos folder.
 - Apple-style icons across the dock's menus, Spotlight, the launcher, Settings and the widget gallery, and in the
   top bar: battery, Wi-Fi, volume and brightness symbols, round Control Center toggles, and notification icons.
+- With "Block sleep and screen locking" (Keep awake) on, closing the laptop lid no longer sleeps or locks it:
+  the laptop keeps running and only the screen goes dark. Opening the lid turns the screen back on.
 
 <!-- auto: rewritten on every publish -->
 - Built for Hyprland 0.57.0-1.1, Qt 6.12.0 and Python 3.14.
-- Updated: Dock & widgets settings; Helper commands; Shell UI (Dock, Spotlight, widgets); Top bar (Caelestia).
+- Updated: Dock & widgets settings; Helper commands; Hyprland config; Shell UI (Dock, Spotlight, widgets); Top bar (Caelestia).
 
 ## v2026.11.03
 
