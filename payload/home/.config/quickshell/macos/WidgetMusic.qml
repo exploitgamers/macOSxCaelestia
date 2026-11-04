@@ -85,6 +85,7 @@ Item {
     Column {
         visible: !root.player
         anchors.centerIn: parent
+        anchors.verticalCenterOffset: -2 // optical: the note's ink starts 5 px into its em box
         spacing: 6
 
         // Apple Music's pink note

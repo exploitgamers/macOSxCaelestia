@@ -86,14 +86,14 @@ Item {
         Icon {
             anchors.right: parent.right
             anchors.top: parent.top
-            anchors.topMargin: -2
+            anchors.topMargin: 2 // icon ink top level with the city's cap height
             name: root.w.icon ?? ""
             size: root.size === "small" ? 26 : 34
         }
 
         Column {
             anchors.bottom: parent.bottom
-            anchors.bottomMargin: root.size === "small" ? 0 : 2
+            anchors.bottomMargin: -2 // H/L ink 17 px from the bottom, like the top inset
             visible: root.size === "small"
 
             Text {
@@ -142,7 +142,7 @@ Item {
     Row {
         visible: root.w.loaded && root.size !== "small"
         x: 16
-        y: 96
+        y: root.size === "medium" ? 104 : 96 // medium: equal space above the city and below the hours
         width: root.width - 32
 
         Repeater {

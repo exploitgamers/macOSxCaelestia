@@ -38,7 +38,8 @@ Item {
         id: header
 
         x: 14
-        y: 12
+        y: 14
+        height: 24 // = Done: tile, name and Done share one centre line on every size
         spacing: 7
 
         // small cards: room for the name instead (Done takes the rest)
@@ -66,7 +67,7 @@ Item {
         id: doneButton
 
         anchors.right: parent.right
-        anchors.rightMargin: 12
+        anchors.rightMargin: 14 // = header.x
         anchors.verticalCenter: header.verticalCenter
         width: doneText.implicitWidth + 22
         height: 24

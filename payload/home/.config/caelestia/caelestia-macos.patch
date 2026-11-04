@@ -1,8 +1,8 @@
 diff --git a/components/MaterialIcon.qml b/components/MaterialIcon.qml
-index 513244ad..a0f8dac0 100644
+index 513244ad..13c7e671 100644
 --- a/components/MaterialIcon.qml
 +++ b/components/MaterialIcon.qml
-@@ -3,9 +3,37 @@ import Caelestia.Config
+@@ -3,9 +3,61 @@ import Caelestia.Config
  import qs.services
  
  StyledText {
@@ -18,12 +18,34 @@ index 513244ad..a0f8dac0 100644
 +    // glyph (e.g. the full wifi fan dimmed under a 1-bar one, like macOS's signal symbols)
 +    property string mode: "mono"
 +    property string underlay: text
++    // [macos] trims the box to this glyph's ink (no side bearings), for an icon at a pill's edge or beside a
++    // label: Material's ~2 px bearings made the padding and the icon-to-label gap uneven. Name the widest
++    // glyph an icon switches between so the pill keeps its width.
++    property string trimTo
 +
 +    function build(f: real): font {
 +        return Tokens.font.icon.size(fontStyle.pointSize).weight(weight).vaxes(fontStyle.variableAxes).vaxis("opsz", Math.max(20, Math.min(48, fontStyle.pointSize * 4 / 3))).fill(f.toFixed(1)).grade(grade).build();
 +    }
 +
 +    font: build(fill)
++    leftPadding: trimTo ? -ink.tightBoundingRect.x : 0
++    rightPadding: trimTo ? ink.tightBoundingRect.right - ink.advanceWidth : 0
++    // [macos] Text's box is ceil(ascent + descent) with the line at its top, so every glyph sat ~0.3 px above
++    // the box centre (a full device px in the bar once the baseline snapped); put the line box in the middle
++    transform: Translate {
++        y: root.text ? (root.contentHeight - lineMetrics.height) / 2 : 0
++    }
++
++    FontMetrics {
++        id: lineMetrics
++        font: root.font
++    }
++
++    TextMetrics {
++        id: ink
++        font: root.font
++        text: root.trimTo
++    }
 +
 +    Loader {
 +        z: -1
@@ -36,6 +58,8 @@ index 513244ad..a0f8dac0 100644
 +            font: root.build(1)
 +            color: Qt.alpha(root.color, 0.3)
 +            renderType: root.renderType
++            leftPadding: root.leftPadding
++            rightPadding: root.rightPadding
 +            horizontalAlignment: root.horizontalAlignment
 +            verticalAlignment: root.verticalAlignment
 +        }
@@ -491,7 +515,7 @@ index 1f3d4972..0bcbeb2b 100644
          }
      }
 diff --git a/modules/bar/Bar.qml b/modules/bar/Bar.qml
-index 1ceb9b6c..5f02c4c4 100644
+index 1ceb9b6c..d51d9b1c 100644
 --- a/modules/bar/Bar.qml
 +++ b/modules/bar/Bar.qml
 @@ -7,17 +7,20 @@ import QtQuick
@@ -899,7 +923,7 @@ index 1ceb9b6c..5f02c4c4 100644
                      }
                  }
              }
-@@ -189,13 +427,272 @@ ColumnLayout {
+@@ -189,13 +427,278 @@ ColumnLayout {
          default property Item item
          readonly property string entryId: modelData.id
  
@@ -934,7 +958,7 @@ index 1ceb9b6c..5f02c4c4 100644
 +        required property ShellScreen screen
 +        readonly property var monitor: Brightness.getMonitorForScreen(screen)
 +
-+        implicitWidth: controlsRow.implicitWidth + Tokens.padding.medium * 2
++        implicitWidth: Math.ceil(controlsRow.implicitWidth + Tokens.padding.medium * 2) // [macos] whole px: the layout ceils cells, so a fractional pill left an uneven gap
 +        implicitHeight: Tokens.sizes.bar.innerWidth
 +        radius: Tokens.rounding.full
 +        color: Colours.tPalette.m3surfaceContainer
@@ -946,12 +970,14 @@ index 1ceb9b6c..5f02c4c4 100644
 +
 +            readonly property BarInk ink: pillInk // [macos] for StatLabel
 +            anchors.centerIn: parent
++            anchors.alignWhenCentered: false // [macos] the pill is whole px now; a rounded offset made the padding uneven
 +            spacing: Tokens.spacing.small
 +
 +            MaterialIcon {
 +                fontStyle: Tokens.font.icon.builders.small.scale(Tokens.sizes.bar.innerWidth / 26).build() // [macos] with the bar
 +                anchors.verticalCenter: parent.verticalCenter
 +                text: Icons.getVolumeIcon(Audio.volume, Audio.muted) // [macos] the same symbols as the drop-down
++                trimTo: "volume_up" // [macos] even pill padding
 +                fill: 1 // [macos] macOS's speaker is solid
 +                color: pillInk.c(Colours.palette.m3tertiary)
 +
@@ -1022,7 +1048,7 @@ index 1ceb9b6c..5f02c4c4 100644
 +
 +        BarInk { id: pillInk; pill: stats } // [macos] adaptive text colour
 +
-+        implicitWidth: statsRow.implicitWidth + Tokens.padding.medium * 2
++        implicitWidth: Math.ceil(statsRow.implicitWidth + Tokens.padding.medium * 2) // [macos] whole px (even gaps)
 +        implicitHeight: Tokens.sizes.bar.innerWidth
 +        radius: Tokens.rounding.full
 +        color: Colours.tPalette.m3surfaceContainer
@@ -1059,12 +1085,14 @@ index 1ceb9b6c..5f02c4c4 100644
 +
 +            readonly property BarInk ink: pillInk // [macos] for StatLabel / StatMeter
 +            anchors.centerIn: parent
++            anchors.alignWhenCentered: false // [macos] the pill is whole px now; a rounded offset made the padding uneven
 +            spacing: Tokens.spacing.small
 +
 +            MaterialIcon {
 +                fontStyle: Tokens.font.icon.builders.small.scale(Tokens.sizes.bar.innerWidth / 26).build() // [macos] with the bar
 +                anchors.verticalCenter: parent.verticalCenter
 +                text: "memory"
++                trimTo: text // [macos] even pill padding
 +                color: stats.accent
 +            }
 +
@@ -1137,7 +1165,7 @@ index 1ceb9b6c..5f02c4c4 100644
 +        property bool shown: true
 +        signal activated
 +
-+        implicitWidth: root.horizontal ? chipRow.implicitWidth + Tokens.padding.medium * 2 : Tokens.sizes.bar.innerWidth
++        implicitWidth: root.horizontal ? Math.ceil(chipRow.implicitWidth + Tokens.padding.medium * 2) : Tokens.sizes.bar.innerWidth // [macos] whole px (even gaps)
 +        implicitHeight: Tokens.sizes.bar.innerWidth
 +        radius: Tokens.rounding.full
 +        color: Colours.tPalette.m3surfaceContainer
@@ -1148,12 +1176,14 @@ index 1ceb9b6c..5f02c4c4 100644
 +            id: chipRow
 +
 +            anchors.centerIn: parent
++            anchors.alignWhenCentered: false // [macos] the pill is whole px now; a rounded offset made the padding uneven
 +            spacing: Tokens.spacing.small
 +
 +            MaterialIcon {
 +                fontStyle: Tokens.font.icon.builders.small.scale(Tokens.sizes.bar.innerWidth / 26).build() // [macos] with the bar
 +                anchors.verticalCenter: parent.verticalCenter
 +                text: chip.icon
++                trimTo: text // [macos] even pill padding
 +                color: pillInk.c(Colours.palette.m3tertiary)
 +            }
 +
@@ -1488,7 +1518,7 @@ index 00000000..91f72c2e
 +    }
 +}
 diff --git a/modules/bar/components/Clock.qml b/modules/bar/components/Clock.qml
-index 8b812edc..d59b4527 100644
+index 8b812edc..a2811c80 100644
 --- a/modules/bar/components/Clock.qml
 +++ b/modules/bar/components/Clock.qml
 @@ -10,9 +10,12 @@ import qs.services
@@ -1506,13 +1536,13 @@ index 8b812edc..d59b4527 100644
  
      function fontFor(text: string, metricWidth: int): font {
          // We don't count seconds for the max width because it changes too often
-@@ -20,69 +23,79 @@ StyledRect {
+@@ -20,69 +23,81 @@ StyledRect {
          return root.font.width(scale * 100).letterSpacing(scale).build();
      }
  
 -    implicitWidth: Tokens.sizes.bar.innerWidth
 -    implicitHeight: layout.implicitHeight + root.padding * 2
-+    implicitWidth: horizontal ? layout.implicitWidth + root.padding * 2 : Tokens.sizes.bar.innerWidth
++    implicitWidth: horizontal ? Math.ceil(layout.implicitWidth + root.padding * 2) : Tokens.sizes.bar.innerWidth // [macos] whole px (even gaps)
 +    implicitHeight: horizontal ? Tokens.sizes.bar.innerWidth : layout.implicitHeight + root.padding * 2
  
      color: Qt.alpha(Colours.tPalette.m3surfaceContainer, Config.bar.clock.background ? Colours.tPalette.m3surfaceContainer.a : 0)
@@ -1524,6 +1554,7 @@ index 8b812edc..d59b4527 100644
  
          anchors.centerIn: parent
 -        spacing: Tokens.spacing.extraSmall
++        anchors.alignWhenCentered: false // [macos] the pill is whole px now; a rounded offset made the padding uneven
 +        columns: root.horizontal ? -1 : 1
 +        rowSpacing: Tokens.spacing.extraSmall
 +        columnSpacing: Tokens.spacing.extraSmall
@@ -1538,6 +1569,7 @@ index 8b812edc..d59b4527 100644
              sourceComponent: MaterialIcon {
 +                fontStyle: Tokens.font.icon.builders.small.scale(Tokens.sizes.bar.innerWidth / 26).build() // [macos] with the bar
                  text: "calendar_month"
++                trimTo: text // [macos] even pill padding
                  color: root.colour
              }
          }
@@ -1607,7 +1639,7 @@ index 8b812edc..d59b4527 100644
              color: root.colour
  
              TextMetrics {
-@@ -94,8 +107,9 @@ StyledRect {
+@@ -94,8 +109,9 @@ StyledRect {
          }
  
          StyledText {
@@ -1619,7 +1651,7 @@ index 8b812edc..d59b4527 100644
              text: Time.minuteStr
              font: root.fontFor(text, minMetrics.width)
              color: root.colour
-@@ -109,8 +123,8 @@ StyledRect {
+@@ -109,8 +125,8 @@ StyledRect {
          }
  
          Loader {
@@ -1630,7 +1662,7 @@ index 8b812edc..d59b4527 100644
              asynchronous: true
              active: Config.bar.clock.showSeconds
              visible: active
-@@ -130,17 +144,23 @@ StyledRect {
+@@ -130,17 +146,23 @@ StyledRect {
          }
  
          Loader {
@@ -1750,10 +1782,16 @@ index a4546fd5..9fb36e7d 100644
 +    HoverWash {} // [macos] the bar's one hover hint
  }
 diff --git a/modules/bar/components/Power.qml b/modules/bar/components/Power.qml
-index 0740e14b..ce71562f 100644
+index 0740e14b..df0b7cde 100644
 --- a/modules/bar/components/Power.qml
 +++ b/modules/bar/components/Power.qml
-@@ -8,17 +8,20 @@ Item {
+@@ -1,4 +1,5 @@
+ import QtQuick
++import Quickshell
+ import Caelestia.Config
+ import qs.components
+ import qs.services
+@@ -8,26 +9,33 @@ Item {
  
      required property ScreenState screenState
  
@@ -1779,9 +1817,13 @@ index 0740e14b..ce71562f 100644
      }
  
      MaterialIcon {
-@@ -26,8 +29,8 @@ Item {
+         id: icon
  
          anchors.centerIn: parent
++        // [macos] optical: on the scaled laptop panel (1.25) the bold bell's ink lands ~1 device px right of its
++        // advance centre (measured +0.76 px against the hover circle; the glyph raster). On HDMI-A-1 at scale 1
++        // the same -1 looked off (user, 2026-11-04), so only fractional scales get it
++        anchors.horizontalCenterOffset: ((QsWindow.window as QsWindow)?.devicePixelRatio ?? 1) % 1 !== 0 ? -1 : 0
  
 -        text: "power_settings_new"
 -        color: Colours.palette.m3error
@@ -1792,7 +1834,7 @@ index 0740e14b..ce71562f 100644
      }
  }
 diff --git a/modules/bar/components/StatusIcons.qml b/modules/bar/components/StatusIcons.qml
-index 90ad09b5..d1dfacc5 100644
+index 90ad09b5..1b2e8c7c 100644
 --- a/modules/bar/components/StatusIcons.qml
 +++ b/modules/bar/components/StatusIcons.qml
 @@ -12,7 +12,10 @@ import qs.modules.bar.components.status
@@ -1807,13 +1849,13 @@ index 90ad09b5..d1dfacc5 100644
      readonly property alias items: iconColumn
  
      readonly property int spacing: Tokens.spacing.medium / 2
-@@ -44,18 +47,25 @@ StyledRect {
+@@ -44,18 +47,26 @@ StyledRect {
      radius: Tokens.rounding.full
  
      clip: true
 -    implicitWidth: Tokens.sizes.bar.innerWidth
 -    implicitHeight: iconColumn.implicitHeight + Tokens.padding.medium * 2
-+    implicitWidth: horizontal ? iconColumn.implicitWidth + Tokens.padding.medium * 2 : Tokens.sizes.bar.innerWidth
++    implicitWidth: horizontal ? Math.ceil(iconColumn.implicitWidth + Tokens.padding.medium * 2) : Tokens.sizes.bar.innerWidth // [macos] whole px (even gaps)
 +    implicitHeight: horizontal ? Tokens.sizes.bar.innerWidth : iconColumn.implicitHeight + Tokens.padding.medium * 2
  
 -    ColumnLayout {
@@ -1824,24 +1866,26 @@ index 90ad09b5..d1dfacc5 100644
 -        anchors.right: parent.right
 -        anchors.bottom: parent.bottom
 -        anchors.bottomMargin: Tokens.padding.medium
+-
+-        spacing: 0
 +        // Only one orientation's anchors resolve, the others are undefined
 +        // qmllint disable Quick.anchor-combinations
 +        anchors.left: root.horizontal ? undefined : parent.left
 +        anchors.right: root.horizontal ? undefined : parent.right
 +        anchors.bottom: root.horizontal ? undefined : parent.bottom
 +        anchors.horizontalCenter: root.horizontal ? parent.horizontalCenter : undefined
++        anchors.alignWhenCentered: false // [macos] the pill is whole px now; a rounded offset made the padding uneven
 +        anchors.verticalCenter: root.horizontal ? parent.verticalCenter : undefined
 +        anchors.bottomMargin: root.horizontal ? 0 : Tokens.padding.medium
 +        // qmllint enable Quick.anchor-combinations
- 
--        spacing: 0
++
 +        columns: root.horizontal ? -1 : 1
 +        rowSpacing: 0
 +        columnSpacing: 0
  
          Repeater {
              model: ScriptModel {
-@@ -73,6 +83,7 @@ StyledRect {
+@@ -73,6 +84,7 @@ StyledRect {
                          LockStatus {
                              colour: root.colour
                              parentSpacing: root.spacing
@@ -1849,7 +1893,7 @@ index 90ad09b5..d1dfacc5 100644
                          }
                      }
                  }
-@@ -85,7 +96,7 @@ StyledRect {
+@@ -85,7 +97,7 @@ StyledRect {
                              animate: true
                              text: Icons.getVolumeIcon(Audio.volume, Audio.muted)
                              color: root.colour
@@ -1858,7 +1902,7 @@ index 90ad09b5..d1dfacc5 100644
                              fill: 1
                          }
                      }
-@@ -100,7 +111,7 @@ StyledRect {
+@@ -100,7 +112,7 @@ StyledRect {
                              animate: true
                              text: Icons.getMicVolumeIcon(Audio.sourceVolume, Audio.sourceMuted)
                              color: root.colour
@@ -1867,7 +1911,7 @@ index 90ad09b5..d1dfacc5 100644
                              fill: 1
                          }
                      }
-@@ -112,7 +123,7 @@ StyledRect {
+@@ -112,7 +124,7 @@ StyledRect {
                              animate: true
                              text: Hypr.kbLayout
                              color: root.colour
@@ -1876,7 +1920,7 @@ index 90ad09b5..d1dfacc5 100644
                          }
                      }
                  }
-@@ -120,9 +131,12 @@ StyledRect {
+@@ -120,9 +132,12 @@ StyledRect {
                      roleValue: "network"
                      delegate: EntryWrapper {
                          MaterialIcon {
@@ -1889,7 +1933,7 @@ index 90ad09b5..d1dfacc5 100644
                          }
                      }
                  }
-@@ -131,6 +145,7 @@ StyledRect {
+@@ -131,6 +146,7 @@ StyledRect {
                      delegate: EntryWrapper {
                          BluetoothStatus {
                              colour: root.colour
@@ -1897,7 +1941,7 @@ index 90ad09b5..d1dfacc5 100644
                          }
                      }
                  }
-@@ -156,9 +171,12 @@ StyledRect {
+@@ -156,9 +172,12 @@ StyledRect {
          default property Item item
          property string name: modelData.id.toLowerCase()
  
@@ -1913,7 +1957,7 @@ index 90ad09b5..d1dfacc5 100644
  
          implicitWidth: item?.implicitWidth ?? 0
          implicitHeight: item?.implicitHeight ?? 0
-@@ -177,4 +195,6 @@ StyledRect {
+@@ -177,4 +196,6 @@ StyledRect {
              }
          }
      }
@@ -2108,10 +2152,10 @@ index 5bc9f993..74add19c 100644
 +    }
  }
 diff --git a/modules/bar/components/status/BatteryStatus.qml b/modules/bar/components/status/BatteryStatus.qml
-index 93daed09..01e2ba19 100644
+index 93daed09..4edcfe4c 100644
 --- a/modules/bar/components/status/BatteryStatus.qml
 +++ b/modules/bar/components/status/BatteryStatus.qml
-@@ -1,23 +1,88 @@
+@@ -1,23 +1,89 @@
  import QtQuick
 +import Caelestia.Config
  import Quickshell.Services.UPower
@@ -2145,7 +2189,8 @@ index 93daed09..01e2ba19 100644
 +    readonly property int bodyH: Math.round(Tokens.sizes.bar.innerWidth * 0.48)
 +    readonly property int bodyW: Math.round(bodyH * 2.1)
 +
-+    implicitWidth: dev.isLaptopBattery ? bodyW + 2 : profile.implicitWidth
++    // [macos] + 3: the nub (1 px gap + 1.5 px) spilled 0.5 px past a + 2 slot into the pill's right padding
++    implicitWidth: dev.isLaptopBattery ? bodyW + 3 : profile.implicitWidth
 +    implicitHeight: dev.isLaptopBattery ? bodyH : profile.implicitHeight
 +
 +    MaterialIcon {

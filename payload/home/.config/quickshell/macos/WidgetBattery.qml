@@ -53,6 +53,8 @@ Item {
 
     Grid {
         anchors.centerIn: parent
+        // optical: the name line's descent left the inks 1–2 px high (measured 2026-11-04)
+        anchors.verticalCenterOffset: root.size !== "small" ? 1 : root.devices.length === 1 ? 2 : 0
         // never more columns than rings: an empty column still adds its spacing (ring sat 7 px off centre)
         columns: Math.max(1, Math.min(root.devices.length, root.size === "small" ? 2 : 4))
         rowSpacing: 12

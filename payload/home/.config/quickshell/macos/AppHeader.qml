@@ -26,6 +26,7 @@ Item {
     Row {
         id: row
 
+        anchors.verticalCenter: parent.verticalCenter // icon top 15 (was 13) next to the 16 px left inset
         spacing: 7
         opacity: tap.pressed ? 0.6 : 1
 

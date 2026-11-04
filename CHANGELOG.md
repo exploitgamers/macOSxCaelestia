@@ -29,6 +29,13 @@ it was published (`vYYYY.MM.DD`) and can be downloaded from the GitHub releases 
 - With Caffeinated on (the coffee cup in the battery drop-down, formerly "Block sleep and screen locking"), closing the laptop lid no longer sleeps or locks it:
   the laptop keeps running and only the screen goes dark. Opening the lid turns the screen back on.
 - Caffeinated now stays on when the top bar restarts; it only turns off when you log out or restart the laptop.
+- Top bar icons and text are centred again: the icons sat almost 1 px high, the pills had 1-2 px more room on
+  the left than the right, the bell sat off the middle of its hover circle, and one gap between pills was wider.
+- Desktop widgets are evenly padded again in every size (clock, weather, calendar, network, reminders, batteries,
+  system, music, conditions, app widgets and the widget editor). Pressing a preview in the widget gallery shrinks
+  it about its centre.
+- The "Split stack" button and the Edit Widgets remove button no longer reach into the top bar on widgets in the
+  top row.
 
 <!-- auto: rewritten on every publish -->
 - Built for Hyprland 0.57.0-1.1, Qt 6.12.0 and Python 3.14.

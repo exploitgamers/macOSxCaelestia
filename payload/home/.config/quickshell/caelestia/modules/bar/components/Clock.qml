@@ -23,7 +23,7 @@ StyledRect {
         return root.font.width(scale * 100).letterSpacing(scale).build();
     }
 
-    implicitWidth: horizontal ? layout.implicitWidth + root.padding * 2 : Tokens.sizes.bar.innerWidth
+    implicitWidth: horizontal ? Math.ceil(layout.implicitWidth + root.padding * 2) : Tokens.sizes.bar.innerWidth // [macos] whole px (even gaps)
     implicitHeight: horizontal ? Tokens.sizes.bar.innerWidth : layout.implicitHeight + root.padding * 2
 
     color: Qt.alpha(Colours.tPalette.m3surfaceContainer, Config.bar.clock.background ? Colours.tPalette.m3surfaceContainer.a : 0)
@@ -33,6 +33,7 @@ StyledRect {
         id: layout
 
         anchors.centerIn: parent
+        anchors.alignWhenCentered: false // [macos] the pill is whole px now; a rounded offset made the padding uneven
         columns: root.horizontal ? -1 : 1
         rowSpacing: Tokens.spacing.extraSmall
         columnSpacing: Tokens.spacing.extraSmall
@@ -46,6 +47,7 @@ StyledRect {
             sourceComponent: MaterialIcon {
                 fontStyle: Tokens.font.icon.builders.small.scale(Tokens.sizes.bar.innerWidth / 26).build() // [macos] with the bar
                 text: "calendar_month"
+                trimTo: text // [macos] even pill padding
                 color: root.colour
             }
         }

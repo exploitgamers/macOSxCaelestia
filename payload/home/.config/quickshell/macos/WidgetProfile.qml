@@ -42,7 +42,7 @@ Item {
 
         width: (root.width - 16 * 2 - 8) / 2
         height: 34
-        radius: 10
+        radius: Theme.panelRadius - 16 // concentric: 16 px into the card corner
         color: area.containsMouse ? Theme.alpha(Theme.fg, 0.16) : Theme.alpha(Theme.fg, 0.08)
 
         Row {

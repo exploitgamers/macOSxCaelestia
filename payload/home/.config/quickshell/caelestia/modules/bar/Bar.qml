@@ -455,7 +455,7 @@ GridLayout {
         required property ShellScreen screen
         readonly property var monitor: Brightness.getMonitorForScreen(screen)
 
-        implicitWidth: controlsRow.implicitWidth + Tokens.padding.medium * 2
+        implicitWidth: Math.ceil(controlsRow.implicitWidth + Tokens.padding.medium * 2) // [macos] whole px: the layout ceils cells, so a fractional pill left an uneven gap
         implicitHeight: Tokens.sizes.bar.innerWidth
         radius: Tokens.rounding.full
         color: Colours.tPalette.m3surfaceContainer
@@ -467,12 +467,14 @@ GridLayout {
 
             readonly property BarInk ink: pillInk // [macos] for StatLabel
             anchors.centerIn: parent
+            anchors.alignWhenCentered: false // [macos] the pill is whole px now; a rounded offset made the padding uneven
             spacing: Tokens.spacing.small
 
             MaterialIcon {
                 fontStyle: Tokens.font.icon.builders.small.scale(Tokens.sizes.bar.innerWidth / 26).build() // [macos] with the bar
                 anchors.verticalCenter: parent.verticalCenter
                 text: Icons.getVolumeIcon(Audio.volume, Audio.muted) // [macos] the same symbols as the drop-down
+                trimTo: "volume_up" // [macos] even pill padding
                 fill: 1 // [macos] macOS's speaker is solid
                 color: pillInk.c(Colours.palette.m3tertiary)
 
@@ -543,7 +545,7 @@ GridLayout {
 
         BarInk { id: pillInk; pill: stats } // [macos] adaptive text colour
 
-        implicitWidth: statsRow.implicitWidth + Tokens.padding.medium * 2
+        implicitWidth: Math.ceil(statsRow.implicitWidth + Tokens.padding.medium * 2) // [macos] whole px (even gaps)
         implicitHeight: Tokens.sizes.bar.innerWidth
         radius: Tokens.rounding.full
         color: Colours.tPalette.m3surfaceContainer
@@ -580,12 +582,14 @@ GridLayout {
 
             readonly property BarInk ink: pillInk // [macos] for StatLabel / StatMeter
             anchors.centerIn: parent
+            anchors.alignWhenCentered: false // [macos] the pill is whole px now; a rounded offset made the padding uneven
             spacing: Tokens.spacing.small
 
             MaterialIcon {
                 fontStyle: Tokens.font.icon.builders.small.scale(Tokens.sizes.bar.innerWidth / 26).build() // [macos] with the bar
                 anchors.verticalCenter: parent.verticalCenter
                 text: "memory"
+                trimTo: text // [macos] even pill padding
                 color: stats.accent
             }
 
@@ -658,7 +662,7 @@ GridLayout {
         property bool shown: true
         signal activated
 
-        implicitWidth: root.horizontal ? chipRow.implicitWidth + Tokens.padding.medium * 2 : Tokens.sizes.bar.innerWidth
+        implicitWidth: root.horizontal ? Math.ceil(chipRow.implicitWidth + Tokens.padding.medium * 2) : Tokens.sizes.bar.innerWidth // [macos] whole px (even gaps)
         implicitHeight: Tokens.sizes.bar.innerWidth
         radius: Tokens.rounding.full
         color: Colours.tPalette.m3surfaceContainer
@@ -669,12 +673,14 @@ GridLayout {
             id: chipRow
 
             anchors.centerIn: parent
+            anchors.alignWhenCentered: false // [macos] the pill is whole px now; a rounded offset made the padding uneven
             spacing: Tokens.spacing.small
 
             MaterialIcon {
                 fontStyle: Tokens.font.icon.builders.small.scale(Tokens.sizes.bar.innerWidth / 26).build() // [macos] with the bar
                 anchors.verticalCenter: parent.verticalCenter
                 text: chip.icon
+                trimTo: text // [macos] even pill padding
                 color: pillInk.c(Colours.palette.m3tertiary)
             }
 

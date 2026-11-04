@@ -218,12 +218,18 @@ PanelWindow {
 
         implicitWidth: WidgetTypes.width(size) * factor
         implicitHeight: WidgetTypes.height(size) * factor
+        // the press shrinks about the centre (on the body, with its top-left origin, it slid up-left)
+        scale: area.pressed && !pv.lifted ? 0.97 : 1
+
+        Behavior on scale {
+            NumberAnimation { duration: 120 }
+        }
 
         WidgetBody {
             width: WidgetTypes.width(pv.size)
             height: WidgetTypes.height(pv.size)
             transformOrigin: Item.TopLeft
-            scale: pv.factor * (area.pressed && !pv.lifted ? 0.97 : 1)
+            scale: pv.factor
             opacity: pv.lifted ? 0.35 : 1
             type: pv.type
             size: pv.size
@@ -267,17 +273,19 @@ PanelWindow {
             cursorShape: pv.lifted ? Qt.ClosedHandCursor : Qt.OpenHandCursor
             property real pressX
             property real pressY
+            property point pressAt // in gallery coords: the press scale moves local coords under a still pointer
 
             onPressed: m => {
                 pressX = m.x;
                 pressY = m.y;
+                pressAt = mapToItem(gallery.contentItem, m.x, m.y);
             }
             onPositionChanged: m => {
                 if (!pressed)
                     return;
                 const p = mapToItem(gallery.contentItem, m.x, m.y);
                 if (!gallery.dragging) {
-                    if (Math.hypot(m.x - pressX, m.y - pressY) < 6)
+                    if (Math.hypot(p.x - pressAt.x, p.y - pressAt.y) < 6)
                         return;
                     // full-size widget follows the pointer, held where it was grabbed
                     gallery.grabDX = pressX / pv.factor;

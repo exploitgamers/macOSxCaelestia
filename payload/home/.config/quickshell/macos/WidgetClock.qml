@@ -70,7 +70,7 @@ Item {
         width: Math.min(root.height, root.size === "small" ? root.width : root.width / 2) - 20
         height: width
         anchors.verticalCenter: parent.verticalCenter
-        x: root.size === "small" ? (root.width - width) / 2 : 14
+        x: root.size === "small" ? (root.width - width) / 2 : 10 // medium: same 10 px inset as top/bottom
 
         // minute ticks
         Repeater {
@@ -164,6 +164,7 @@ Item {
 
         Rectangle {
             anchors.centerIn: parent
+            anchors.alignWhenCentered: false // stay on the hands' pivot (face centre can be a half pixel)
             width: 7
             height: 7
             radius: 3.5

@@ -22,7 +22,8 @@ Item {
     readonly property int bodyH: Math.round(Tokens.sizes.bar.innerWidth * 0.48)
     readonly property int bodyW: Math.round(bodyH * 2.1)
 
-    implicitWidth: dev.isLaptopBattery ? bodyW + 2 : profile.implicitWidth
+    // [macos] + 3: the nub (1 px gap + 1.5 px) spilled 0.5 px past a + 2 slot into the pill's right padding
+    implicitWidth: dev.isLaptopBattery ? bodyW + 3 : profile.implicitWidth
     implicitHeight: dev.isLaptopBattery ? bodyH : profile.implicitHeight
 
     MaterialIcon {

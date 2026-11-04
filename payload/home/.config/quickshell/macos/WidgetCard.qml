@@ -632,7 +632,7 @@ Item {
     // Edit Widgets: remove button (removes the front widget)
     Rectangle {
         x: -8
-        y: -8
+        y: Math.max(-8, -card.y) // same clamp as the split badge
         z: 200
         width: 24
         height: 24
@@ -695,7 +695,7 @@ Item {
         // corner like a macOS close badge (mirrors the Edit Widgets remove badge: 8 px out);
         // the hit area reaches 40 px into the card, so the pointer never leaves it on the way
         x: card.width - width + 8
-        y: -8
+        y: Math.max(-8, -card.y) // top row: no higher than the usable area's top, or it reaches into the bar's pills
         z: 200
         width: 48
         height: 48

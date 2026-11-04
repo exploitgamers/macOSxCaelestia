@@ -1,4 +1,5 @@
 import QtQuick
+import Quickshell
 import Caelestia.Config
 import qs.components
 import qs.services
@@ -28,6 +29,10 @@ Item {
         id: icon
 
         anchors.centerIn: parent
+        // [macos] optical: on the scaled laptop panel (1.25) the bold bell's ink lands ~1 device px right of its
+        // advance centre (measured +0.76 px against the hover circle; the glyph raster). On HDMI-A-1 at scale 1
+        // the same -1 looked off (user, 2026-11-04), so only fractional scales get it
+        anchors.horizontalCenterOffset: ((QsWindow.window as QsWindow)?.devicePixelRatio ?? 1) % 1 !== 0 ? -1 : 0
 
         text: "notifications"
         color: pillInk.c(Colours.palette.m3secondary) // [macos] adaptive (BarInk), like the status icons

@@ -126,9 +126,9 @@ Item {
     Flickable {
         id: list
 
-        x: 14
+        x: 16 // check circles in line with the title
         y: 38
-        width: root.width - 28
+        width: root.width - 32
         height: root.height - y - 46 // 8 px above the new-reminder field
         contentHeight: col.implicitHeight
         clip: true
@@ -239,7 +239,7 @@ Item {
             id: input
 
             anchors.left: plus.right
-            anchors.leftMargin: 4
+            anchors.leftMargin: 5 // text starts where the reminders' text does (40)
             anchors.right: parent.right
             anchors.rightMargin: 8
             anchors.verticalCenter: parent.verticalCenter

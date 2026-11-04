@@ -47,7 +47,7 @@ StyledRect {
     radius: Tokens.rounding.full
 
     clip: true
-    implicitWidth: horizontal ? iconColumn.implicitWidth + Tokens.padding.medium * 2 : Tokens.sizes.bar.innerWidth
+    implicitWidth: horizontal ? Math.ceil(iconColumn.implicitWidth + Tokens.padding.medium * 2) : Tokens.sizes.bar.innerWidth // [macos] whole px (even gaps)
     implicitHeight: horizontal ? Tokens.sizes.bar.innerWidth : iconColumn.implicitHeight + Tokens.padding.medium * 2
 
     GridLayout {
@@ -59,6 +59,7 @@ StyledRect {
         anchors.right: root.horizontal ? undefined : parent.right
         anchors.bottom: root.horizontal ? undefined : parent.bottom
         anchors.horizontalCenter: root.horizontal ? parent.horizontalCenter : undefined
+        anchors.alignWhenCentered: false // [macos] the pill is whole px now; a rounded offset made the padding uneven
         anchors.verticalCenter: root.horizontal ? parent.verticalCenter : undefined
         anchors.bottomMargin: root.horizontal ? 0 : Tokens.padding.medium
         // qmllint enable Quick.anchor-combinations

@@ -38,6 +38,7 @@ Item {
         x: 16
         width: root.width - 32
         anchors.verticalCenter: parent.verticalCenter
+        anchors.verticalCenterOffset: -1 // optical: each label's cap starts ~3 px into its line box
         spacing: root.stats.length > 3 ? 7 : 11
 
         Repeater {
@@ -93,7 +94,7 @@ Item {
     Row {
         visible: root.size === "medium"
         anchors.horizontalCenter: parent.horizontalCenter
-        y: 18
+        y: 17 // rings' top = the footer's baseline inset
         spacing: root.stats.length > 3 ? 16 : 34
 
         Repeater {

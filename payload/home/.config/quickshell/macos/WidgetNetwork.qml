@@ -115,11 +115,11 @@ Item {
     Canvas {
         id: graph
 
-        x: 12
-        width: root.width - 24
-        height: root.size === "small" ? 56 : 70
+        x: 16 // same 16 px inset as the text
+        width: root.width - 32
+        height: root.size === "small" ? 56 : 66
         anchors.bottom: parent.bottom
-        anchors.bottomMargin: 12
+        anchors.bottomMargin: 16
         onPaint: {
             const ctx = getContext("2d");
             ctx.reset();

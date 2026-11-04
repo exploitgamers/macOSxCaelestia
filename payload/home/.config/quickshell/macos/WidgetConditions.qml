@@ -39,6 +39,7 @@ Item {
     Grid {
         visible: root.w.loaded
         anchors.centerIn: parent
+        anchors.verticalCenterOffset: root.size === "small" ? 0 : 2 // optical: the values' descent left the medium inks 2 px high
         columns: root.size === "small" ? 2 : 3
         rowSpacing: root.size === "small" ? 6 : 14
         columnSpacing: root.size === "small" ? 10 : 18
@@ -52,7 +53,9 @@ Item {
                 width: root.size === "small" ? 64 : 92
                 spacing: 1
 
+                // medium: centred in the cell (left-aligned, the grid's ink sat 14 px off centre); small cells are full already
                 Row {
+                    anchors.horizontalCenter: root.size === "small" ? undefined : parent.horizontalCenter
                     spacing: 3
 
                     // multicolor where Apple tints it (cyan drop, yellow sun), else the label's grey
@@ -77,6 +80,7 @@ Item {
                 }
 
                 Text {
+                    anchors.horizontalCenter: root.size === "small" ? undefined : parent.horizontalCenter
                     text: parent.modelData.value
                     color: Theme.fg
                     font.family: Theme.font

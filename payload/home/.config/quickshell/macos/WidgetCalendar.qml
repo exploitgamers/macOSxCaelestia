@@ -97,7 +97,8 @@ Item {
         visible: root.size !== "small"
         x: root.size === "medium" ? root.width / 2 - 14 : 18
         y: root.size === "medium" ? 14 : 16
-        width: root.size === "medium" ? root.width / 2 : root.width - 36
+        // medium: wider so the last column's digits sit as far from the edge as the left text (cells centre them)
+        width: root.size === "medium" ? root.width / 2 + (root.weekNumbers ? 3 : 5) : root.width - 36
         spacing: root.size === "large" ? 8 : 2
 
         readonly property real cellW: width / root.columns
