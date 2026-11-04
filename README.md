@@ -112,7 +112,7 @@ Example: `bash macOSxCaelestia.run --dry-run`.
 - **Keep the laptop running with the lid closed:** click the battery in the top bar and turn on "Block sleep and
   screen locking". Closing the lid then only turns the screen off; the laptop doesn't sleep or lock. That also means
   anyone who opens the lid gets your desktop without a password, so turn it off when you leave the laptop somewhere.
-  It turns itself off when you restart.
+  It turns itself off when you log out or restart.
 
 ## Troubleshooting
 
