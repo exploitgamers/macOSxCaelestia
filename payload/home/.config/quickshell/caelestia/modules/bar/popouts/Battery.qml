@@ -255,7 +255,7 @@ Column {
                 anchors.verticalCenter: parent.verticalCenter
                 width: blockRow.width - blockSwitch.width - blockRow.spacing
                 wrapMode: Text.WordWrap
-                text: Tr.tr("Block sleep and screen locking, even with the lid closed") // [macos] IdleInhibitor takes the lid over
+                text: Tr.trCtx("Keep awake", "idle inhibitor") // [macos] short, like the utilities card; it covers the lid too
             }
         }
     }

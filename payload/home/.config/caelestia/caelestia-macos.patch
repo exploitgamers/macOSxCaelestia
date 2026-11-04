@@ -3870,7 +3870,7 @@ index d9a07287..3d18fe36 100644
      ButtonGroup {
          id: sinks
 diff --git a/modules/bar/popouts/Battery.qml b/modules/bar/popouts/Battery.qml
-index 37ae38b6..4bfe9207 100644
+index 37ae38b6..91770629 100644
 --- a/modules/bar/popouts/Battery.qml
 +++ b/modules/bar/popouts/Battery.qml
 @@ -5,6 +5,7 @@ import Quickshell.Services.UPower
@@ -3947,7 +3947,7 @@ index 37ae38b6..4bfe9207 100644
 +                anchors.verticalCenter: parent.verticalCenter
 +                width: blockRow.width - blockSwitch.width - blockRow.spacing
 +                wrapMode: Text.WordWrap
-+                text: Tr.tr("Block sleep and screen locking, even with the lid closed") // [macos] IdleInhibitor takes the lid over
++                text: Tr.trCtx("Keep awake", "idle inhibitor") // [macos] short, like the utilities card; it covers the lid too
 +            }
 +        }
 +    }
