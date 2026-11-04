@@ -109,8 +109,8 @@ Example: `bash macOSxCaelestia.run --dry-run`.
   week, weather location and units, which batteries or system meters to show, Notes text size, timer presets and
   the Photos folder.
 - Weather uses your rough location from your internet address. To use a city instead, set it in the weather widget's Edit options.
-- **Keep the laptop running with the lid closed:** click the battery in the top bar and turn on "Block sleep and
-  screen locking". Closing the lid then only turns the screen off; the laptop doesn't sleep or lock. That also means
+- **Keep the laptop running with the lid closed:** click the battery in the top bar and turn on "Keep awake"
+  (the coffee cup). Closing the lid then only turns the screen off; the laptop doesn't sleep or lock. That also means
   anyone who opens the lid gets your desktop without a password, so turn it off when you leave the laptop somewhere.
   It turns itself off when you log out or restart.
 
