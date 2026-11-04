@@ -227,7 +227,7 @@ Column {
     }
 
     // [macos] like KDE Plasma's battery popup: "Manually block sleep and screen
-    // locking" — Caelestia's idle inhibitor (same as the utilities "Keep awake" card)
+    // locking" — Caelestia's idle inhibitor (same as the utilities "Caffeinated" card)
     Item {
         width: parent.width
         height: blockRow.implicitHeight + Tokens.padding.small
@@ -255,7 +255,7 @@ Column {
                 anchors.verticalCenter: parent.verticalCenter
                 width: blockRow.width - blockSwitch.width - blockRow.spacing
                 wrapMode: Text.WordWrap
-                text: Tr.trCtx("Keep awake", "idle inhibitor") // [macos] short, like the utilities card; it covers the lid too
+                text: Tr.trCtx("Caffeinated", "idle inhibitor") // [macos] the user's name for it, like the utilities card; it covers the lid too
             }
         }
     }

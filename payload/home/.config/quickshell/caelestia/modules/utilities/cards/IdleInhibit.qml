@@ -49,7 +49,7 @@ StyledRect {
 
             StyledText {
                 Layout.fillWidth: true
-                text: Tr.trCtx("Keep awake", "idle inhibitor")
+                text: Tr.trCtx("Caffeinated", "idle inhibitor") // [macos] the user's name
                 font: Tokens.font.body.medium
                 elide: Text.ElideRight
             }

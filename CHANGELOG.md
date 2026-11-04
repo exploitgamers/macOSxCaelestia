@@ -26,9 +26,9 @@ it was published (`vYYYY.MM.DD`) and can be downloaded from the GitHub releases 
   size, the timer presets and the Photos folder.
 - Apple-style icons across the dock's menus, Spotlight, the launcher, Settings and the widget gallery, and in the
   top bar: battery, Wi-Fi, volume and brightness symbols, round Control Center toggles, and notification icons.
-- With Keep awake on (the coffee cup in the battery drop-down, formerly "Block sleep and screen locking"), closing the laptop lid no longer sleeps or locks it:
+- With Caffeinated on (the coffee cup in the battery drop-down, formerly "Block sleep and screen locking"), closing the laptop lid no longer sleeps or locks it:
   the laptop keeps running and only the screen goes dark. Opening the lid turns the screen back on.
-- Keep awake now stays on when the top bar restarts; it only turns off when you log out or restart the laptop.
+- Caffeinated now stays on when the top bar restarts; it only turns off when you log out or restart the laptop.
 
 <!-- auto: rewritten on every publish -->
 - Built for Hyprland 0.57.0-1.1, Qt 6.12.0 and Python 3.14.

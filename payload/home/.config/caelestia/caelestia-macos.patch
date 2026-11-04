@@ -3870,7 +3870,7 @@ index d9a07287..3d18fe36 100644
      ButtonGroup {
          id: sinks
 diff --git a/modules/bar/popouts/Battery.qml b/modules/bar/popouts/Battery.qml
-index 37ae38b6..91770629 100644
+index 37ae38b6..21b598ad 100644
 --- a/modules/bar/popouts/Battery.qml
 +++ b/modules/bar/popouts/Battery.qml
 @@ -5,6 +5,7 @@ import Quickshell.Services.UPower
@@ -3919,7 +3919,7 @@ index 37ae38b6..91770629 100644
      }
  
 +    // [macos] like KDE Plasma's battery popup: "Manually block sleep and screen
-+    // locking" — Caelestia's idle inhibitor (same as the utilities "Keep awake" card)
++    // locking" — Caelestia's idle inhibitor (same as the utilities "Caffeinated" card)
 +    Item {
 +        width: parent.width
 +        height: blockRow.implicitHeight + Tokens.padding.small
@@ -3947,7 +3947,7 @@ index 37ae38b6..91770629 100644
 +                anchors.verticalCenter: parent.verticalCenter
 +                width: blockRow.width - blockSwitch.width - blockRow.spacing
 +                wrapMode: Text.WordWrap
-+                text: Tr.trCtx("Keep awake", "idle inhibitor") // [macos] short, like the utilities card; it covers the lid too
++                text: Tr.trCtx("Caffeinated", "idle inhibitor") // [macos] the user's name for it, like the utilities card; it covers the lid too
 +            }
 +        }
 +    }
@@ -6106,6 +6106,19 @@ index c3558b67..3a1053ed 100644
              const body = modelData.body.replace(/\n/g, " ");
              const colour = root.urgency === "critical" ? Colours.palette.m3secondary : Colours.palette.m3outline;
  
+diff --git a/modules/nexus/pages/panels/UtilitiesPanel.qml b/modules/nexus/pages/panels/UtilitiesPanel.qml
+index 58630372..817d09f1 100644
+--- a/modules/nexus/pages/panels/UtilitiesPanel.qml
++++ b/modules/nexus/pages/panels/UtilitiesPanel.qml
+@@ -59,7 +59,7 @@ PageBase {
+ 
+         ToggleRow {
+             first: true
+-            text: Tr.tr("Keep awake")
++            text: Tr.tr("Caffeinated") // [macos] the user's name
+             subtext: Tr.tr("Show the idle inhibitor card")
+             checked: Config.utilities.cards.keepAwake
+             onToggled: GlobalConfig.utilities.cards.keepAwake = checked
 diff --git a/modules/notifications/Content.qml b/modules/notifications/Content.qml
 index c65d3471..72172928 100644
 --- a/modules/notifications/Content.qml
@@ -6589,7 +6602,7 @@ index 9e6160c2..52c98ea2 100644
          asynchronous: true
          active: root.shouldBeActive || root.visible
 diff --git a/modules/utilities/cards/IdleInhibit.qml b/modules/utilities/cards/IdleInhibit.qml
-index c38465a2..1dbaecc5 100644
+index c38465a2..df0c2046 100644
 --- a/modules/utilities/cards/IdleInhibit.qml
 +++ b/modules/utilities/cards/IdleInhibit.qml
 @@ -13,7 +13,7 @@ StyledRect {
@@ -6601,7 +6614,15 @@ index c38465a2..1dbaecc5 100644
      color: Colours.tPalette.m3surfaceContainer
      clip: true
  
-@@ -56,7 +56,7 @@ StyledRect {
+@@ -49,14 +49,14 @@ StyledRect {
+ 
+             StyledText {
+                 Layout.fillWidth: true
+-                text: Tr.trCtx("Keep awake", "idle inhibitor")
++                text: Tr.trCtx("Caffeinated", "idle inhibitor") // [macos] the user's name
+                 font: Tokens.font.body.medium
+                 elide: Text.ElideRight
+             }
  
              StyledText {
                  Layout.fillWidth: true
