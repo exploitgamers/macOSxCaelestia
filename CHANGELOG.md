@@ -15,6 +15,12 @@ it was published (`vYYYY.MM.DD`) and can be downloaded from the GitHub releases 
 
 ## Unreleased
 
+## v2026.11.05
+
+<!-- auto: rewritten on every publish -->
+- Built for Hyprland 0.57.0-1.1, Qt 6.12.0 and Python 3.14.
+- Updated: Dock & widgets settings; Shell UI (Dock, Spotlight, widgets).
+
 ## v2026.11.04
 
 - Pressing the volume or brightness keys briefly opens the volume/brightness drop-down under the top bar again

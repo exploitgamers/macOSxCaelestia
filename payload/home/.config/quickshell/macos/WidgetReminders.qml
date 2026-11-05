@@ -221,7 +221,7 @@ Item {
         width: root.width - 24
         height: 26
         radius: Theme.panelRadius - 12
-        color: Theme.alpha(Theme.fg, input.activeFocus ? 0.12 : 0.07)
+        color: Theme.alpha(Theme.surfaceContainerHigh, input.activeFocus ? 0.85 : 0.75)
 
         Symbol {
             id: plus
@@ -259,7 +259,7 @@ Item {
                 visible: !input.text
                 anchors.verticalCenter: parent.verticalCenter
                 text: "New Reminder"
-                color: Theme.alpha(Theme.fg, 0.4)
+                color: Theme.alpha(Theme.fgDim, 0.72)
                 font: input.font
             }
         }
