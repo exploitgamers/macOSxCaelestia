@@ -68,7 +68,7 @@
       },
       {
         "id": "weather-1",
-        "order": -963,
+        "order": -1319,
         "pos": {
           "HDMI-A-1": {
             "x": 1546,
@@ -102,7 +102,7 @@
       },
       {
         "id": "music-1",
-        "order": -962,
+        "order": -1318,
         "pos": {
           "HDMI-A-1": {
             "x": 1546,
@@ -232,6 +232,7 @@
       },
       {
         "id": "clock-mvdcd6a3",
+        "order": -4,
         "screen": "HDMI-A-1",
         "size": "medium",
         "stack": "clock-mvdcd6a3",
@@ -241,7 +242,7 @@
       },
       {
         "id": "reminders-mvqmwpmb",
-        "order": -1,
+        "order": -5,
         "pos": {},
         "screen": "HDMI-A-1",
         "size": "medium",
