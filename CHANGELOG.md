@@ -15,6 +15,13 @@ it was published (`vYYYY.MM.DD`) and can be downloaded from the GitHub releases 
 
 ## Unreleased
 
+## v2026.11.07
+
+<!-- auto: rewritten on every publish -->
+- Built for Hyprland 0.57.1-1.1, Qt 6.12.0 and Python 3.14.
+- Package updates: hyprland 0.57.0-1.1 → 0.57.1-1.1, python 3.14.8-1 → 3.14.9-1.
+- Updated: Dock & widgets settings.
+
 ## v2026.11.06
 
 <!-- auto: rewritten on every publish -->
