@@ -68,7 +68,7 @@
       },
       {
         "id": "weather-1",
-        "order": -2243,
+        "order": -2451,
         "pos": {
           "HDMI-A-1": {
             "x": 1546,
@@ -102,7 +102,7 @@
       },
       {
         "id": "music-1",
-        "order": -2242,
+        "order": -2450,
         "pos": {
           "HDMI-A-1": {
             "x": 1546,
@@ -119,7 +119,7 @@
       },
       {
         "id": "system-1",
-        "order": -30,
+        "order": -32,
         "screen": "",
         "size": "small",
         "smartRotate": true,
@@ -164,7 +164,7 @@
       },
       {
         "id": "conditions-1",
-        "order": -31,
+        "order": -33,
         "screen": "",
         "size": "small",
         "smartRotate": true,
